@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Header.css';
 import { Button } from './Button';
@@ -48,8 +48,8 @@ export const Header: React.FC = () => {
         <div className="header-right-desktop">
           <nav className="desktop-nav">
             <ul>
-              <li><a href="#" className="nav-link active">Flights</a></li>
-              <li><a href="#" className="nav-link">Hotels</a></li>
+              <li><a href="#" className="nav-link">Flights</a></li>
+              <li><Link to="/hotels" className="nav-link active">Hotels</Link></li>
               <li><a href="#" className="nav-link">Activities</a></li>
               <li><a href="#" className="nav-link">Offers</a></li>
               <li><a href="#" className="nav-link">Support</a></li>
@@ -105,8 +105,8 @@ export const Header: React.FC = () => {
           <div className="mobile-nav-content">
             <nav>
               <ul>
-                <li><a href="#" className="nav-link active" onClick={() => setMobileMenuOpen(false)}>Flights</a></li>
-                <li><a href="#" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Hotels</a></li>
+                <li><a href="#" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Flights</a></li>
+                <li><Link to="/hotels" className="nav-link active" onClick={() => setMobileMenuOpen(false)}>Hotels</Link></li>
                 <li><a href="#" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Activities</a></li>
                 <li><a href="#" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Offers</a></li>
                 <li><a href="#" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Support</a></li>
