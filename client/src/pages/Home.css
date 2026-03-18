@@ -14,8 +14,8 @@
   position: relative;
   height: 90vh;
   min-height: 600px;
-  background-image: url('../assets/doiluangbg.jpg');
-  /* Sunset mountain image */
+  background-image: url('/doiluangbg.jpg');
+  /* Sunset mountain image from public */
   background-size: cover;
   background-position: center;
   display: flex;
