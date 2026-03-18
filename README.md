@@ -1,2 +1,2 @@
 # PakJaiTravel
-TahiTravelPlatform
+ThaiTravelPlatform
