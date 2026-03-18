@@ -1,19 +1,19 @@
 .verified-badge {
   display: inline-flex;
   align-items: center;
-  background-color: #e6f0fa;
-  color: #004ba2;
+  background-color: #E0F2F1;
+  color: #00796B;
   padding: 4px 10px;
   border-radius: var(--radius-full);
   font-size: 0.75rem;
   font-weight: 700;
-  box-shadow: 0 2px 4px rgba(0, 95, 206, 0.1);
-  border: 1px solid #cce0f5;
+  box-shadow: 0 2px 4px rgba(5, 176, 166, 0.15);
+  border: 1px solid #B2DFDB;
   cursor: help;
 }
 
 .verified-icon {
-  background-color: #005fce;
+  background-color: #00796B;
   color: #fff;
   border-radius: 50%;
   width: 14px;

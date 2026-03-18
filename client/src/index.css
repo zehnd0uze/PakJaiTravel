@@ -1,16 +1,16 @@
 /* PakJaiTravel Design System */
 :root {
-  /* Colors - Monotone Premium */
-  --primary-color: #111111; /* Deep Black Accent */
-  --primary-hover: #333333;
-  --secondary-color: #444444; /* Dark Gray */
-  --secondary-hover: #222222;
+  /* Colors - Vibrant Modern Travel (Teal & Coral) */
+  --primary-color: #05B0A6; /* Tropical Teal */
+  --primary-hover: #038D85;
+  --secondary-color: #FF5A5F; /* Coral Red CTA */
+  --secondary-hover: #E04E53;
   
-  --bg-color: #f7f7f7;
+  --bg-color: #F7F9FC;
   --surface-color: #ffffff;
-  --text-primary: #111111;
-  --text-secondary: #666666;
-  --border-color: #e5e5e5;
+  --text-primary: #1C2833;
+  --text-secondary: #566573;
+  --border-color: #EAECEE;
   
   /* Typography */
   --font-heading: 'Outfit', sans-serif;

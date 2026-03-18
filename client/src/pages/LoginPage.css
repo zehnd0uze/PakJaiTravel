@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0a1b2e 0%, #003b82 40%, #005fce 100%);
+  background: linear-gradient(135deg, #022F40 0%, #0077B6 40%, #05B0A6 100%);
   padding: var(--spacing-xl);
   position: relative;
   overflow: hidden;
@@ -31,7 +31,7 @@
 .auth-page::after {
   width: 300px;
   height: 300px;
-  background: #3388ff;
+  background: #FF5A5F;
   bottom: -80px;
   left: -80px;
 }
@@ -165,7 +165,7 @@
 .auth-submit-btn {
   width: 100%;
   padding: 14px;
-  background: linear-gradient(135deg, var(--primary-color), #004ba2);
+  background: linear-gradient(135deg, var(--primary-color), #0077B6);
   color: #fff;
   font-family: var(--font-heading);
   font-size: 1rem;
@@ -217,7 +217,7 @@
 }
 
 .auth-footer a {
-  color: #82b1ff;
+  color: #05B0A6;
   font-weight: 600;
   transition: color var(--transition-fast);
 }
