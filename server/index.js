@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { chiangDaoProperties } from './data/chiangDao.js';
+import authRoutes from './routes/auth.js';
 
 dotenv.config();
 
@@ -19,6 +20,9 @@ app.use(express.json());
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'PakJaiTravel API is running' });
 });
+
+// Auth routes
+app.use('/api/auth', authRoutes);
 
 // Endpoint for Verified Chiang Dao Properties
 app.get('/api/chiangdao/accommodations', (req, res) => {
