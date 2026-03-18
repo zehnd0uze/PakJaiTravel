@@ -42,7 +42,7 @@ export const Home: React.FC = () => {
       {/* Anti-Scam Trust Banner */}
       <div className="trust-banner">
         <div className="container flex-center" style={{gap: '12px'}}>
-          <span style={{fontSize: '1.2rem', color: '#ffb300'}}>⚠️</span>
+          <span style={{fontSize: '1.2rem', color: '#111111'}}>⚠️</span>
           <p><strong>Traveler Alert:</strong> Avoid fake Facebook pages. Book directly with 100% verified real owners in Chiang Dao right here on PakJaiTravel.</p>
         </div>
       </div>
@@ -66,9 +66,9 @@ export const Home: React.FC = () => {
               <h2 className="section-title">Verified Chiang Dao Stays</h2>
               <p className="section-subtitle">Hand-picked locations with guaranteed authentic owners. No scammers.</p>
             </div>
-            <div style={{display: 'flex', alignItems: 'center', gap: '8px', background: '#e8f5e9', padding: '8px 16px', borderRadius: '8px'}}>
+            <div style={{display: 'flex', alignItems: 'center', gap: '8px', background: '#f7f7f7', padding: '8px 16px', borderRadius: '8px', border: '1px solid #e5e5e5'}}>
               <VerifiedBadge />
-              <span style={{color: '#2e7d32', fontWeight: 600, fontSize: '0.9rem'}}>All Listings Guaranteed</span>
+              <span style={{color: '#111111', fontWeight: 600, fontSize: '0.9rem'}}>All Listings Guaranteed</span>
             </div>
           </div>
           

@@ -1,16 +1,16 @@
 /* PakJaiTravel Design System */
 :root {
-  /* Colors */
-  --primary-color: #005fce; /* Trip.com / Agoda blue */
-  --primary-hover: #004ba2;
-  --secondary-color: #FF5722; /* Vibrant Orange for CTA */
-  --secondary-hover: #E64A19;
+  /* Colors - Monotone Premium */
+  --primary-color: #111111; /* Deep Black Accent */
+  --primary-hover: #333333;
+  --secondary-color: #444444; /* Dark Gray */
+  --secondary-hover: #222222;
   
-  --bg-color: #f8f9fa;
+  --bg-color: #f7f7f7;
   --surface-color: #ffffff;
-  --text-primary: #1a1a1a;
-  --text-secondary: #6c757d;
-  --border-color: #e0e0e0;
+  --text-primary: #111111;
+  --text-secondary: #666666;
+  --border-color: #e5e5e5;
   
   /* Typography */
   --font-heading: 'Outfit', sans-serif;
@@ -47,6 +47,10 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+html, body {
+  overflow-x: hidden;
 }
 
 body {

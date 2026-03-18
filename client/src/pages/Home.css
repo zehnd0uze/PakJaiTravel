@@ -70,6 +70,12 @@
   margin-bottom: var(--spacing-md);
   border-bottom: 2px solid var(--border-color);
   padding-bottom: var(--spacing-sm);
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+.search-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .search-tab {
@@ -139,9 +145,27 @@
   .hero-title {
     font-size: 2.5rem;
   }
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
   .search-inputs {
     flex-direction: column;
     align-items: stretch;
+  }
+  .promo-content h2 {
+    font-size: 2rem;
+  }
+  .promo-banner {
+    padding: var(--spacing-xl);
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+  .hero-subtitle {
+    font-size: 1rem;
   }
 }
 
