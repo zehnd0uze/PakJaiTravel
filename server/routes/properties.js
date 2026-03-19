@@ -44,7 +44,7 @@ router.get('/:id', (req, res) => {
 router.post('/', (req, res) => {
   const properties = getProperties();
   const newProperty = {
-    id: 'cd-' + Date.now(),
+    id: 'cd-' + Date.now() + '-' + Math.random().toString(36).substring(2, 9),
     ...req.body,
     status: req.body.status || 'draft',
     createdAt: new Date().toISOString(),
