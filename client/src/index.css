@@ -49,9 +49,10 @@
   padding: 0;
 }
 
-#root, .app-container {
+html, body {
   overflow-x: hidden;
   width: 100%;
+  position: relative;
 }
 
 body {
