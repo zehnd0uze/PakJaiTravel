@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { chiangDaoProperties } from './data/chiangDao.js';
+import { chiangDaoProperties } from './chiangDao.js';
 import authRoutes from './routes/auth.js';
 import propertiesRoutes from './routes/properties.js';
 
