@@ -1,6 +1,6 @@
 .header {
   position: fixed;
-  top: 40px; /* Offset for trust banner */
+  top: 0;
   left: 0;
   width: 100%;
   z-index: 1000;
@@ -45,12 +45,22 @@
 }
 
 .logo-accent {
-  color: var(--secondary-color); /* Defaults to orange */
+  color: var(--secondary-color);
+}
+
+.header:not(.header-scrolled) .logo-accent {
+  color: #ffffff;
 }
 
 .desktop-nav ul {
   display: flex;
   gap: var(--spacing-xl);
+}
+
+@media (max-width: 768px) {
+  .header-right-desktop {
+    display: none;
+  }
 }
 
 .nav-link {
@@ -88,6 +98,17 @@
 
 .header:not(.header-scrolled) .btn-text:hover {
   background-color: rgba(255, 255, 255, 0.1);
+}
+
+.header:not(.header-scrolled) .btn-outline {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.header:not(.header-scrolled) .btn-outline:hover {
+  background-color: #fff;
+  border-color: #fff;
+  color: var(--primary-color);
 }
 
 /* User Menu */

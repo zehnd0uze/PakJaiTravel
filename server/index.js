@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { chiangDaoProperties } from './data/chiangDao.js';
 import authRoutes from './routes/auth.js';
+import propertiesRoutes from './routes/properties.js';
 
 dotenv.config();
 
@@ -23,6 +24,9 @@ app.get('/api/health', (req, res) => {
 
 // Auth routes
 app.use('/api/auth', authRoutes);
+
+// Properties CRUD routes (admin)
+app.use('/api/properties', propertiesRoutes);
 
 // Endpoint for Verified Chiang Dao Properties
 app.get('/api/chiangdao/accommodations', (req, res) => {

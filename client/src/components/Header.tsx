@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Header.css';
 import { Button } from './Button';
@@ -10,6 +10,8 @@ export const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,7 +41,7 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className={`header ${scrolled ? 'header-scrolled glass-panel' : ''}`}>
+    <header className={`header ${scrolled || !isHomePage ? 'header-scrolled glass-panel' : ''}`}>
       <div className="container header-content">
         <div className="logo-container" onClick={() => navigate('/')}>
           <span className="logo-text">PakJai<span className="logo-accent">Travel</span></span>
@@ -86,8 +88,8 @@ export const Header: React.FC = () => {
               </div>
             ) : (
               <>
-                <Button variant="text" size="sm" onClick={() => navigate('/login')}>Log in</Button>
-                <Button variant="primary" size="sm" onClick={() => navigate('/register')}>Sign up</Button>
+                <Button variant="outline" size="sm" onClick={() => navigate('/login')}>Log in</Button>
+                <Button variant="text" size="sm" onClick={() => navigate('/register')}>Sign up</Button>
               </>
             )}
           </div>

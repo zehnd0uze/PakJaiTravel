@@ -60,6 +60,9 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Mobile resets */
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -93,6 +96,12 @@ button {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255,255,255,0.3);
   box-shadow: var(--shadow-lg);
+}
+
+@media (max-width: 768px) {
+  main {
+    padding-bottom: calc(70px + env(safe-area-inset-bottom));
+  }
 }
 
 .container {

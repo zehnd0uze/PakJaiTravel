@@ -57,12 +57,14 @@
 
 .btn-outline {
   background-color: transparent;
-  border: 1px solid var(--primary-color);
+  border: 1.5px solid currentColor;
   color: var(--primary-color);
+  border-radius: var(--radius-full);
 }
 
 .btn-outline:hover:not(:disabled) {
   background-color: var(--primary-color);
+  border-color: var(--primary-color);
   color: #fff;
 }
 
@@ -72,7 +74,7 @@
 }
 
 .btn-text:hover:not(:disabled) {
-  background-color: rgba(0, 95, 206, 0.05); /* very light primary */
+  background-color: rgba(5, 176, 166, 0.08);
 }
 
 .btn-full {

@@ -1,38 +1,67 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '../components/Card';
-import { mockHotels } from '../data/mockHotels';
 import './Hotels.css';
 
+interface Hotel {
+  id: string;
+  name: string;
+  type: string;
+  rating: number;
+  reviews: number;
+  pricePerNight: number;
+  currency: string;
+  imageUrl: string;
+  isVerified: boolean;
+  location: string;
+  province: string;
+  district: string;
+  status?: string;
+}
+
 export const Hotels: React.FC = () => {
-  // Pre-set to user requirements: Province Chiang Mai, District Chiang Dao, Type Homestay
-  const [selectedProvince, setSelectedProvince] = useState('Chiang Mai');
-  const [selectedDistrict, setSelectedDistrict] = useState('Chiang Dao');
-  const [selectedType, setSelectedType] = useState('Homestay');
+  const navigate = useNavigate();
+  const [allHotels, setAllHotels] = useState<Hotel[]>([]);
+  const [selectedProvince, setSelectedProvince] = useState('');
+  const [selectedDistrict, setSelectedDistrict] = useState('');
+  const [selectedType, setSelectedType] = useState('');
+
+  // Fetch from API instead of static data
+  useEffect(() => {
+    fetch('/api/properties')
+      .then(r => r.json())
+      .then(data => {
+        // Only show published properties on public site
+        const published = data.filter((h: Hotel) => h.status !== 'draft');
+        setAllHotels(published);
+      })
+      .catch(err => console.error('Failed to fetch properties:', err));
+  }, []);
 
   // Extract unique provinces
-  const provinces = useMemo(() => Array.from(new Set(mockHotels.map(h => h.province))), []);
+  const provinces = useMemo(() => Array.from(new Set(allHotels.map(h => h.province))), [allHotels]);
   
   // Extract unique districts based on selected province
   const districts = useMemo(() => {
     if (!selectedProvince) return [];
-    return Array.from(new Set(mockHotels.filter(h => h.province === selectedProvince).map(h => h.district)));
-  }, [selectedProvince]);
+    return Array.from(new Set(allHotels.filter(h => h.province === selectedProvince).map(h => h.district)));
+  }, [selectedProvince, allHotels]);
   
   // Extract unique types based on selected district
   const types = useMemo(() => {
     if (!selectedDistrict) return [];
-    return Array.from(new Set(mockHotels.filter(h => h.district === selectedDistrict).map(h => h.type)));
-  }, [selectedDistrict]);
+    return Array.from(new Set(allHotels.filter(h => h.district === selectedDistrict).map(h => h.type)));
+  }, [selectedDistrict, allHotels]);
 
   // Filter hotels
   const filteredHotels = useMemo(() => {
-    return mockHotels.filter(hotel => {
+    return allHotels.filter(hotel => {
       const matchProv = selectedProvince ? hotel.province === selectedProvince : true;
       const matchDist = selectedDistrict ? hotel.district === selectedDistrict : true;
       const matchType = selectedType ? hotel.type === selectedType : true;
       return matchProv && matchDist && matchType;
     });
-  }, [selectedProvince, selectedDistrict, selectedType]);
+  }, [selectedProvince, selectedDistrict, selectedType, allHotels]);
 
   return (
     <div className="hotels-page container section-padding animate-fade-in">
@@ -107,12 +136,13 @@ export const Hotels: React.FC = () => {
                   price={`${hotel.pricePerNight} ${hotel.currency}`}
                   rating={hotel.rating}
                   isVerified={hotel.isVerified}
+                  onClick={() => navigate(`/hotels/${hotel.id}`)}
                 />
               ))}
             </div>
           ) : (
             <div className="no-results">
-              <p>No verified accommodations found matching your filters. Try checking a different distinct or type.</p>
+              <p>No verified accommodations found matching your filters. Try checking a different district or type.</p>
             </div>
           )}
         </div>
