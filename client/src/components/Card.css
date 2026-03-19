@@ -31,13 +31,14 @@
   position: absolute;
   top: var(--spacing-sm);
   left: var(--spacing-sm);
-  background-color: var(--secondary-color);
+  background-color: var(--primary-color);
   color: #fff;
   padding: 4px 8px;
   border-radius: var(--radius-sm);
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
   z-index: 1;
 }
 
@@ -66,10 +67,11 @@
   align-items: center;
   font-weight: 600;
   font-size: 0.875rem;
-  background: rgba(0, 95, 206, 0.1);
-  color: var(--primary-color);
+  background: var(--bg-color);
+  color: var(--text-primary);
   padding: 2px 6px;
   border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
 }
 
 .star {
