@@ -15,15 +15,12 @@ interface Property {
 export const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [properties, setProperties] = useState<Property[]>([]);
-  const [userCount, setUserCount] = useState(0);
 
   useEffect(() => {
     fetch('/api/properties')
       .then(r => r.json())
       .then(data => setProperties(data))
       .catch(() => {});
-    // Simple count — in production this would be a real endpoint
-    setUserCount(12);
   }, []);
 
   const totalProperties = properties.length;
