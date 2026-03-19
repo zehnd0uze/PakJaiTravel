@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { chiangDaoProperties } from './chiangDao.js';
 import authRoutes from './routes/auth.js';
 import propertiesRoutes from './routes/properties.js';
+import uploadRoutes from './routes/upload.js';
 
 dotenv.config();
 
@@ -27,6 +28,12 @@ app.use('/api/auth', authRoutes);
 
 // Properties CRUD routes (admin)
 app.use('/api/properties', propertiesRoutes);
+
+// File uploads
+app.use('/api/upload', uploadRoutes);
+
+// Serve static uploaded files from persistent data/uploads folder
+app.use('/uploads', express.static(path.join(__dirname, 'data/uploads')));
 
 // Endpoint for Verified Chiang Dao Properties
 app.get('/api/chiangdao/accommodations', (req, res) => {

@@ -45,6 +45,7 @@ export const AdminHotelEdit: React.FC = () => {
   const [form, setForm] = useState<PropertyForm>(emptyForm);
   const [alert, setAlert] = useState<{ type: string; message: string } | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (!isNew && id) {
@@ -90,6 +91,41 @@ export const AdminHotelEdit: React.FC = () => {
       ...prev,
       [field]: value.split(',').map(s => s.trim()).filter(Boolean),
     }));
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'imageUrl' | 'images') => {
+    if (!e.target.files?.length) return;
+    
+    const formData = new FormData();
+    Array.from(e.target.files).forEach(file => {
+      formData.append('images', file);
+    });
+
+    setUploading(true);
+    setAlert({ type: 'info', message: 'Uploading image(s)...' });
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      
+      if (res.ok && data.urls) {
+        if (field === 'imageUrl') {
+          handleChange('imageUrl', data.urls[0]);
+        } else {
+          setForm(prev => ({ ...prev, images: [...prev.images, ...data.urls] }));
+        }
+        setAlert({ type: 'success', message: 'Image(s) uploaded successfully!' });
+      } else {
+        throw new Error(data.error || 'Upload failed');
+      }
+    } catch (err: any) {
+      setAlert({ type: 'error', message: err.message });
+    } finally {
+      setUploading(false);
+      e.target.value = ''; // Reset file input
+    }
   };
 
   const handleSubmit = async () => {
@@ -167,8 +203,8 @@ export const AdminHotelEdit: React.FC = () => {
 
       <div className="admin-content">
         {alert && (
-          <div className={`admin-alert ${alert.type}`}>
-            {alert.type === 'success' ? '✅' : '⚠️'} {alert.message}
+          <div className={`admin-alert ${alert.type}`} style={alert.type === 'info' ? { background: '#e0f2fe', color: '#0369a1', borderLeft: '4px solid #0284c7' } : {}}>
+            {alert.type === 'success' ? '✅' : alert.type === 'info' ? '⏳' : '⚠️'} {alert.message}
           </div>
         )}
 
@@ -256,20 +292,33 @@ export const AdminHotelEdit: React.FC = () => {
             <h3>Images</h3>
             <div className="admin-form-grid single">
               <div className="admin-form-group">
-                <label>Cover Image URL</label>
-                <input
-                  value={form.imageUrl}
-                  onChange={e => handleChange('imageUrl', e.target.value)}
-                  placeholder="https://..."
-                />
+                <label>Cover Image</label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input
+                    value={form.imageUrl}
+                    onChange={e => handleChange('imageUrl', e.target.value)}
+                    placeholder="https://..."
+                    style={{ flex: 1 }}
+                  />
+                  <label className="admin-btn admin-btn-secondary" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                    {uploading ? '⏳ Uploading...' : '📁 Upload'}
+                    <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleFileUpload(e, 'imageUrl')} disabled={uploading} />
+                  </label>
+                </div>
               </div>
               <div className="admin-form-group">
-                <label>Gallery Image URLs (comma-separated)</label>
-                <textarea
-                  value={form.images.join(', ')}
-                  onChange={e => handleArrayChange('images', e.target.value)}
-                  placeholder="https://img1.jpg, https://img2.jpg, ..."
-                />
+                <label>Gallery Images (comma-separated URLs)</label>
+                <div style={{ display: 'flex', gap: '8px', flexDirection: 'column' }}>
+                  <textarea
+                    value={form.images.join(', ')}
+                    onChange={e => handleArrayChange('images', e.target.value)}
+                    placeholder="https://img1.jpg, https://img2.jpg, ..."
+                  />
+                  <label className="admin-btn admin-btn-secondary" style={{ width: 'fit-content', cursor: 'pointer' }}>
+                    {uploading ? '⏳ Uploading...' : '📁 Upload More Images'}
+                    <input type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => handleFileUpload(e, 'images')} disabled={uploading} />
+                  </label>
+                </div>
               </div>
             </div>
           </div>
