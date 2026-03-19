@@ -49,8 +49,9 @@
   padding: 0;
 }
 
-html, body {
+#root, .app-container {
   overflow-x: hidden;
+  width: 100%;
 }
 
 body {
@@ -61,7 +62,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* Mobile resets */
-  overscroll-behavior-y: none;
   -webkit-tap-highlight-color: transparent;
 }
 
