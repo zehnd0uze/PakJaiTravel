@@ -22,11 +22,17 @@ async function initMailer() {
   try {
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
       transporter = nodemailer.createTransport({
-        service: 'gmail', // Default to Gmail
+        service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true, // Use SSL
         auth: {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,
         },
+        connectionTimeout: 10000, // 10 seconds
+        greetingTimeout: 10000,
+        socketTimeout: 10000,
       });
       console.log('Real Mailer initialized for:', process.env.EMAIL_USER);
     } else {
@@ -240,6 +246,48 @@ router.get('/users', (req, res) => {
     res.json(safeUsers);
   } catch (err) {
     console.error('Fetch users error:', err);
+    res.status(500).json({ error: 'Server error. Please try again.' });
+  }
+});
+
+// DELETE /api/auth/users/:id - Admin delete user
+router.delete('/users/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    let users = getUsers();
+    const userIndex = users.findIndex(u => u.id === id);
+    if (userIndex === -1) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+    
+    users.splice(userIndex, 1);
+    saveUsers(users);
+    res.json({ message: 'User deleted successfully.' });
+  } catch (err) {
+    console.error('Delete user error:', err);
+    res.status(500).json({ error: 'Server error. Please try again.' });
+  }
+});
+
+// PATCH /api/auth/users/:id - Admin update user details
+router.patch('/users/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email } = req.body;
+    let users = getUsers();
+    const user = users.find(u => u.id === id);
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+    
+    if (name) user.name = name;
+    if (email) user.email = email.toLowerCase();
+    
+    saveUsers(users);
+    res.json({ message: 'User updated successfully.', user: { id: user.id, name: user.name, email: user.email } });
+  } catch (err) {
+    console.error('Update user error:', err);
     res.status(500).json({ error: 'Server error. Please try again.' });
   }
 });
