@@ -122,6 +122,7 @@ router.post('/register', async (req, res) => {
     console.log('-------------------------------------------');
 
     // Send email in background (don't block the response)
+    if (transporter) {
       transporter.sendMail({
         from: process.env.EMAIL_USER ? `"PakJaiTravel" <${process.env.EMAIL_USER}>` : '"PakJaiTravel Admin" <no-reply@pakjaitravel.com>',
         to: newUser.email,
