@@ -30,8 +30,9 @@ async function initMailer() {
           pass: process.env.EMAIL_PASS,
         },
         tls: {
-          rejectUnauthorized: false // Helps with some hosting environments
-        }
+          rejectUnauthorized: false 
+        },
+        family: 4 // Force IPv4 to avoid ENETUNREACH on IPv6-only environments
       });
       console.log('Real Mailer initialized for:', process.env.EMAIL_USER);
     } else {
@@ -104,24 +105,23 @@ router.post('/register', async (req, res) => {
     users.push(newUser);
     saveUsers(users);
 
-    // Send email
+    // Send email in background (don't block the response)
     if (transporter) {
-      try {
-        const info = await transporter.sendMail({
-          from: process.env.EMAIL_USER ? `PakJaiTravel <${process.env.EMAIL_USER}>` : '"PakJaiTravel Admin" <no-reply@pakjaitravel.com>',
-          to: newUser.email,
-          subject: "Your Verification Code",
-          text: `Hello ${newUser.name}, your verification code is ${newUser.otp}`,
-          html: `<b>Hello ${newUser.name}</b>,<br/>Your verification code is <h2>${newUser.otp}</h2>`
-        });
+      transporter.sendMail({
+        from: process.env.EMAIL_USER ? `PakJaiTravel <${process.env.EMAIL_USER}>` : '"PakJaiTravel Admin" <no-reply@pakjaitravel.com>',
+        to: newUser.email,
+        subject: "Your Verification Code",
+        text: `Hello ${newUser.name}, your verification code is ${newUser.otp}`,
+        html: `<b>Hello ${newUser.name}</b>,<br/>Your verification code is <h2>${newUser.otp}</h2>`
+      }).then(info => {
         if (!process.env.EMAIL_USER) {
           console.log("Mock Email sent! Preview URL: %s", nodemailer.getTestMessageUrl(info));
         } else {
           console.log("Real Email sent to:", newUser.email);
         }
-      } catch (mailErr) {
-        console.error("Failed to send email:", mailErr.message);
-      }
+      }).catch(mailErr => {
+        console.error("Failed to send email in background:", mailErr.message);
+      });
     }
 
     const token = jwt.sign({ id: newUser.id, email: newUser.email }, JWT_SECRET, { expiresIn: '7d' });
