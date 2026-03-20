@@ -21,6 +21,7 @@ let transporter;
 async function initMailer() {
   try {
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      console.log('Attempting to initialize Real Mailer for:', process.env.EMAIL_USER);
       transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 587,
@@ -34,7 +35,15 @@ async function initMailer() {
         },
         family: 4 // Force IPv4 to avoid ENETUNREACH on IPv6-only environments
       });
-      console.log('Real Mailer initialized for:', process.env.EMAIL_USER);
+
+      // Verification to catch connection issues early
+      transporter.verify((error, success) => {
+        if (error) {
+          console.error('SMTP Verification Error:', error.message);
+        } else {
+          console.log('Server is ready to take our messages (SMTP Verified)');
+        }
+      });
     } else {
       const testAccount = await nodemailer.createTestAccount();
       transporter = nodemailer.createTransport({
@@ -46,7 +55,7 @@ async function initMailer() {
           pass: testAccount.pass,
         },
       });
-      console.log('Ethereal Mock Mailer initialized. (No EMAIL_USER in .env)');
+      console.log('Ethereal Mock Mailer initialized. (No EMAIL_USER found)');
     }
   } catch (err) {
     console.error('Failed to init Mailer', err);
