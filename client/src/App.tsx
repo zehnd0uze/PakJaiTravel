@@ -5,6 +5,7 @@ import { Footer } from './components/Footer';
 import { Home } from './pages/Home';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { VerifyEmailPage } from './pages/VerifyEmailPage';
 import { Hotels } from './pages/Hotels';
 import { HotelDetail } from './pages/HotelDetail';
 import { AdminLayout } from './pages/admin/AdminLayout';
@@ -23,6 +24,7 @@ function App() {
             {/* Auth pages render without header/footer */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
 
             {/* Admin panel — separate layout */}
             <Route path="/admin" element={<AdminLayout />}>

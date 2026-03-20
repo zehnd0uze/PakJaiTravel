@@ -12,6 +12,7 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
+  verify: (email: string, otp: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -75,6 +76,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Registration failed');
+    // Notice: We don't log them in yet. They have to verify.
+  }, []);
+
+  const verify = useCallback(async (email: string, otp: string) => {
+    const res = await fetch(`${API_BASE}/api/auth/verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, otp }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Verification failed');
+    
     localStorage.setItem('pakjai_token', data.token);
     setToken(data.token);
     setUser(data.user);
@@ -87,7 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, verify, logout }}>
       {children}
     </AuthContext.Provider>
   );

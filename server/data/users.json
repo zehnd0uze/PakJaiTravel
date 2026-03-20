@@ -5,5 +5,32 @@
     "email": "test@pakjai.com",
     "password": "$2b$10$xc9GzLOst/r4tLSuF5qzMeWxSnuzgW6PB09rXbRsbYDxU6zb9/KUG",
     "createdAt": "2026-03-18T11:30:40.377Z"
+  },
+  {
+    "id": "1774022685639",
+    "name": "Test User Agent",
+    "email": "agent.test22@example.com",
+    "password": "$2b$10$owi1yV2VngWV5sxN7Wlq/uAawFkUU9j6oA8OkVZDRqqlMvuhJdpuq",
+    "createdAt": "2026-03-20T16:04:45.639Z",
+    "isVerified": false,
+    "otp": "724998"
+  },
+  {
+    "id": "1774024253767",
+    "name": "Real Test User",
+    "email": "real.test99@example.com",
+    "password": "$2b$10$hUlZXCTDsUHEJiMSLzqEduNsAARFKVfI8Gaxg0XhdgkiIZoUVG89m",
+    "createdAt": "2026-03-20T16:30:53.767Z",
+    "isVerified": false,
+    "otp": "327273"
+  },
+  {
+    "id": "1774024691659",
+    "name": "Final App Pw User",
+    "email": "final.apppw.email@example.com",
+    "password": "$2b$10$FZThAGAZEfYDKZmu3nNEKe471X2VaZ9g1lrSBdalqiylqD0/HH4mC",
+    "createdAt": "2026-03-20T16:38:11.659Z",
+    "isVerified": false,
+    "otp": "837624"
   }
 ]

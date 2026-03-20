@@ -53,7 +53,7 @@ export const RegisterPage: React.FC = () => {
     setLoading(true);
     try {
       await register(name, email, password);
-      navigate('/');
+      navigate(`/verify-email?email=${encodeURIComponent(email)}`);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);

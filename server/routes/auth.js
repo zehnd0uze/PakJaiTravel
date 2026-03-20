@@ -4,6 +4,10 @@ import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,6 +15,38 @@ const __dirname = path.dirname(__filename);
 const router = express.Router();
 const USERS_FILE = path.join(__dirname, '../data/users.json');
 const JWT_SECRET = process.env.JWT_SECRET || 'pakjai-secret-key-change-in-production';
+
+// Helper to create email transporter
+let transporter;
+async function initMailer() {
+  try {
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      transporter = nodemailer.createTransport({
+        service: 'gmail', // Default to Gmail
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+      console.log('Real Mailer initialized for:', process.env.EMAIL_USER);
+    } else {
+      const testAccount = await nodemailer.createTestAccount();
+      transporter = nodemailer.createTransport({
+        host: "smtp.ethereal.email",
+        port: 587,
+        secure: false, // true for 465, false for other ports
+        auth: {
+          user: testAccount.user,
+          pass: testAccount.pass,
+        },
+      });
+      console.log('Ethereal Mock Mailer initialized. (No EMAIL_USER in .env)');
+    }
+  } catch (err) {
+    console.error('Failed to init Mailer', err);
+  }
+}
+initMailer();
 
 // Helper to read users
 function getUsers() {
@@ -48,23 +84,40 @@ router.post('/register', async (req, res) => {
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
+    const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6 digit code
 
     const newUser = {
       id: Date.now().toString(),
       name,
       email: email.toLowerCase(),
       password: hashedPassword,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      isVerified: false,
+      otp
     };
 
     users.push(newUser);
     saveUsers(users);
 
-    const token = jwt.sign({ id: newUser.id, email: newUser.email }, JWT_SECRET, { expiresIn: '7d' });
+    // Send email
+    if (transporter) {
+      try {
+        const info = await transporter.sendMail({
+          from: process.env.EMAIL_USER ? `PakJaiTravel <${process.env.EMAIL_USER}>` : '"PakJaiTravel Admin" <no-reply@pakjaitravel.com>',
+          to: newUser.email,
+          subject: "Your Verification Code",
+          text: `Hello ${newUser.name}, your verification code is ${newUser.otp}`,
+          html: `<b>Hello ${newUser.name}</b>,<br/>Your verification code is <h2>${newUser.otp}</h2>`
+        });
+        console.log("Mock Email sent! Preview URL: %s", nodemailer.getTestMessageUrl(info));
+      } catch (mailErr) {
+        console.error("Failed to send mock email", mailErr);
+      }
+    }
 
     res.status(201).json({
-      token,
-      user: { id: newUser.id, name: newUser.name, email: newUser.email }
+      message: 'Registration successful. Please check your email for the verification code.',
+      email: newUser.email
     });
   } catch (err) {
     console.error('Register error:', err);
@@ -92,6 +145,14 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
 
+    if (!user.isVerified && user.isVerified !== undefined) {
+      if (!user.otp) {
+         user.otp = Math.floor(100000 + Math.random() * 900000).toString();
+         saveUsers(users);
+      }
+      return res.status(403).json({ error: 'Please verify your email before logging in.', email: user.email });
+    }
+
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
 
     res.json({
@@ -100,6 +161,47 @@ router.post('/login', async (req, res) => {
     });
   } catch (err) {
     console.error('Login error:', err);
+    res.status(500).json({ error: 'Server error. Please try again.' });
+  }
+});
+
+// POST /api/auth/verify - Verify OTP
+router.post('/verify', async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) {
+      return res.status(400).json({ error: 'Email and OTP are required.' });
+    }
+
+    const users = getUsers();
+    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ error: 'User is already verified.' });
+    }
+
+    if (user.otp !== otp) {
+      return res.status(400).json({ error: 'Invalid verification code.' });
+    }
+
+    // Mark as verified
+    user.isVerified = true;
+    delete user.otp;
+    saveUsers(users);
+
+    // Issue token
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+
+    res.json({
+      token,
+      user: { id: user.id, name: user.name, email: user.email }
+    });
+  } catch (err) {
+    console.error('Verify error:', err);
     res.status(500).json({ error: 'Server error. Please try again.' });
   }
 });
