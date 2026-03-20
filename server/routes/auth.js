@@ -22,17 +22,16 @@ async function initMailer() {
   try {
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
       transporter = nodemailer.createTransport({
-        service: 'gmail',
         host: 'smtp.gmail.com',
-        port: 465,
-        secure: true, // Use SSL
+        port: 587,
+        secure: false, // port 587 uses STARTTLS
         auth: {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,
         },
-        connectionTimeout: 10000, // 10 seconds
-        greetingTimeout: 10000,
-        socketTimeout: 10000,
+        tls: {
+          rejectUnauthorized: false // Helps with some hosting environments
+        }
       });
       console.log('Real Mailer initialized for:', process.env.EMAIL_USER);
     } else {
@@ -40,7 +39,7 @@ async function initMailer() {
       transporter = nodemailer.createTransport({
         host: "smtp.ethereal.email",
         port: 587,
-        secure: false, // true for 465, false for other ports
+        secure: false, 
         auth: {
           user: testAccount.user,
           pass: testAccount.pass,
@@ -115,9 +114,13 @@ router.post('/register', async (req, res) => {
           text: `Hello ${newUser.name}, your verification code is ${newUser.otp}`,
           html: `<b>Hello ${newUser.name}</b>,<br/>Your verification code is <h2>${newUser.otp}</h2>`
         });
-        console.log("Mock Email sent! Preview URL: %s", nodemailer.getTestMessageUrl(info));
+        if (!process.env.EMAIL_USER) {
+          console.log("Mock Email sent! Preview URL: %s", nodemailer.getTestMessageUrl(info));
+        } else {
+          console.log("Real Email sent to:", newUser.email);
+        }
       } catch (mailErr) {
-        console.error("Failed to send mock email", mailErr);
+        console.error("Failed to send email:", mailErr.message);
       }
     }
 
