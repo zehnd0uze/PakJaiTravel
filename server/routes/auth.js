@@ -21,11 +21,11 @@ let transporter;
 async function initMailer() {
   try {
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-      console.log('Attempting to initialize Real Mailer for:', process.env.EMAIL_USER);
+      console.log('Attempting to initialize Real Mailer (Port 465 SSL) for:', process.env.EMAIL_USER);
       transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
-        port: 587,
-        secure: false, // port 587 uses STARTTLS
+        port: 465,
+        secure: true, // Use SSL/TLS
         auth: {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,
@@ -33,13 +33,15 @@ async function initMailer() {
         tls: {
           rejectUnauthorized: false 
         },
-        family: 4 // Force IPv4 to avoid ENETUNREACH on IPv6-only environments
+        family: 4, // Force IPv4 to avoid ENETUNREACH
+        debug: true, // Show full SMTP logging
+        logger: true
       });
 
       // Verification to catch connection issues early
       transporter.verify((error, success) => {
         if (error) {
-          console.error('SMTP Verification Error:', error.message);
+          console.error('SMTP Verification Error (Startup):', error.message);
         } else {
           console.log('Server is ready to take our messages (SMTP Verified)');
         }
@@ -114,10 +116,9 @@ router.post('/register', async (req, res) => {
     users.push(newUser);
     saveUsers(users);
 
-    // Send email in background (don't block the response)
     if (transporter) {
       transporter.sendMail({
-        from: process.env.EMAIL_USER ? `PakJaiTravel <${process.env.EMAIL_USER}>` : '"PakJaiTravel Admin" <no-reply@pakjaitravel.com>',
+        from: process.env.EMAIL_USER ? `"PakJaiTravel" <${process.env.EMAIL_USER}>` : '"PakJaiTravel Admin" <no-reply@pakjaitravel.com>',
         to: newUser.email,
         subject: "Your Verification Code",
         text: `Hello ${newUser.name}, your verification code is ${newUser.otp}`,
@@ -246,7 +247,7 @@ router.post('/resend-otp', async (req, res) => {
     // Send email in background
     if (transporter) {
       transporter.sendMail({
-        from: process.env.EMAIL_USER ? `PakJaiTravel <${process.env.EMAIL_USER}>` : '"PakJaiTravel Admin" <no-reply@pakjaitravel.com>',
+        from: process.env.EMAIL_USER ? `"PakJaiTravel" <${process.env.EMAIL_USER}>` : '"PakJaiTravel Admin" <no-reply@pakjaitravel.com>',
         to: user.email,
         subject: "Your New Verification Code",
         text: `Hello ${user.name}, your new verification code is ${user.otp}`,
