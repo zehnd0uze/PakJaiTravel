@@ -9,6 +9,7 @@ export const AdminLayout: React.FC = () => {
   const navItems = [
     { path: '/admin', icon: '📊', label: 'Dashboard', exact: true },
     { path: '/admin/hotels', icon: '🏨', label: 'Properties' },
+    { path: '/admin/users', icon: '👥', label: 'Users' },
   ];
 
   const isActive = (path: string, exact?: boolean) => {

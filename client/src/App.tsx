@@ -11,6 +11,7 @@ import { AdminLayout } from './pages/admin/AdminLayout';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminHotels } from './pages/admin/AdminHotels';
 import { AdminHotelEdit } from './pages/admin/AdminHotelEdit';
+import { AdminUsers } from './pages/admin/AdminUsers';
 import { MobileBottomNav } from './components/MobileBottomNav';
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
               <Route path="hotels" element={<AdminHotels />} />
               <Route path="hotels/:id/edit" element={<AdminHotelEdit />} />
               <Route path="hotels/new" element={<AdminHotelEdit />} />
+              <Route path="users" element={<AdminUsers />} />
             </Route>
 
             {/* Main public layout */}

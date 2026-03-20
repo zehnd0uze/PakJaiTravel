@@ -15,11 +15,17 @@ interface Property {
 export const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [properties, setProperties] = useState<Property[]>([]);
+  const [usersCount, setUsersCount] = useState<number>(0);
 
   useEffect(() => {
     fetch('/api/properties')
       .then(r => r.json())
       .then(data => setProperties(data))
+      .catch(() => {});
+
+    fetch('/api/auth/users')
+      .then(r => r.json())
+      .then(data => setUsersCount(data?.length || 0))
       .catch(() => {});
   }, []);
 
@@ -44,6 +50,11 @@ export const AdminDashboard: React.FC = () => {
       <div className="admin-content">
         {/* Stats */}
         <div className="stats-grid">
+          <div className="stat-card" onClick={() => navigate('/admin/users')} style={{ cursor: 'pointer' }}>
+            <div className="stat-icon">👥</div>
+            <div className="stat-value">{usersCount}</div>
+            <div className="stat-label">Total Users</div>
+          </div>
           <div className="stat-card">
             <div className="stat-icon">🏨</div>
             <div className="stat-value">{totalProperties}</div>

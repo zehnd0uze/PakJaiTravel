@@ -125,4 +125,21 @@ router.get('/me', (req, res) => {
   }
 });
 
+// GET /api/auth/users - Admin fetch all users
+router.get('/users', (req, res) => {
+  try {
+    const users = getUsers();
+    const safeUsers = users.map(u => ({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      createdAt: u.createdAt
+    }));
+    res.json(safeUsers);
+  } catch (err) {
+    console.error('Fetch users error:', err);
+    res.status(500).json({ error: 'Server error. Please try again.' });
+  }
+});
+
 export default router;
