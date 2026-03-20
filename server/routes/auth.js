@@ -116,7 +116,12 @@ router.post('/register', async (req, res) => {
     users.push(newUser);
     saveUsers(users);
 
-    if (transporter) {
+    // LOG THE CODE TO CONSOLE (Backup for blocked SMTP)
+    console.log('-------------------------------------------');
+    console.log(`[VERIFICATION CODE for ${newUser.email}]: ${newUser.otp}`);
+    console.log('-------------------------------------------');
+
+    // Send email in background (don't block the response)
       transporter.sendMail({
         from: process.env.EMAIL_USER ? `"PakJaiTravel" <${process.env.EMAIL_USER}>` : '"PakJaiTravel Admin" <no-reply@pakjaitravel.com>',
         to: newUser.email,
@@ -244,6 +249,11 @@ router.post('/resend-otp', async (req, res) => {
     user.otp = otp;
     saveUsers(users);
 
+    // LOG THE CODE TO CONSOLE (Backup for blocked SMTP)
+    console.log('-------------------------------------------');
+    console.log(`[NEW VERIFICATION CODE for ${user.email}]: ${user.otp}`);
+    console.log('-------------------------------------------');
+
     // Send email in background
     if (transporter) {
       transporter.sendMail({
@@ -260,10 +270,11 @@ router.post('/resend-otp', async (req, res) => {
         }
       }).catch(mailErr => {
         console.error("Failed to resend email in background:", mailErr.message);
+        console.log("Check the console log above for the new code!");
       });
     }
 
-    res.json({ message: 'A new verification code has been sent to your email.' });
+    res.json({ message: 'A new verification code has been sent to your email (Check logs if not received).' });
   } catch (err) {
     console.error('Resend OTP error:', err);
     res.status(500).json({ error: 'Server error. Please try again.' });
