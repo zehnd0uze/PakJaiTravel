@@ -354,3 +354,57 @@
   }
 }
 
+/* Unverified Account Indicators */
+.avatar-status-dot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  background-color: #ff4d4f; /* Red for alert */
+  border: 2px solid #fff;
+  border-radius: 50%;
+}
+
+.unverified-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  background: #ff4d4f;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+.verify-prompt-box {
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: rgba(255, 77, 79, 0.05);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.verify-prompt-box p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+
+.verify-now-btn {
+  width: 100%;
+  padding: 8px;
+  background: #ff4d4f;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.verify-now-btn:hover {
+  opacity: 0.9;
+}
+

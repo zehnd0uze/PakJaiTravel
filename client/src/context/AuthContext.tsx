@@ -4,6 +4,7 @@ interface User {
   id: string;
   name: string;
   email: string;
+  isVerified: boolean;
 }
 
 interface AuthContextType {
@@ -76,7 +77,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Registration failed');
-    // Notice: We don't log them in yet. They have to verify.
+    
+    // Log them in immediately (Soft Verification)
+    localStorage.setItem('pakjai_token', data.token);
+    setToken(data.token);
+    setUser(data.user);
   }, []);
 
   const verify = useCallback(async (email: string, otp: string) => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { VerifiedBadge } from '../components/VerifiedBadge';
 import { Button } from '../components/Button';
+import { useAuth } from '../context/AuthContext';
 import './HotelDetail.css';
 
 interface Hotel {
@@ -28,6 +29,7 @@ interface Hotel {
 export const HotelDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [selectedImage, setSelectedImage] = useState(0);
   const [hotel, setHotel] = useState<Hotel | null>(null);
   const [loading, setLoading] = useState(true);
@@ -260,10 +262,25 @@ export const HotelDetail: React.FC = () => {
               </div>
             )}
 
+            {user && !user.isVerified && (
+              <div className="verification-lock-notice" style={{
+                background: '#fff1f0',
+                border: '1px solid #ffa39e',
+                padding: '12px',
+                borderRadius: '8px',
+                marginBottom: '16px',
+                fontSize: '0.85rem'
+              }}>
+                <span style={{ fontSize: '1.2rem', marginRight: '8px' }}>🔒</span>
+                <strong>Verify your email</strong> to contact hosts and book this property.
+              </div>
+            )}
+
             <Button
               variant="primary"
               size="lg"
               className="sidebar-book-btn"
+              disabled={!!(user && !user.isVerified)}
               onClick={() => hotel.contact?.phone ? window.open(`tel:${hotel.contact.phone}`) : null}
             >
               Contact Host
@@ -272,6 +289,7 @@ export const HotelDetail: React.FC = () => {
               variant="outline"
               size="md"
               className="sidebar-msg-btn"
+              disabled={!!(user && !user.isVerified)}
               onClick={() => hotel.contact?.email ? window.open(`mailto:${hotel.contact.email}`) : null}
             >
               Send Message

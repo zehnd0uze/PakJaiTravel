@@ -121,9 +121,12 @@ router.post('/register', async (req, res) => {
       }
     }
 
+    const token = jwt.sign({ id: newUser.id, email: newUser.email }, JWT_SECRET, { expiresIn: '7d' });
+    
     res.status(201).json({
-      message: 'Registration successful. Please check your email for the verification code.',
-      email: newUser.email
+      message: 'Registration successful. Account created and logged in.',
+      token,
+      user: { id: newUser.id, name: newUser.name, email: newUser.email, isVerified: newUser.isVerified }
     });
   } catch (err) {
     console.error('Register error:', err);
@@ -151,19 +154,11 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
 
-    if (!user.isVerified && user.isVerified !== undefined) {
-      if (!user.otp) {
-         user.otp = Math.floor(100000 + Math.random() * 900000).toString();
-         saveUsers(users);
-      }
-      return res.status(403).json({ error: 'Please verify your email before logging in.', email: user.email });
-    }
-
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
 
     res.json({
       token,
-      user: { id: user.id, name: user.name, email: user.email }
+      user: { id: user.id, name: user.name, email: user.email, isVerified: user.isVerified }
     });
   } catch (err) {
     console.error('Login error:', err);
@@ -204,7 +199,7 @@ router.post('/verify', async (req, res) => {
 
     res.json({
       token,
-      user: { id: user.id, name: user.name, email: user.email }
+      user: { id: user.id, name: user.name, email: user.email, isVerified: user.isVerified }
     });
   } catch (err) {
     console.error('Verify error:', err);
@@ -227,7 +222,7 @@ router.get('/me', (req, res) => {
     if (!user) {
       return res.status(404).json({ error: 'User not found.' });
     }
-    res.json({ user: { id: user.id, name: user.name, email: user.email } });
+    res.json({ user: { id: user.id, name: user.name, email: user.email, isVerified: user.isVerified } });
   } catch {
     res.status(401).json({ error: 'Invalid or expired token.' });
   }

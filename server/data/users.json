@@ -32,5 +32,77 @@
     "createdAt": "2026-03-20T16:38:11.659Z",
     "isVerified": false,
     "otp": "837624"
+  },
+  {
+    "id": "1774026722260",
+    "name": "Soft Test",
+    "email": "soft.test@example.com",
+    "password": "$2b$10$DwGADGsRHSjTmVNDnCD8ouLgA0lp2hDkQee.d/bv/0Dp.TkrqfKjG",
+    "createdAt": "2026-03-20T17:12:02.260Z",
+    "isVerified": false,
+    "otp": "165669"
+  },
+  {
+    "id": "1774026854351",
+    "name": "Soft Test",
+    "email": "soft.test2@example.com",
+    "password": "$2b$10$oIEc2CSgHsRK3WpaCdQYnekpXeGp4oIXYgpoRBTMK0DY9Po6Gw6l.",
+    "createdAt": "2026-03-20T17:14:14.351Z",
+    "isVerified": false,
+    "otp": "172953"
+  },
+  {
+    "id": "1774026970213",
+    "name": "Soft Test 3",
+    "email": "soft.test3@example.com",
+    "password": "$2b$10$6umGj/s79IEpWUrL4scZbuqpnzg7a2ZqLcor3QFPlSeMhX.71natW",
+    "createdAt": "2026-03-20T17:16:10.213Z",
+    "isVerified": false,
+    "otp": "303578"
+  },
+  {
+    "id": "1774027245315",
+    "name": "Soft Test 4Soft Tester",
+    "email": "soft.test.final@example.com",
+    "password": "$2b$10$JEqxSBbReje1YMP1nx5L.eJg/Tz5KJENcxb/0G.W6cgSm.JoxioxC",
+    "createdAt": "2026-03-20T17:20:45.315Z",
+    "isVerified": false,
+    "otp": "184255"
+  },
+  {
+    "id": "1774027416136",
+    "name": "Final Soft Test",
+    "email": "final.soft@example.com",
+    "password": "$2b$10$suAVJg9Pcft..2kvG0cAvupFh8YaQyaDHQbCH.67pblST88M3eMVq",
+    "createdAt": "2026-03-20T17:23:36.136Z",
+    "isVerified": false,
+    "otp": "598482"
+  },
+  {
+    "id": "1774027598631",
+    "name": "Final Soft Test 2",
+    "email": "final.soft.test2@example.com",
+    "password": "$2b$10$ZouTEzydL4wIPIXlEOrcGuBZhN9RWg8b4wHXsj6ZroerEnyqqmG7m",
+    "createdAt": "2026-03-20T17:26:38.631Z",
+    "isVerified": false,
+    "otp": "982771"
+  },
+  {
+    "id": "1774027794877",
+    "name": "Final Soft Test 3",
+    "email": "final.soft.test3@example.com",
+    "password": "$2b$10$aIBYxLf1NM9wNpogiyZNneqB1VM9zzax54.qDdjwkB/mB9UWGR.LO",
+    "createdAt": "2026-03-20T17:29:54.877Z",
+    "isVerified": false,
+    "otp": "798013"
+  },
+  {
+    "id": "1774027848247",
+    "name": "Final Soft Test 4",
+    "email": "final.soft.test4@example.com",
+    "password": "$2b$10$RZoeUSFOrChiTdLvKBSvsOf0tKvT9S2mgDbB732bJT08oXRUNKyla",
+    "createdAt": "2026-03-20T17:30:48.247Z",
+    "isVerified": false,
+    "otp": "572505"
   }
 ]

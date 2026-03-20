@@ -69,6 +69,7 @@ export const Header: React.FC = () => {
                 >
                   <span className="user-avatar">
                     {user.name.charAt(0).toUpperCase()}
+                    {!user.isVerified && <span className="avatar-status-dot" />}
                   </span>
                 </button>
 
@@ -77,7 +78,23 @@ export const Header: React.FC = () => {
                     <div className="user-dropdown-header">
                       <span className="user-dropdown-name">{user.name}</span>
                       <span className="user-dropdown-email">{user.email}</span>
+                      {!user.isVerified && (
+                        <div className="unverified-badge">
+                          Unverified Account
+                        </div>
+                      )}
                     </div>
+                    {!user.isVerified && (
+                      <div className="verify-prompt-box">
+                        <p>Verify your email to unlock all features.</p>
+                        <button 
+                          className="verify-now-btn" 
+                          onClick={() => { setMenuOpen(false); navigate(`/verify-email?email=${user.email}`); }}
+                        >
+                          Verify Now
+                        </button>
+                      </div>
+                    )}
                     <div className="user-dropdown-divider" />
                     <button className="user-dropdown-item" onClick={handleLogout} id="logout-btn">
                       <span className="dropdown-icon">↪</span>
