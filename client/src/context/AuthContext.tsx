@@ -14,6 +14,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   verify: (email: string, otp: string) => Promise<void>;
+  resendOtp: (email: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -98,6 +99,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(data.user);
   }, []);
 
+  const resendOtp = useCallback(async (email: string) => {
+    const res = await fetch(`${API_BASE}/api/auth/resend-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to resend code');
+  }, []);
+
   const logout = useCallback(() => {
     localStorage.removeItem('pakjai_token');
     setToken(null);
@@ -105,7 +116,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, verify, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, verify, resendOtp, logout }}>
       {children}
     </AuthContext.Provider>
   );

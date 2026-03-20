@@ -210,6 +210,56 @@ router.post('/verify', async (req, res) => {
   }
 });
 
+// POST /api/auth/resend-otp - Resend verification code
+router.post('/resend-otp', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required.' });
+    }
+
+    const users = getUsers();
+    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ error: 'User is already verified.' });
+    }
+
+    // Generate new OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.otp = otp;
+    saveUsers(users);
+
+    // Send email in background
+    if (transporter) {
+      transporter.sendMail({
+        from: process.env.EMAIL_USER ? `PakJaiTravel <${process.env.EMAIL_USER}>` : '"PakJaiTravel Admin" <no-reply@pakjaitravel.com>',
+        to: user.email,
+        subject: "Your New Verification Code",
+        text: `Hello ${user.name}, your new verification code is ${user.otp}`,
+        html: `<b>Hello ${user.name}</b>,<br/>Your new verification code is <h2>${user.otp}</h2>`
+      }).then(info => {
+        if (!process.env.EMAIL_USER) {
+          console.log("Mock Resend Email sent! Preview URL: %s", nodemailer.getTestMessageUrl(info));
+        } else {
+          console.log("Real Resend Email sent to:", user.email);
+        }
+      }).catch(mailErr => {
+        console.error("Failed to resend email in background:", mailErr.message);
+      });
+    }
+
+    res.json({ message: 'A new verification code has been sent to your email.' });
+  } catch (err) {
+    console.error('Resend OTP error:', err);
+    res.status(500).json({ error: 'Server error. Please try again.' });
+  }
+});
+
 // GET /api/auth/me - Verify token & get user data
 router.get('/me', (req, res) => {
   const authHeader = req.headers.authorization;
