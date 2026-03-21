@@ -136,3 +136,32 @@ button {
   transform: translateY(-5px);
   box-shadow: var(--shadow-hover);
 }
+
+/* --- Mobile Touch & Usability Enhancements --- */
+@media (max-width: 768px) {
+  /* Ensure hit areas are comfortable (min 48px) */
+  input, select, textarea, .btn, .nav-item {
+    min-height: 48px;
+  }
+
+  /* Native-like active press feedback */
+  button:active, 
+  .category-item:active, 
+  .scroll-card:active, 
+  .clickable:active {
+    transform: scale(0.97);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* Skeleton Shimmer Effect */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f2f5 25%, #e6e9ef 50%, #f0f2f5 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}

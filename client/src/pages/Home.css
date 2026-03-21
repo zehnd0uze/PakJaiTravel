@@ -65,37 +65,42 @@
 .section-header-mobile h2 {
   font-size: 18px;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   color: #222;
 }
 
-.section-tabs {
+.section-chips {
   display: flex;
-  gap: 16px;
-  border-bottom: 1px solid #eee;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0;
+  scrollbar-width: none;
 }
 
-.section-tabs .tab {
-  padding: 8px 0;
-  font-size: 14px;
-  color: #757575;
-  cursor: pointer;
-  position: relative;
+.section-chips::-webkit-scrollbar {
+  display: none;
 }
 
-.section-tabs .tab.active {
-  color: #1877F2;
-  font-weight: 700;
+.chip {
+  padding: 6px 16px;
+  border-radius: 99px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #eee;
+  color: #666;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  transition: all 0.2s;
 }
 
-.section-tabs .tab.active::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background-color: #1877F2;
+.chip.active {
+  background: #1877F2;
+  color: white;
+  box-shadow: 0 4px 12px rgba(24, 119, 242, 0.25);
+}
+
+.chip:active {
+  transform: scale(0.95);
 }
 
 .horizontal-scroll-container {

@@ -46,9 +46,10 @@ export const Home: React.FC = () => {
     { label: 'แนะนำ', icon: '⭐', color: '#1E88E5', path: '/hotels' },
   ];
 
+  const [activeTab, setActiveTab] = useState('ยอดนิยม');
+
   return (
     <div className="home-page animate-fade-in">
-
       {/* Hero Section - Hidden on Mobile to focus on App UI */}
       <section className="hero chiang-dao-hero desktop-only">
         <div className="hero-overlay"></div>
@@ -58,20 +59,29 @@ export const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Mobile-Only Header Placeholder (Actual Header handled in Header.tsx) */}
+      {/* Mobile-Only Header Placeholder */}
       <div className="mobile-only-spacing"></div>
 
       {/* Wongnai Category Grid (Mobile Primary) */}
       <section className="category-grid-section container">
         <div className="category-grid">
-          {categories.map((cat, i) => (
-            <div key={i} className="category-item" onClick={() => navigate(cat.path)}>
-              <div className="category-icon-circle" style={{ backgroundColor: cat.color }}>
-                {cat.icon}
+          {loading ? (
+             [1,2,3,4,5].map(i => (
+              <div key={i} className="category-item">
+                <div className="category-icon-circle skeleton" style={{ background: '#eee' }}></div>
+                <div className="skeleton" style={{ height: 12, width: 40, marginTop: 4 }}></div>
               </div>
-              <span className="category-label">{cat.label}</span>
-            </div>
-          ))}
+            ))
+          ) : (
+            categories.map((cat, i) => (
+              <div key={i} className="category-item clickable" onClick={() => navigate(cat.path)}>
+                <div className="category-icon-circle" style={{ backgroundColor: cat.color }}>
+                  {cat.icon}
+                </div>
+                <span className="category-label">{cat.label}</span>
+              </div>
+            ))
+          )}
         </div>
       </section>
 
@@ -80,20 +90,33 @@ export const Home: React.FC = () => {
         <div className="container">
           <div className="section-header-mobile">
             <h2 className="section-title">แนะนำสำหรับคุณ</h2>
-            <div className="section-tabs">
-              <span className="tab active">ยอดนิยม</span>
-              <span className="tab">เปิดใหม่</span>
+            <div className="section-chips">
+              {['ยอดนิยม', 'เปิดใหม่', 'ใกล้ฉัน'].map(tab => (
+                <button 
+                  key={tab} 
+                  className={`chip ${activeTab === tab ? 'active' : ''}`}
+                  onClick={() => setActiveTab(tab)}
+                >
+                  {tab}
+                </button>
+              ))}
             </div>
           </div>
 
           {loading ? (
-            <div className="horizontal-scroll-loading"><p>Loading...</p></div>
+            <div className="horizontal-scroll-container">
+              {[1,2,3].map(i => (
+                <div key={i} className="scroll-item">
+                  <div className="scroll-card skeleton" style={{ height: 200, width: '100%', border: 'none' }}></div>
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="horizontal-scroll-container">
               {properties.slice(0, 6).map(prop => (
-                <div key={prop.id} className="scroll-item" onClick={() => navigate(`/hotels/${prop.id}`)}>
+                <div key={prop.id} className="scroll-item clickable" onClick={() => navigate(`/hotels/${prop.id}`)}>
                   <div className="scroll-card">
-                    <img src={prop.imageUrl} alt={prop.name} />
+                    <img src={prop.imageUrl} alt={prop.name} loading="lazy" />
                     <div className="scroll-card-content">
                       <h3 className="scroll-card-title">{prop.name}</h3>
                       <div className="scroll-card-meta">
