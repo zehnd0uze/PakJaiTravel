@@ -8,6 +8,7 @@ import authRoutes from './routes/auth.js';
 import propertiesRoutes from './routes/properties.js';
 import uploadRoutes from './routes/upload.js';
 import postsRoutes from './routes/posts.js';
+import adminRoutes from './routes/admin.js';
 
 dotenv.config();
 
@@ -19,6 +20,35 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+
+// Traffic Logging Middleware
+const TRAFFIC_FILE = path.join(__dirname, 'data/traffic.json');
+app.use((req, res, next) => {
+  // Log API calls and page loads, ignore static assets
+  if (req.path.startsWith('/api') || req.path === '/' || !req.path.includes('.')) {
+    try {
+      let traffic = [];
+      if (fs.existsSync(TRAFFIC_FILE)) {
+        traffic = JSON.parse(fs.readFileSync(TRAFFIC_FILE, 'utf8') || '[]');
+      }
+      
+      traffic.push({ 
+        ts: Date.now(), 
+        ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress, 
+        p: req.path 
+      });
+
+      // Keep only last 24 hours
+      const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
+      const filtered = traffic.filter(t => t.ts > oneDayAgo);
+      
+      fs.writeFileSync(TRAFFIC_FILE, JSON.stringify(filtered));
+    } catch (err) {
+      // Sliently fail logging to avoid breaking the app
+    }
+  }
+  next();
+});
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'PakJaiTravel API is running' });
@@ -35,6 +65,9 @@ app.use('/api/upload', uploadRoutes);
 
 // Community Posts
 app.use('/api/posts', postsRoutes);
+
+// Admin specific routes (stats/traffic)
+app.use('/api/admin', adminRoutes);
 
 // Serve static uploaded files from persistent data/uploads folder
 app.use('/uploads', express.static(path.join(__dirname, 'data/uploads')));
