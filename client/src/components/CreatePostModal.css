@@ -210,3 +210,12 @@
   font-weight: 500;
   border: 1px solid #fecaca;
 }
+
+/* Google Maps Autocomplete override for modals */
+.pac-container {
+  z-index: 99999 !important;
+  font-family: inherit;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
