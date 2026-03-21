@@ -1,0 +1,76 @@
+.community-page {
+  background-color: #f3f4f6;
+  min-height: 100vh;
+  padding-bottom: 60px;
+}
+
+.community-header {
+  background: linear-gradient(135deg, var(--primary-color, #0ea5e9), var(--secondary-color, #fb923c));
+  color: white;
+  padding: 60px 20px;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.community-header-content {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.community-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+}
+
+.community-header p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin-bottom: 24px;
+}
+
+.create-btn {
+  font-size: 1.1rem;
+  padding: 12px 32px;
+  border-radius: 30px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: transform 0.2s;
+}
+
+.create-btn:hover {
+  transform: translateY(-2px);
+}
+
+.community-feed {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.posts-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.community-loading {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #666;
+  padding: 40px;
+}
+
+.no-posts {
+  background: white;
+  padding: 60px 20px;
+  text-align: center;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.no-posts h2 {
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.no-posts p {
+  color: #666;
+}

@@ -8,6 +8,7 @@ import { RegisterPage } from './pages/RegisterPage';
 import { VerifyEmailPage } from './pages/VerifyEmailPage';
 import { Hotels } from './pages/Hotels';
 import { HotelDetail } from './pages/HotelDetail';
+import CommunityPage from './pages/CommunityPage';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminHotels } from './pages/admin/AdminHotels';
@@ -44,6 +45,7 @@ function App() {
                   <main>
                     <Routes>
                       <Route path="/" element={<Home />} />
+                      <Route path="/community" element={<CommunityPage />} />
                       <Route path="/hotels" element={<Hotels />} />
                       <Route path="/hotels/:id" element={<HotelDetail />} />
                     </Routes>

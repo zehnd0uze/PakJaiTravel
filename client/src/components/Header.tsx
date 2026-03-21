@@ -52,6 +52,7 @@ export const Header: React.FC = () => {
             <ul>
               <li><a href="#" className="nav-link">Flights</a></li>
               <li><Link to="/hotels" className="nav-link active">Hotels</Link></li>
+              <li><Link to="/community" className="nav-link">Community</Link></li>
               <li><a href="#" className="nav-link">Activities</a></li>
               <li><a href="#" className="nav-link">Offers</a></li>
               <li><a href="#" className="nav-link">Support</a></li>
