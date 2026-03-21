@@ -118,7 +118,6 @@ export const AdminDashboard: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const totalProperties = properties.length;
   const verifiedCount = properties.filter(p => p.isVerified).length;
   const publishedCount = properties.filter(p => p.status === 'published').length;
   const avgRating = properties.length > 0
@@ -161,9 +160,9 @@ export const AdminDashboard: React.FC = () => {
             <div className="stat-label">Total Users</div>
           </div>
           <div className="stat-card">
-            <div className="stat-icon">🏨</div>
-            <div className="stat-value">{totalProperties}</div>
-            <div className="stat-label">Total Properties</div>
+            <div className="stat-icon">⭐</div>
+            <div className="stat-value">{avgRating}</div>
+            <div className="stat-label">Average Rating</div>
           </div>
           <div className="stat-card">
             <div className="stat-icon">✅</div>
