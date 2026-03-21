@@ -96,28 +96,54 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate }) => {
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const formatTimeAgo = (dateString: string) => {
     const d = new Date(dateString);
-    return d.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - d.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) return 'now';
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) return `${diffInMinutes} m`;
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours} h`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays} d`;
+    
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
   return (
-    <div className="post-card">
-      {/* Header - Avatar and User Info */}
+    <div className="post-card ig-style">
+      {/* IG-style Header */}
       <div className="post-header">
-        <img src={post.authorAvatar} alt={post.authorName} className="post-avatar" />
-        <div className="post-header-info">
-          <h3>{post.authorName}</h3>
-          <span className="post-date">{formatDate(post.createdAt)}</span>
+        <div className="avatar-wrapper">
+          <div className="ig-ring"></div>
+          <img src={post.authorAvatar} alt={post.authorName} className="post-avatar" />
         </div>
+        <div className="post-header-info">
+          <div className="name-row">
+            <h3>{post.authorName}</h3>
+            {/* Blue checkmark icon (verified placeholder) */}
+            <svg className="verified-icon-small" viewBox="0 0 24 24" fill="#0095f6" width="14" height="14">
+              <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-1.9 14.7L6 12.6l1.5-1.5 2.6 2.6 6.4-6.4 1.5 1.5-7.9 7.9z"/>
+            </svg>
+            <span className="dot-sep">•</span>
+            <span className="post-date">{formatTimeAgo(post.createdAt)}</span>
+          </div>
+          {post.locationTag && (
+            <div className="location-row">{post.locationTag}</div>
+          )}
+        </div>
+        <button className="post-menu-btn">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+            <circle cx="12" cy="12" r="1.5"></circle>
+            <circle cx="6" cy="12" r="1.5"></circle>
+            <circle cx="18" cy="12" r="1.5"></circle>
+          </svg>
+        </button>
       </div>
 
-      {/* Content Text - Above Image (Facebook style) */}
+      {/* Content Text - Above Image */}
       {post.content && (
         <div className="post-content">
           <p>{post.content}</p>
@@ -131,12 +157,9 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate }) => {
         </div>
       )}
 
-      {/* Metadata Bar - Ratings and Location below image */}
-      {(post.rating || post.priceRating || post.locationTag) && (
+      {/* Metadata Bar - Ratings (Keep this for the travel app functionality) */}
+      {(post.rating || post.priceRating) && (
         <div className="post-rating-bar">
-          {post.locationTag && (
-            <span className="post-location">📍 {post.locationTag}</span>
-          )}
           {post.rating && (
             <span className="post-stars">
               {'★'.repeat(post.rating)}{'☆'.repeat(5 - post.rating)}
@@ -155,45 +178,36 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate }) => {
           onClick={handleLike}
           disabled={isLiking}
         >
-          {hasLiked ? '👍 Liked' : '👍 Like'} ({post.likes.length})
+          {hasLiked ? '❤️' : '🤍'} <span>{post.likes.length}</span>
         </button>
         <button 
           className="action-btn comment-btn"
           onClick={() => setShowComments(!showComments)}
         >
-          💬 Comment ({post.comments.length})
+          💬 <span>{post.comments.length}</span>
         </button>
       </div>
 
       {/* Comments Section */}
       {showComments && (
         <div className="post-comments-section">
-          {post.comments.length > 0 ? (
+          {post.comments.length > 0 && (
             <div className="comments-list">
               {post.comments.map(c => (
                 <div key={c.id} className="comment-item">
-                  <img src={c.authorAvatar} alt={c.authorName} className="comment-avatar" />
                   <div className="comment-body">
-                    <strong>{c.authorName}</strong>
-                    <p>{c.text}</p>
+                    <strong>{c.authorName}</strong> {c.text}
                   </div>
                 </div>
               ))}
             </div>
-          ) : (
-            <p className="no-comments">No comments yet.</p>
           )}
 
           {user && (
             <form className="comment-form" onSubmit={handleComment}>
-              <img 
-                src={(user as any).avatar || `https://ui-avatars.com/api/?name=${user.name}`} 
-                alt={user.name} 
-                className="comment-avatar" 
-              />
               <input 
                 type="text" 
-                placeholder="Write a comment..." 
+                placeholder="Add a comment..." 
                 value={commentText}
                 onChange={e => setCommentText(e.target.value)}
                 disabled={isCommenting}
