@@ -63,19 +63,31 @@ export const Header: React.FC = () => {
           <span className="logo-text">PakJai<span className="logo-accent">Travel</span></span>
         </div>
         
+        <div className="search-pill-container desktop-only-header">
+          <div className="search-pill">
+            <div className="search-pill-item">
+              <span className="label">Where</span>
+              <span className="value">Search destinations</span>
+            </div>
+            <div className="search-pill-divider"></div>
+            <div className="search-pill-item">
+              <span className="label">When</span>
+              <span className="value">Add dates</span>
+            </div>
+            <div className="search-pill-divider"></div>
+            <div className="search-pill-item">
+              <span className="label">Who</span>
+              <span className="value">Add guests</span>
+            </div>
+            <button className="search-pill-btn">
+              <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="presentation" focusable="false" style={{ display: 'block', fill: 'none', height: '16px', width: '16px', stroke: 'white', strokeWidth: '4', overflow: 'visible' }}><path d="M13 24a11 11 0 1 0 0-22 11 11 0 0 0 0 22zm8-3 9 9"></path></svg>
+            </button>
+          </div>
+        </div>
+        
         <div className="header-right-desktop">
-          <nav className="desktop-nav">
-            <ul>
-              <li><a href="#" className="nav-link">Flights</a></li>
-              <li><Link to="/hotels" className="nav-link active">Hotels</Link></li>
-              <li><Link to="/community" className="nav-link">Community</Link></li>
-              <li><a href="#" className="nav-link">Activities</a></li>
-              <li><a href="#" className="nav-link">Offers</a></li>
-              <li><a href="#" className="nav-link">Support</a></li>
-            </ul>
-          </nav>
-
           <div className="auth-actions">
+            <Link to="/community" className="nav-link" style={{marginRight: '1rem'}}>Community</Link>
             {user ? (
               <div className="user-menu-container" ref={menuRef}>
                 <button

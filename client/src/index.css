@@ -1,46 +1,40 @@
 /* PakJaiTravel Minimalist Design System */
 :root {
-  /* Colors - Minimal Luxury (Monochrome & Muted Accents) */
-  --primary-color: #0F172A; /* Slate 900 - Deep Black */
-  --primary-hover: #1E293B; /* Slate 800 */
-  --secondary-color: #334155; /* Slate 700 */
-  --secondary-hover: #475569; /* Slate 600 */
+  /* Colors - Airbnb Inspiration */
+  --primary-color: #FF385C; /* Airbnb Red */
+  --primary-hover: #E31C5F;
+  --secondary-color: #008489;
   
-  --bg-color: #FAFAFA; /* Off-white / Minimal light gray */
-  --surface-color: #FFFFFF; /* Pure White */
-  --text-primary: #0F172A; /* Deep Black Text */
-  --text-secondary: #64748B; /* Subtle Gray Text */
-  --border-color: #E2E8F0; /* Soft, almost invisible borders */
+  --bg-color: #FFFFFF;
+  --surface-color: #FFFFFF;
+  --text-primary: #222222;
+  --text-secondary: #717171;
+  --border-color: #DDDDDD;
   
   /* Typography */
-  --font-heading: 'Outfit', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  --font-heading: 'Circular', -apple-system, BlinkMacSystemFont, Roboto, Helvetica Neue, sans-serif;
+  --font-body: 'Circular', -apple-system, BlinkMacSystemFont, Roboto, Helvetica Neue, sans-serif;
   
   /* Spacing */
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
-  --spacing-2xl: 3rem;
-  --spacing-3xl: 4rem;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
   
-  /* Radii - Modern Sleek Curves */
+  /* Radii */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
-  --radius-xl: 24px;
-  --radius-full: 9999px;
+  --radius-xl: 32px;
   
-  /* Diffused Modern Shadows */
-  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.04);
-  --shadow-md: 0 4px 20px rgba(15, 23, 42, 0.05); /* Premium float effect */
-  --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.08); /* Extreme float effect for hero cards */
-  --shadow-hover: 0 20px 40px rgba(15, 23, 42, 0.12); /* Interactive hover lift */
-  
-  /* Transitions */
-  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Airbnb-style soft shadows */
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+  --shadow-md: 0 6px 16px rgba(0,0,0,0.12);
+  --shadow-lg: 0 12px 24px rgba(0,0,0,0.15);
+  --shadow-hover: 0 16px 32px rgba(0,0,0,0.2);
 }
 
 * {

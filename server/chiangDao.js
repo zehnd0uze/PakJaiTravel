@@ -8,7 +8,7 @@ export const chiangDaoProperties = [
     reviews: 245,
     pricePerNight: 800,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1540202404-b711c0791486?q=80&w=800&auto=format&fit=crop', // Mountain view homestay
+    imageUrl: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=800&auto=format&fit=crop', // Baan Rabiang Dao
     isVerified: true,
     features: ['Doi Luang View', 'Breakfast Included', 'Private Balcony', 'Real Owner'],
     location: 'Chiang Dao, Chiang Mai'
@@ -21,7 +21,7 @@ export const chiangDaoProperties = [
     reviews: 180,
     pricePerNight: 1500,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=800&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800&auto=format&fit=crop', // Azalea Style
     isVerified: true,
     features: ['Swimming Pool', 'Mountain View', 'Air Conditioning', 'Restaurant'],
     location: 'Chiang Dao, Chiang Mai'
@@ -34,7 +34,7 @@ export const chiangDaoProperties = [
     reviews: 312,
     pricePerNight: 1200,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?q=80&w=800&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=800&auto=format&fit=crop', // Nature Nest
     isVerified: true,
     features: ['Nature Surroundings', 'Award-winning Restaurant', 'Wi-Fi'],
     location: 'Chiang Dao, Chiang Mai'
@@ -47,7 +47,7 @@ export const chiangDaoProperties = [
     reviews: 89,
     pricePerNight: 950,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1510798831971-661eb04b3739?q=80&w=800&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=800&auto=format&fit=crop', // Doi Luang view homestay
     isVerified: true,
     features: ['Authentic Style', 'Local Food', 'Real Owner', 'Doi Luang View'],
     location: 'Chiang Dao, Chiang Mai'

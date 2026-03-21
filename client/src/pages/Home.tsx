@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Home.css';
-import { Card } from '../components/Card';
+import { AirbnbCard } from '../components/AirbnbCard';
 import { VerifiedBadge } from '../components/VerifiedBadge';
 
 interface Property {
@@ -109,23 +109,24 @@ export const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Desktop Destinations Section */}
+      {/* Airbnb-Inspired Verified Destinations Section */}
       <section className="destinations section-padding desktop-only">
         <div className="container">
           <div className="section-header">
             <h2 className="section-title">Verified Destinations</h2>
+            <p className="section-subtitle">Stays owned by real locals, verified for your safety.</p>
           </div>
-          <div className="destinations-grid grid-chiang-dao">
-            {properties.slice(0, 4).map(prop => (
-              <Card
+          <div className="destinations-grid">
+            {properties.map(prop => (
+              <AirbnbCard
                 key={prop.id}
-                title={prop.name}
-                subtitle={prop.features.join(' • ')}
+                title={`${prop.type} in ${prop.name}`}
+                subtitle={prop.features.slice(0, 2).join(' • ')}
                 image={prop.imageUrl}
                 price={`฿${prop.pricePerNight.toLocaleString()}`}
                 rating={prop.rating}
-                badge={prop.type}
-                isVerified={prop.isVerified}
+                reviews={prop.reviews}
+                isGuestFavorite={prop.rating >= 4.8}
                 onClick={() => navigate(`/hotels/${prop.id}`)}
               />
             ))}
