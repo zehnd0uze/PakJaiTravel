@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import PostCard from '../components/PostCard';
+import CreatePostModal from '../components/CreatePostModal';
 import './ProfilePage.css';
 
 const ProfilePage: React.FC = () => {
@@ -9,28 +10,28 @@ const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const [userPosts, setUserPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchUserPosts = async () => {
+    try {
+      const res = await fetch('/api/posts');
+      if (res.ok) {
+        const data = await res.json();
+        const mine = data.filter((p: any) => p.userId === user?.id);
+        setUserPosts(mine);
+      }
+    } catch (err) {
+      console.error("Failed to fetch user posts", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!user) {
       navigate('/login');
       return;
     }
-
-    const fetchUserPosts = async () => {
-      try {
-        const res = await fetch('/api/posts');
-        if (res.ok) {
-          const data = await res.json();
-          const mine = data.filter((p: any) => p.userId === user.id);
-          setUserPosts(mine);
-        }
-      } catch (err) {
-        console.error("Failed to fetch user posts", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUserPosts();
   }, [user, navigate]);
 
@@ -97,10 +98,19 @@ const ProfilePage: React.FC = () => {
         </div>
 
         {/* Profile Tabs */}
-        <div className="profile-tabs">
-          <button className="profile-tab active">My Reviews</button>
-          <button className="profile-tab">Photos</button>
-          <button className="profile-tab">Saved Places</button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <div className="profile-tabs" style={{ marginBottom: 0, flex: 1 }}>
+            <button className="profile-tab active">My Reviews</button>
+            <button className="profile-tab">Photos</button>
+            <button className="profile-tab">Saved Places</button>
+          </div>
+          <button 
+            onClick={() => setIsModalOpen(true)} 
+            className="btn btn-primary" 
+            style={{ marginLeft: '16px', borderRadius: '20px', padding: '10px 24px', boxShadow: '0 4px 12px rgba(14, 165, 233, 0.2)' }}
+          >
+            + Create Post
+          </button>
         </div>
 
         {/* User's Post Feed */}
@@ -118,14 +128,24 @@ const ProfilePage: React.FC = () => {
               <div className="empty-icon">🗺️</div>
               <h2>No reviews yet!</h2>
               <p>Share your favorite places, tips, and photos with the travel community.</p>
-              <Link to="/community" className="btn btn-primary start-review-btn">
+              <button onClick={() => setIsModalOpen(true)} className="btn btn-primary start-review-btn">
                 Write a Review
-              </Link>
+              </button>
             </div>
           )}
         </div>
 
       </div>
+
+      {isModalOpen && (
+        <CreatePostModal 
+          onClose={() => setIsModalOpen(false)} 
+          onPostCreated={() => {
+            setIsModalOpen(false);
+            fetchUserPosts();
+          }} 
+        />
+      )}
     </div>
   );
 };
