@@ -97,7 +97,7 @@ export const Header: React.FC = () => {
                   aria-label="User menu"
                 >
                   <span className="user-avatar">
-                    {user.name.charAt(0).toUpperCase()}
+                    {(user.name?.[0] || user.email?.[0] || 'U').toUpperCase()}
                     {!user.isVerified && <span className="avatar-status-dot" />}
                   </span>
                 </button>
@@ -105,7 +105,7 @@ export const Header: React.FC = () => {
                 {menuOpen && (
                   <div className="user-dropdown">
                     <div className="user-dropdown-header">
-                      <span className="user-dropdown-name">{user.name}</span>
+                      <span className="user-dropdown-name">{user.name || 'User'}</span>
                       <span className="user-dropdown-email">{user.email}</span>
                       {!user.isVerified && (
                         <div className="unverified-badge">

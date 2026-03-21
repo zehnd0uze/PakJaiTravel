@@ -123,10 +123,10 @@ export const Home: React.FC = () => {
                 title={`${prop.type || 'Stay'} in ${prop.name || 'Unknown'}`}
                 subtitle={(prop.features || []).slice(0, 2).join(' • ') || 'Local Stay'}
                 image={prop.imageUrl || '/assets/placeholder-hotel.jpg'}
-                price={`฿${(prop.pricePerNight || 0).toLocaleString()}`}
-                rating={prop.rating || 0}
-                reviews={prop.reviews || 0}
-                isGuestFavorite={(prop.rating || 0) >= 4.8}
+                price={`฿${Number(prop.pricePerNight || 0).toLocaleString()}`}
+                rating={Number(prop.rating || 0)}
+                reviews={Number(prop.reviews || 0)}
+                isGuestFavorite={Number(prop.rating || 0) >= 4.8}
                 onClick={() => navigate(`/hotels/${prop.id}`)}
               />
             ))}
