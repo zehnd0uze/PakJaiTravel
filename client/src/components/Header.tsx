@@ -97,6 +97,15 @@ export const Header: React.FC = () => {
                       </div>
                     )}
                     <div className="user-dropdown-divider" />
+                    <button className="user-dropdown-item" onClick={() => { setMenuOpen(false); navigate('/profile'); }}>
+                      <span className="dropdown-icon">👤</span>
+                      Profile
+                    </button>
+                    <button className="user-dropdown-item" onClick={() => { setMenuOpen(false); navigate('/community'); }}>
+                      <span className="dropdown-icon">📸</span>
+                      Community Feed
+                    </button>
+                    <div className="user-dropdown-divider" />
                     <button className="user-dropdown-item" onClick={handleLogout} id="logout-btn">
                       <span className="dropdown-icon">↪</span>
                       Log out
