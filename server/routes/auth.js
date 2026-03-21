@@ -3,10 +3,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
-import { Resend } from 'resend';
 
 dotenv.config();
 
@@ -19,12 +17,13 @@ const JWT_SECRET = process.env.JWT_SECRET || 'pakjai-secret-key-change-in-produc
 
 // Helper to create email transporter
 let transporter;
-let resendClient;
+// Brevo API integration doesn't need an instance, just the key
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
+
 async function initMailer() {
   try {
-    if (process.env.RESEND_API_KEY) {
-      console.log('Initializing Resend API for email delivery.');
-      resendClient = new Resend(process.env.RESEND_API_KEY);
+    if (BREVO_API_KEY) {
+      console.log('Using Brevo API for email delivery.');
     } else if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
       console.log('Attempting to initialize Real Mailer (Port 465 SSL) for:', process.env.EMAIL_USER);
       transporter = nodemailer.createTransport({
@@ -127,21 +126,24 @@ router.post('/register', async (req, res) => {
     console.log('-------------------------------------------');
 
     // Send email in background (don't block the response)
-    if (resendClient) {
-      resendClient.emails.send({
-        from: 'PakJaiTravel <onboarding@resend.dev>',
-        to: newUser.email,
-        subject: "Your Verification Code",
-        html: `<b>Hello ${newUser.name}</b>,<br/>Your verification code is <h2>${newUser.otp}</h2>`
-      }).then(data => {
-        if (data.error) {
-           console.error("Resend API Validation Error:", data.error);
-        } else {
-           console.log("Resend API Email sent successfully to:", newUser.email);
-        }
-      }).catch(err => {
-        console.error("Resend API Network Error:", err);
-      });
+    if (BREVO_API_KEY) {
+      fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'api-key': BREVO_API_KEY,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          sender: { name: 'PakJaiTravel', email: process.env.EMAIL_USER || 'elefteriacompany@gmail.com' },
+          to: [{ email: newUser.email, name: newUser.name }],
+          subject: 'Your Verification Code',
+          htmlContent: `<b>Hello ${newUser.name}</b>,<br/>Your verification code is <h2>${newUser.otp}</h2>`
+        })
+      })
+      .then(res => res.json())
+      .then(data => console.log("Brevo API Email sent response:", data))
+      .catch(err => console.error("Brevo API Network Error:", err));
     } else if (transporter) {
       transporter.sendMail({
         from: process.env.EMAIL_USER ? `"PakJaiTravel" <${process.env.EMAIL_USER}>` : '"PakJaiTravel Admin" <no-reply@pakjaitravel.com>',
@@ -276,21 +278,24 @@ router.post('/resend-otp', async (req, res) => {
     console.log('-------------------------------------------');
 
     // Send email in background
-    if (resendClient) {
-      resendClient.emails.send({
-        from: 'PakJaiTravel <onboarding@resend.dev>',
-        to: user.email,
-        subject: "Your New Verification Code",
-        html: `<b>Hello ${user.name}</b>,<br/>Your new verification code is <h2>${user.otp}</h2>`
-      }).then(data => {
-        if (data.error) {
-           console.error("Resend API Validation Error:", data.error);
-        } else {
-           console.log("Resend API Resend Email sent successfully to:", user.email);
-        }
-      }).catch(err => {
-        console.error("Resend API Network Error:", err);
-      });
+    if (BREVO_API_KEY) {
+      fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'api-key': BREVO_API_KEY,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          sender: { name: 'PakJaiTravel', email: process.env.EMAIL_USER || 'elefteriacompany@gmail.com' },
+          to: [{ email: user.email, name: user.name }],
+          subject: 'Your New Verification Code',
+          htmlContent: `<b>Hello ${user.name}</b>,<br/>Your new verification code is <h2>${user.otp}</h2>`
+        })
+      })
+      .then(res => res.json())
+      .then(data => console.log("Brevo API Resend Email sent response:", data))
+      .catch(err => console.error("Brevo API Network Error:", err));
     } else if (transporter) {
       transporter.sendMail({
         from: process.env.EMAIL_USER ? `"PakJaiTravel" <${process.env.EMAIL_USER}>` : '"PakJaiTravel Admin" <no-reply@pakjaitravel.com>',
