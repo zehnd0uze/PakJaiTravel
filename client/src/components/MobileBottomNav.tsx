@@ -34,15 +34,16 @@ export const MobileBottomNav: React.FC = () => {
       </div>
       
       <div 
-        className={`mobile-nav-item ${isActive('/hotels') || isActive('/hotels/search') ? 'active' : ''}`}
-        onClick={() => navigate('/hotels')}
+        className={`mobile-nav-item ${isActive('/community') ? 'active' : ''}`}
+        onClick={() => navigate('/community')}
       >
         <span className="mobile-nav-icon">
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-            <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <path d="M12 8l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2z"/>
           </svg>
         </span>
-        <span className="mobile-nav-label">ค้นหา</span>
+        <span className="mobile-nav-label">สำหรับคุณ</span>
       </div>
 
       <div 
@@ -50,8 +51,8 @@ export const MobileBottomNav: React.FC = () => {
         onClick={() => user ? navigate('/saved') : navigate('/login')}
       >
         <span className="mobile-nav-icon">
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-            <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
           </svg>
         </span>
         <span className="mobile-nav-label">ที่บันทึกไว้</span>
@@ -62,8 +63,9 @@ export const MobileBottomNav: React.FC = () => {
         onClick={() => user ? navigate('/profile') : navigate('/login')}
       >
         <span className="mobile-nav-icon">
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
           </svg>
         </span>
         <span className="mobile-nav-label">ฉัน</span>

@@ -85,7 +85,7 @@
 .location-selector {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 0;
   cursor: pointer;
   white-space: nowrap;
 }
@@ -102,8 +102,8 @@
   align-items: center;
   gap: 8px;
   background: #f0f2f5;
-  padding: 8px 12px;
-  border-radius: 8px;
+  padding: 7px 12px;
+  border-radius: 99px;
   position: relative;
 }
 
@@ -115,7 +115,7 @@
   color: #333;
   outline: none;
   width: 100%;
-  padding: 2px 0;
+  padding: 0;
 }
 
 .clear-search-btn {
@@ -139,15 +139,19 @@
 
 .header-icons-mobile {
   display: flex;
-  gap: 8px;
+  gap: 12px;
+  align-items: center;
 }
 
-.icon-btn {
+.icon-btn-wongnai {
   background: transparent;
   border: none;
   font-size: 20px;
   cursor: pointer;
-  padding: 4px;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav-link {
