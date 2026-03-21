@@ -33,6 +33,7 @@ async function initMailer() {
         tls: {
           rejectUnauthorized: false 
         },
+        family: 4, // CRITICAL: Force IPv4 to prevent ENETUNREACH on Railway
         debug: true, 
         logger: true
       });
