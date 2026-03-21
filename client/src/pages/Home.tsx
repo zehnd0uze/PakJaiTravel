@@ -49,8 +49,8 @@ export const Home: React.FC = () => {
   return (
     <div className="home-page animate-fade-in">
 
-      {/* Hero Section - Hidden on Mobile to focus on App UI */}
-      <section className="hero chiang-dao-hero desktop-only">
+      {/* Hero Section - Restored beautiful background */}
+      <section className="hero chiang-dao-hero">
         <div className="hero-overlay"></div>
         <div className="container hero-content">
           <h1 className="hero-title">Discover the Magic of <span style={{ color: '#ffffff' }}>Chiang Dao</span></h1>
