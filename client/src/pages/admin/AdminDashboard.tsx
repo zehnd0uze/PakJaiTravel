@@ -96,6 +96,11 @@ export const AdminDashboard: React.FC = () => {
             <div className="stat-label">Verified Listings</div>
           </div>
           <div className="stat-card">
+            <div className="stat-icon">📢</div>
+            <div className="stat-value">{publishedCount}</div>
+            <div className="stat-label">Published Stays</div>
+          </div>
+          <div className="stat-card">
             <div className="stat-icon">⭐</div>
             <div className="stat-value">{avgRating}</div>
             <div className="stat-label">Average Rating</div>
