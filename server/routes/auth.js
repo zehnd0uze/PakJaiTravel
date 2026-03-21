@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
 
 dotenv.config();
 
@@ -400,6 +401,89 @@ router.patch('/users/:id', (req, res) => {
   } catch (err) {
     console.error('Update user error:', err);
     res.status(500).json({ error: 'Server error. Please try again.' });
+  }
+});
+
+/* --- PASSWORD RESET ROUTES --- */
+
+// POST /api/auth/forgot-password
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email is required' });
+
+    let users = getUsers();
+    const userIndex = users.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
+    
+    if (userIndex === -1) {
+      return res.json({ message: 'If an account exists, a reset link has been sent.' });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetExpires = Date.now() + 3600000; // 1 hour
+
+    users[userIndex].resetPasswordToken = resetToken;
+    users[userIndex].resetPasswordExpires = resetExpires;
+    saveUsers(users);
+
+    // Dynamic origin for the reset link
+    const origin = req.headers.origin || 'http://localhost:5173';
+    const resetLink = `${origin}/reset-password?token=${resetToken}`;
+
+    if (BREVO_API_KEY) {
+      await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'api-key': BREVO_API_KEY,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          sender: { name: 'PakJaiTravel', email: process.env.EMAIL_USER || 'elefteriacompany@gmail.com' },
+          to: [{ email: users[userIndex].email, name: users[userIndex].name }],
+          subject: 'Password Reset Request',
+          htmlContent: `<b>Hello ${users[userIndex].name}</b>,<br/><br/>You requested a password reset. Click the link below to set a new password:<br/><br/><a href="${resetLink}">Reset Password</a><br/><br/>This link will expire in 1 hour.<br/><br/>If you did not request this, please ignore this email.`
+        })
+      });
+    }
+
+    console.log(`[PASSWORD RESET LINK for ${email}]: ${resetLink}`);
+    res.json({ message: 'If an account exists, a reset link has been sent.' });
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// POST /api/auth/reset-password
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+    if (!token || !newPassword) return res.status(400).json({ error: 'Token and new password are required' });
+    if (newPassword.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+
+    let users = getUsers();
+    const userIndex = users.findIndex(u => 
+      u.resetPasswordToken === token && 
+      u.resetPasswordExpires > Date.now()
+    );
+
+    if (userIndex === -1) {
+      return res.status(400).json({ error: 'Invalid or expired reset token' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    users[userIndex].password = hashedPassword;
+    delete users[userIndex].resetPasswordToken;
+    delete users[userIndex].resetPasswordExpires;
+    saveUsers(users);
+
+    res.json({ message: 'Password has been successfully reset' });
+  } catch (err) {
+    console.error('Reset password error:', err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

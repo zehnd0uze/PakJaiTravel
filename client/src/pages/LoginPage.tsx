@@ -76,6 +76,11 @@ export const LoginPage: React.FC = () => {
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="current-password"
             />
+            <div style={{ textAlign: 'right', marginTop: '8px' }}>
+              <Link to="/forgot-password" style={{ fontSize: '0.85rem', color: 'var(--primary-color, #0ea5e9)', textDecoration: 'none', fontWeight: 500 }}>
+                Forgot password?
+              </Link>
+            </div>
           </div>
 
           <button
