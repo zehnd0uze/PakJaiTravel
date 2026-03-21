@@ -11,7 +11,9 @@ const TRAFFIC_FILE = path.join(__dirname, '../data/traffic.json');
 // GET /api/admin/traffic
 router.get('/traffic', (req, res) => {
   try {
-    if (!fs.existsSync(TRAFFIC_FILE)) return res.json({ active5m: 0, total24h: 0 });
+    if (!fs.existsSync(TRAFFIC_FILE)) {
+      return res.json({ active5m: 0, total24h: 0, chartData: [] });
+    }
     
     const traffic = JSON.parse(fs.readFileSync(TRAFFIC_FILE, 'utf8') || '[]');
     const now = Date.now();
@@ -25,11 +27,24 @@ router.get('/traffic', (req, res) => {
     );
 
     // Total hits in 24h
-    const totalHits = traffic.filter(t => t.ts > oneDayAgo).length;
+    const hits24h = traffic.filter(t => t.ts > oneDayAgo);
+    const totalHits = hits24h.length;
+
+    // Aggregate into 24 hourly buckets
+    const chartData = [];
+    for (let i = 23; i >= 0; i--) {
+      const hourStart = now - (i * 60 * 60 * 1000);
+      const hourEnd = now - ((i - 1) * 60 * 60 * 1000);
+      const hourLabel = new Date(hourStart).getHours() + ":00";
+      
+      const count = hits24h.filter(t => t.ts >= hourStart && t.ts < hourEnd).length;
+      chartData.push({ label: hourLabel, value: count });
+    }
 
     res.json({
       active5m: activeIps.size,
       total24h: totalHits,
+      chartData: chartData,
       lastUpdated: new Date().toISOString()
     });
   } catch (err) {
