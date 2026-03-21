@@ -51,10 +51,10 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
         const lng = place.geometry.location.lng();
         setCoordinates({ lat, lng });
         
-        if (place.formatted_address) {
-          setLocationTag(place.formatted_address);
-        } else if (place.name) {
+        if (place.name) {
           setLocationTag(place.name);
+        } else if (place.formatted_address) {
+          setLocationTag(place.formatted_address);
         }
       }
     }

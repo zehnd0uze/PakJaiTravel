@@ -98,11 +98,17 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate }) => {
 
   const formatDate = (dateString: string) => {
     const d = new Date(dateString);
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric', 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
   };
 
   return (
     <div className="post-card">
+      {/* Header - Avatar and User Info */}
       <div className="post-header">
         <img src={post.authorAvatar} alt={post.authorName} className="post-avatar" />
         <div className="post-header-info">
@@ -111,46 +117,55 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate }) => {
         </div>
       </div>
 
-      {(post.rating || post.priceRating || post.locationTag) && (
-        <div className="post-rating-bar">
-          {post.locationTag && <span className="post-location">📍 {post.locationTag}</span>}
-          {post.rating && (
-            <span className="post-stars">
-              {'★'.repeat(post.rating)}{'☆'.repeat(5 - post.rating)}
-            </span>
-          )}
-          {post.priceRating && <span className="post-price">{post.priceRating}</span>}
-        </div>
-      )}
-
-      {post.imageUrl && (
-        <div className="post-image-container">
-          <img src={post.imageUrl} alt="Travel Post" className="post-image" />
-        </div>
-      )}
-
+      {/* Content Text - Above Image (Facebook style) */}
       {post.content && (
         <div className="post-content">
           <p>{post.content}</p>
         </div>
       )}
 
+      {/* Post Media - Full Width */}
+      {post.imageUrl && (
+        <div className="post-image-container">
+          <img src={post.imageUrl} alt="Post Content" className="post-image" />
+        </div>
+      )}
+
+      {/* Metadata Bar - Ratings and Location below image */}
+      {(post.rating || post.priceRating || post.locationTag) && (
+        <div className="post-rating-bar">
+          {post.locationTag && (
+            <span className="post-location">📍 {post.locationTag}</span>
+          )}
+          {post.rating && (
+            <span className="post-stars">
+              {'★'.repeat(post.rating)}{'☆'.repeat(5 - post.rating)}
+            </span>
+          )}
+          {post.priceRating && (
+            <span className="post-price">{post.priceRating}</span>
+          )}
+        </div>
+      )}
+
+      {/* Action Bar - Like and Comment */}
       <div className="post-actions">
         <button 
           className={`action-btn like-btn ${hasLiked ? 'liked' : ''}`} 
           onClick={handleLike}
           disabled={isLiking}
         >
-          {hasLiked ? '❤️' : '🤍'} {post.likes.length}
+          {hasLiked ? '👍 Liked' : '👍 Like'} ({post.likes.length})
         </button>
         <button 
           className="action-btn comment-btn"
           onClick={() => setShowComments(!showComments)}
         >
-          💬 {post.comments.length}
+          💬 Comment ({post.comments.length})
         </button>
       </div>
 
+      {/* Comments Section */}
       {showComments && (
         <div className="post-comments-section">
           {post.comments.length > 0 ? (
@@ -161,18 +176,21 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate }) => {
                   <div className="comment-body">
                     <strong>{c.authorName}</strong>
                     <p>{c.text}</p>
-                    <span className="comment-date">{formatDate(c.createdAt)}</span>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="no-comments">No comments yet. Be the first!</p>
+            <p className="no-comments">No comments yet.</p>
           )}
 
           {user && (
             <form className="comment-form" onSubmit={handleComment}>
-              <img src={(user as any).avatar || `https://ui-avatars.com/api/?name=${user.name}`} alt={user.name} className="comment-avatar" />
+              <img 
+                src={(user as any).avatar || `https://ui-avatars.com/api/?name=${user.name}`} 
+                alt={user.name} 
+                className="comment-avatar" 
+              />
               <input 
                 type="text" 
                 placeholder="Write a comment..." 
