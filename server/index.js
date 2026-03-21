@@ -22,10 +22,13 @@ app.use(cors());
 app.use(express.json());
 
 // Traffic Logging Middleware
-const TRAFFIC_FILE = path.join(__dirname, 'data/traffic.json');
+const TRAFFIC_FILE = path.resolve(__dirname, 'data/traffic.json');
+
 app.use((req, res, next) => {
-  // Log API calls and page loads, ignore static assets
-  if (req.path.startsWith('/api') || req.path === '/' || !req.path.includes('.')) {
+  // Log all requests that aren't obvious static files
+  const isDoc = req.path === '/' || req.path.startsWith('/api') || !req.path.includes('.');
+  
+  if (isDoc) {
     try {
       let traffic = [];
       if (fs.existsSync(TRAFFIC_FILE)) {
@@ -34,20 +37,25 @@ app.use((req, res, next) => {
       
       traffic.push({ 
         ts: Date.now(), 
-        ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress, 
+        ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown-ip', 
         p: req.path 
       });
 
-      // Keep only last 24 hours
-      const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
-      const filtered = traffic.filter(t => t.ts > oneDayAgo);
+      // Maintain last 24h
+      const cutOff = Date.now() - (24 * 60 * 60 * 1000);
+      const filtered = traffic.filter(t => t.ts > cutOff);
       
       fs.writeFileSync(TRAFFIC_FILE, JSON.stringify(filtered));
     } catch (err) {
-      // Sliently fail logging to avoid breaking the app
+      console.error('Traffic log failed:', err.message);
     }
   }
   next();
+});
+
+// Dedicated tracking hit (can be called by frontend)
+app.post('/api/track', (req, res) => {
+  res.status(204).end(); // Just to trigger the middleware above
 });
 
 app.get('/api/health', (req, res) => {

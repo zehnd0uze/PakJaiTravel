@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
@@ -19,9 +20,19 @@ import { AdminHotelEdit } from './pages/admin/AdminHotelEdit';
 import { AdminUsers } from './pages/admin/AdminUsers';
 import { MobileBottomNav } from './components/MobileBottomNav';
 
+// Lightweight component to pig the server on every page navigation
+const TrafficTracker = () => {
+  const location = useLocation();
+  useEffect(() => {
+    fetch('/api/track', { method: 'POST' }).catch(() => {});
+  }, [location.pathname]);
+  return null;
+};
+
 function App() {
   return (
     <BrowserRouter>
+      <TrafficTracker />
       <AuthProvider>
         <div className="app-container">
           <Routes>
