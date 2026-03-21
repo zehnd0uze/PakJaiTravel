@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import { Resend } from 'resend';
 
 dotenv.config();
 
@@ -18,9 +19,13 @@ const JWT_SECRET = process.env.JWT_SECRET || 'pakjai-secret-key-change-in-produc
 
 // Helper to create email transporter
 let transporter;
+let resendClient;
 async function initMailer() {
   try {
-    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+    if (process.env.RESEND_API_KEY) {
+      console.log('Initializing Resend API for email delivery.');
+      resendClient = new Resend(process.env.RESEND_API_KEY);
+    } else if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
       console.log('Attempting to initialize Real Mailer (Port 465 SSL) for:', process.env.EMAIL_USER);
       transporter = nodemailer.createTransport({
         host: 'smtp-relay.gmail.com',
@@ -122,7 +127,22 @@ router.post('/register', async (req, res) => {
     console.log('-------------------------------------------');
 
     // Send email in background (don't block the response)
-    if (transporter) {
+    if (resendClient) {
+      resendClient.emails.send({
+        from: 'PakJaiTravel <onboarding@resend.dev>',
+        to: newUser.email,
+        subject: "Your Verification Code",
+        html: `<b>Hello ${newUser.name}</b>,<br/>Your verification code is <h2>${newUser.otp}</h2>`
+      }).then(data => {
+        if (data.error) {
+           console.error("Resend API Validation Error:", data.error);
+        } else {
+           console.log("Resend API Email sent successfully to:", newUser.email);
+        }
+      }).catch(err => {
+        console.error("Resend API Network Error:", err);
+      });
+    } else if (transporter) {
       transporter.sendMail({
         from: process.env.EMAIL_USER ? `"PakJaiTravel" <${process.env.EMAIL_USER}>` : '"PakJaiTravel Admin" <no-reply@pakjaitravel.com>',
         to: newUser.email,
@@ -256,7 +276,22 @@ router.post('/resend-otp', async (req, res) => {
     console.log('-------------------------------------------');
 
     // Send email in background
-    if (transporter) {
+    if (resendClient) {
+      resendClient.emails.send({
+        from: 'PakJaiTravel <onboarding@resend.dev>',
+        to: user.email,
+        subject: "Your New Verification Code",
+        html: `<b>Hello ${user.name}</b>,<br/>Your new verification code is <h2>${user.otp}</h2>`
+      }).then(data => {
+        if (data.error) {
+           console.error("Resend API Validation Error:", data.error);
+        } else {
+           console.log("Resend API Resend Email sent successfully to:", user.email);
+        }
+      }).catch(err => {
+        console.error("Resend API Network Error:", err);
+      });
+    } else if (transporter) {
       transporter.sendMail({
         from: process.env.EMAIL_USER ? `"PakJaiTravel" <${process.env.EMAIL_USER}>` : '"PakJaiTravel Admin" <no-reply@pakjaitravel.com>',
         to: user.email,
