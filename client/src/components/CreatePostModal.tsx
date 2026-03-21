@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useJsApiLoader, Autocomplete } from '@react-google-maps/api';
 import './CreatePostModal.css';
+
+const libraries: ("places")[] = ["places"];
 
 interface CreatePostModalProps {
   onClose: () => void;
@@ -16,6 +19,29 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
   const [locationTag, setLocationTag] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
+    libraries: libraries
+  });
+
+  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+
+  const onLoad = (autocomplete: google.maps.places.Autocomplete) => {
+    autocompleteRef.current = autocomplete;
+  };
+
+  const onPlaceChanged = () => {
+    if (autocompleteRef.current !== null) {
+      const place = autocompleteRef.current.getPlace();
+      if (place && place.formatted_address) {
+        setLocationTag(place.formatted_address);
+      } else if (place && place.name) {
+        setLocationTag(place.name);
+      }
+    }
+  };
 
   const submitPost = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,12 +121,28 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
 
           <div className="form-group">
             <label>Location / Hotel (Optional)</label>
-            <input 
-              type="text" 
-              placeholder="E.g., The Chiang Dao Resort"
-              value={locationTag}
-              onChange={e => setLocationTag(e.target.value)}
-            />
+            {isLoaded ? (
+              <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
+                <input 
+                  type="text" 
+                  placeholder="Search exact location..."
+                  value={locationTag}
+                  onChange={e => setLocationTag(e.target.value)}
+                />
+              </Autocomplete>
+            ) : (
+              <input 
+                type="text" 
+                placeholder="E.g., The Chiang Dao Resort"
+                value={locationTag}
+                onChange={e => setLocationTag(e.target.value)}
+              />
+            )}
+            {!import.meta.env.VITE_GOOGLE_MAPS_API_KEY && (
+              <small style={{ color: '#ef4444', display: 'block', marginTop: '4px' }}>
+                Note: Google Maps live search unavailable (API Key missing).
+              </small>
+            )}
           </div>
 
           <div className="ratings-container">
