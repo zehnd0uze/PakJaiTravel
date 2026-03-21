@@ -120,13 +120,13 @@ export const Home: React.FC = () => {
             {properties.map(prop => (
               <AirbnbCard
                 key={prop.id}
-                title={`${prop.type} in ${prop.name}`}
-                subtitle={prop.features.slice(0, 2).join(' • ')}
-                image={prop.imageUrl}
-                price={`฿${prop.pricePerNight.toLocaleString()}`}
-                rating={prop.rating}
-                reviews={prop.reviews}
-                isGuestFavorite={prop.rating >= 4.8}
+                title={`${prop.type || 'Stay'} in ${prop.name || 'Unknown'}`}
+                subtitle={(prop.features || []).slice(0, 2).join(' • ') || 'Local Stay'}
+                image={prop.imageUrl || '/assets/placeholder-hotel.jpg'}
+                price={`฿${(prop.pricePerNight || 0).toLocaleString()}`}
+                rating={prop.rating || 0}
+                reviews={prop.reviews || 0}
+                isGuestFavorite={(prop.rating || 0) >= 4.8}
                 onClick={() => navigate(`/hotels/${prop.id}`)}
               />
             ))}

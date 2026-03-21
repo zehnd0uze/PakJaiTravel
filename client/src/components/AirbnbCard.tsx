@@ -54,7 +54,7 @@ export const AirbnbCard: React.FC<AirbnbCardProps> = ({
           <h3 className="airbnb-card-title">{title}</h3>
           <div className="airbnb-card-rating">
             <span className="star">★</span>
-            <span>{rating.toFixed(2)}</span>
+            <span>{rating?.toFixed(2) || '0.00'}</span>
             {reviews && <span className="reviews-count">({reviews})</span>}
           </div>
         </div>
