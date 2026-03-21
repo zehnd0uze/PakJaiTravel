@@ -58,9 +58,74 @@
 }
 
 @media (max-width: 768px) {
-  .header-right-desktop {
-    display: none;
+  .header-right-desktop, .desktop-only-header {
+    display: none !important;
   }
+}
+
+/* Wongnai Mobile Top Bar */
+.mobile-top-bar {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: white;
+  border-bottom: 1px solid #eee;
+}
+
+@media (max-width: 768px) {
+  .mobile-top-bar {
+    display: flex;
+    position: sticky;
+    top: 0;
+    z-index: 1001;
+  }
+}
+
+.location-selector {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.location-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+}
+
+.search-bar-mobile {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f0f2f5;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.search-placeholder {
+  font-size: 13px;
+  color: #757575;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-icons-mobile {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
 }
 
 .nav-link {
