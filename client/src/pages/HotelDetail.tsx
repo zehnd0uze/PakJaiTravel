@@ -196,6 +196,26 @@ export const HotelDetail: React.FC = () => {
             </div>
           )}
 
+          {/* Location Map */}
+          <div className="detail-section">
+            <h2>Location & Map</h2>
+            <div className="map-container" style={{ width: '100%', height: '400px', borderRadius: '20px', overflow: 'hidden', marginTop: '16px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
+              <iframe
+                title={`Map of ${hotel.name}`}
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                loading="lazy"
+                allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(hotel.name + ' ' + (hotel.location || 'Chiang Dao, Thailand'))}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+              ></iframe>
+            </div>
+            <p style={{ marginTop: '16px', fontSize: '0.95rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '1.2rem' }}>📍</span> {hotel.location}
+            </p>
+          </div>
+
           {/* Contact */}
           {hotel.contact && (
             <div className="detail-section">
