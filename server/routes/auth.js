@@ -23,9 +23,9 @@ async function initMailer() {
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
       console.log('Attempting to initialize Real Mailer (Port 465 SSL) for:', process.env.EMAIL_USER);
       transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true, // Use SSL/TLS
+        host: 'smtp-relay.gmail.com',
+        port: 587,
+        secure: false, // port 587 uses STARTTLS
         auth: {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,
@@ -33,8 +33,7 @@ async function initMailer() {
         tls: {
           rejectUnauthorized: false 
         },
-        family: 4, // Force IPv4 to avoid ENETUNREACH
-        debug: true, // Show full SMTP logging
+        debug: true, 
         logger: true
       });
 
