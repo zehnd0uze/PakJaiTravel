@@ -8,7 +8,6 @@ export const Header: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -41,38 +40,21 @@ export const Header: React.FC = () => {
     navigate('/');
   };
 
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      navigate(`/hotels?search=${encodeURIComponent(searchQuery)}`);
-    } else {
-      navigate('/hotels');
-    }
-  };
-
   return (
     <header className={`header ${scrolled || !isHomePage ? 'header-scrolled glass-panel' : ''}`}>
       {/* Wongnai Mobile Top Bar */}
       <div className="mobile-top-bar">
-        <div className="location-selector clickable" onClick={() => navigate('/hotels')}>
+        <div className="location-selector" onClick={() => navigate('/hotels')}>
           <span className="location-text">ใกล้ฉัน</span>
           <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
         </div>
-        <div className="search-bar-mobile">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="#757575" className="search-icon-svg"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-          <input 
-            type="text" 
-            className="search-input-mobile" 
-            placeholder="ค้นหาโรงแรม, คาเฟ่..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-          />
-          {searchQuery && (
-            <button className="clear-search-btn" onClick={() => setSearchQuery('')} aria-label="Clear search">✕</button>
-          )}
+        <div className="search-bar-mobile" onClick={() => navigate('/hotels')}>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="#757575"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <span className="search-placeholder">ค้นหาโรงแรม, คาเฟ่...</span>
         </div>
         <div className="header-icons-mobile">
-          <button className="icon-btn clickable" title="Map">🗺️</button>
+          <button className="icon-btn" title="Map">🗺️</button>
+          <button className="icon-btn" title="History">🕒</button>
         </div>
       </div>
 
