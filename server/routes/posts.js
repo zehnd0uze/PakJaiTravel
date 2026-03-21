@@ -60,7 +60,7 @@ router.get('/', (req, res) => {
 // POST /api/posts
 router.post('/', authenticate, (req, res) => {
   try {
-    const { content, imageUrl, locationTag, rating, priceRating } = req.body;
+    const { content, imageUrl, locationTag, rating, priceRating, lat, lng } = req.body;
     
     if (!content && !imageUrl) {
       return res.status(400).json({ error: 'Post must contain text or an image.' });
@@ -78,6 +78,8 @@ router.post('/', authenticate, (req, res) => {
       content: content || '',
       imageUrl: imageUrl || null,
       locationTag: locationTag || null,
+      lat: lat || null,
+      lng: lng || null,
       rating: rating || null,
       priceRating: priceRating || null,
       likes: [],

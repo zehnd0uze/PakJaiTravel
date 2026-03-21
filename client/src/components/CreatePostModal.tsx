@@ -1,9 +1,16 @@
 import React, { useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useJsApiLoader, Autocomplete } from '@react-google-maps/api';
+import { useJsApiLoader, Autocomplete, GoogleMap, Marker } from '@react-google-maps/api';
 import './CreatePostModal.css';
 
 const libraries: ("places")[] = ["places"];
+
+const mapContainerStyle = {
+  width: '100%',
+  height: '200px',
+  borderRadius: '8px',
+  marginTop: '12px'
+};
 
 interface CreatePostModalProps {
   onClose: () => void;
@@ -18,6 +25,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
   const [rating, setRating] = useState<number>(0);
   const [priceRating, setPriceRating] = useState<string>('');
   const [locationTag, setLocationTag] = useState('');
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -38,12 +46,23 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
   const onPlaceChanged = () => {
     if (autocompleteRef.current !== null) {
       const place = autocompleteRef.current.getPlace();
-      if (place && place.formatted_address) {
-        setLocationTag(place.formatted_address);
-      } else if (place && place.name) {
-        setLocationTag(place.name);
+      if (place && place.geometry && place.geometry.location) {
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+        setCoordinates({ lat, lng });
+        
+        if (place.formatted_address) {
+          setLocationTag(place.formatted_address);
+        } else if (place.name) {
+          setLocationTag(place.name);
+        }
       }
     }
+  };
+
+  const clearLocation = () => {
+    setLocationTag('');
+    setCoordinates(null);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,7 +90,6 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
       let imageUrl = null;
       if (imageFile) {
         const formData = new FormData();
-        // Server expects 'images' field (plural) and handles multiple files
         formData.append('images', imageFile); 
         
         const uploadRes = await fetch('/api/upload', {
@@ -83,7 +101,6 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
         if (!uploadRes.ok) throw new Error('Failed to upload image');
         
         const uploadData = await uploadRes.json();
-        // Server returns { urls: [...] }
         if (uploadData.urls && uploadData.urls.length > 0) {
           imageUrl = uploadData.urls[0];
         } else {
@@ -101,6 +118,8 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
           content: content.trim(),
           imageUrl,
           locationTag: locationTag.trim() || null,
+          lat: coordinates?.lat || null,
+          lng: coordinates?.lng || null,
           rating: rating > 0 ? rating : null,
           priceRating: priceRating || null
         })
@@ -121,7 +140,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
     <div className="modal-backdrop">
       <div className="create-post-modal">
         <div className="modal-header">
-          <h2>สร้างโพสต์</h2> {/* Facebook-style Thai title */}
+          <h2>สร้างโพสต์</h2>
           <button className="close-btn" onClick={onClose} disabled={isSubmitting}>&times;</button>
         </div>
 
@@ -138,7 +157,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
                 <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
                   <path d="M8 0a8 8 0 100 16A8 8 0 008 0zm0 14.5a6.5 6.5 0 110-13 6.5 6.5 0 010 13zM11.5 8a3.5 3.5 0 11-7 0 3.5 3.5 0 017 0z"/>
                 </svg>
-                สาธารณะ {/* Public */}
+                สาธารณะ
                 <svg width="8" height="8" viewBox="0 0 10 6" fill="currentColor">
                   <path d="M0 0l5 6 5-6H0z"/>
                 </svg>
@@ -171,17 +190,40 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
 
             <div className="fb-location-input-container">
               {isLoaded ? (
-                <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
-                  <div className="fb-location-input-wrapper">
-                    <span>📍</span>
-                    <input 
-                      type="text" 
-                      placeholder="เพิ่มสถานที่..."
-                      value={locationTag}
-                      onChange={e => setLocationTag(e.target.value)}
-                    />
-                  </div>
-                </Autocomplete>
+                <div className="fb-location-group">
+                  <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
+                    <div className="fb-location-input-wrapper">
+                      <span>📍</span>
+                      <input 
+                        type="text" 
+                        placeholder="เพิ่มสถานที่..."
+                        value={locationTag}
+                        onChange={e => setLocationTag(e.target.value)}
+                      />
+                      {locationTag && (
+                        <button type="button" className="clear-location-btn" onClick={clearLocation}>
+                          &times;
+                        </button>
+                      )}
+                    </div>
+                  </Autocomplete>
+                  
+                  {coordinates && isLoaded && (
+                    <div className="fb-map-preview">
+                      <GoogleMap
+                        mapContainerStyle={mapContainerStyle}
+                        center={coordinates}
+                        zoom={15}
+                        options={{
+                          disableDefaultUI: true,
+                          gestureHandling: 'cooperative'
+                        }}
+                      >
+                        <Marker position={coordinates} />
+                      </GoogleMap>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <div className="fb-location-input-wrapper">
                   <span>📍</span>
@@ -195,7 +237,6 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
               )}
             </div>
 
-            {/* Price and Star Ratings Bar */}
             <div className="fb-ratings-bar">
               <div className="ratings-item">
                 <label>คะแนน</label>

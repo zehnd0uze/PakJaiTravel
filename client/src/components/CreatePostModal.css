@@ -195,6 +195,11 @@
   margin-bottom: 16px;
 }
 
+.fb-location-group {
+  display: flex;
+  flex-direction: column;
+}
+
 .fb-location-input-wrapper {
   display: flex;
   align-items: center;
@@ -203,6 +208,7 @@
   padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid #ced0d4;
+  position: relative;
 }
 
 .fb-location-input-wrapper input {
@@ -212,6 +218,27 @@
   font-size: 14px;
   flex: 1;
   outline: none;
+}
+
+.clear-location-btn {
+  background: #e4e6eb;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #606770;
+  font-size: 14px;
+}
+
+.fb-map-preview {
+  margin-top: 12px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #ced0d4;
 }
 
 /* Add to Post Bar */
