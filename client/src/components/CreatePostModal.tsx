@@ -20,7 +20,6 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
   const [locationTag, setLocationTag] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [showOptions, setShowOptions] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
