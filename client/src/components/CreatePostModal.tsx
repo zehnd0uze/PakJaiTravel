@@ -15,19 +15,24 @@ const mapContainerStyle = {
 interface CreatePostModalProps {
   onClose: () => void;
   onPostCreated: () => void;
+  postToEdit?: any; // Optional post object for editing
 }
 
-const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreated }) => {
+const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreated, postToEdit }) => {
   const { user, token } = useAuth();
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState(postToEdit?.content || '');
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [rating, setRating] = useState<number>(0);
-  const [priceRating, setPriceRating] = useState<string>('');
-  const [locationTag, setLocationTag] = useState('');
-  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(postToEdit?.imageUrl || null);
+  const [rating, setRating] = useState<number>(postToEdit?.rating || 0);
+  const [priceRating, setPriceRating] = useState<string>(postToEdit?.priceRating || '');
+  const [locationTag, setLocationTag] = useState(postToEdit?.locationTag || '');
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(
+    postToEdit?.lat && postToEdit?.lng ? { lat: postToEdit.lat, lng: postToEdit.lng } : null
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  const isEditing = !!postToEdit;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -79,7 +84,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
 
   const submitPost = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim() && !imageFile) {
+    if (!content.trim() && !imageFile && !imagePreview) {
       setError('Please add a photo or write something.');
       return;
     }
@@ -87,7 +92,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
     setIsSubmitting(true);
 
     try {
-      let imageUrl = null;
+      let imageUrl = imagePreview || null;
       if (imageFile) {
         const formData = new FormData();
         formData.append('images', imageFile); 
@@ -108,8 +113,11 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
         }
       }
 
-      const postRes = await fetch('/api/posts', {
-        method: 'POST',
+      const url = isEditing ? `/api/posts/${postToEdit.id}` : '/api/posts';
+      const method = isEditing ? 'PUT' : 'POST';
+
+      const postRes = await fetch(url, {
+        method: method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
@@ -125,7 +133,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
         })
       });
 
-      if (!postRes.ok) throw new Error('Failed to create post');
+      if (!postRes.ok) throw new Error(`Failed to ${isEditing ? 'update' : 'create'} post`);
 
       onPostCreated();
       onClose();
@@ -140,7 +148,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
     <div className="modal-backdrop">
       <div className="create-post-modal">
         <div className="modal-header">
-          <h2>สร้างโพสต์</h2>
+          <h2>{isEditing ? 'แก้ไขโพสต์' : 'สร้างโพสต์'}</h2>
           <button className="close-btn" onClick={onClose} disabled={isSubmitting}>&times;</button>
         </div>
 
@@ -169,7 +177,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
             <div className="textarea-container">
               <textarea 
                 className="create-post-textarea"
-                placeholder={`คุณคิดอะไรอยู่ ${user?.name?.split(' ')[0] || ''}?`}
+                placeholder={isEditing ? 'แก้ไขข้อความของคุณ...' : `คุณคิดอะไรอยู่ ${user?.name?.split(' ')[0] || ''}?`}
                 value={content}
                 onChange={e => setContent(e.target.value)}
               />
@@ -305,9 +313,9 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
             type="submit" 
             form="fb-post-form" 
             className="fb-post-btn" 
-            disabled={isSubmitting || (!content.trim() && !imageFile)}
+            disabled={isSubmitting || (!content.trim() && !imageFile && !imagePreview)}
           >
-            {isSubmitting ? 'กำลังโพสต์...' : 'โพสต์'}
+            {isSubmitting ? (isEditing ? 'กำลังบันทึก...' : 'กำลังโพสต์...') : (isEditing ? 'บันทึก' : 'โพสต์')}
           </button>
         </div>
       </div>

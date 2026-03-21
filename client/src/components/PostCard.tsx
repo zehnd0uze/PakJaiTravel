@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import CreatePostModal from './CreatePostModal';
 import './PostCard.css';
 
 interface Comment {
@@ -24,21 +25,40 @@ interface Post {
   likes: string[];
   comments: Comment[];
   createdAt: string;
+  lat?: number | null;
+  lng?: number | null;
 }
 
 interface PostCardProps {
   post: Post;
   onUpdate: (updatedPost: Post) => void;
+  onDelete?: (postId: string) => void;
 }
 
-const PostCard: React.FC<PostCardProps> = ({ post, onUpdate }) => {
+const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete }) => {
   const { user, token } = useAuth();
   const [commentText, setCommentText] = useState('');
   const [showComments, setShowComments] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
   const [isCommenting, setIsCommenting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
+  const menuRef = useRef<HTMLDivElement>(null);
+  const isOwner = user && post.userId === user.id;
   const hasLiked = user && post.likes.includes(user.id);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleLike = async () => {
     if (!user || !token) {
@@ -49,9 +69,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate }) => {
     try {
       const res = await fetch(`/api/posts/${post.id}/like`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
         const data = await res.json();
@@ -96,6 +114,28 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate }) => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this post?")) return;
+    
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/posts/${post.id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        if (onDelete) onDelete(post.id);
+      } else {
+        alert("Failed to delete post");
+      }
+    } catch (err) {
+      alert("Error deleting post");
+    } finally {
+      setIsDeleting(false);
+      setShowMenu(false);
+    }
+  };
+
   const formatTimeAgo = (dateString: string) => {
     const d = new Date(dateString);
     const now = new Date();
@@ -113,7 +153,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate }) => {
   };
 
   return (
-    <div className="post-card ig-style">
+    <div className={`post-card ig-style ${isDeleting ? 'deleting' : ''}`}>
       {/* IG-style Header */}
       <div className="post-header">
         <div className="avatar-wrapper">
@@ -123,7 +163,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate }) => {
         <div className="post-header-info">
           <div className="name-row">
             <h3>{post.authorName}</h3>
-            {/* Blue checkmark icon (verified placeholder) */}
             <svg className="verified-icon-small" viewBox="0 0 24 24" fill="#0095f6" width="14" height="14">
               <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-1.9 14.7L6 12.6l1.5-1.5 2.6 2.6 6.4-6.4 1.5 1.5-7.9 7.9z"/>
             </svg>
@@ -134,30 +173,42 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate }) => {
             <div className="location-row">{post.locationTag}</div>
           )}
         </div>
-        <button className="post-menu-btn">
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-            <circle cx="12" cy="12" r="1.5"></circle>
-            <circle cx="6" cy="12" r="1.5"></circle>
-            <circle cx="18" cy="12" r="1.5"></circle>
-          </svg>
-        </button>
+        
+        {isOwner && (
+          <div className="post-menu-container" ref={menuRef}>
+            <button className="post-menu-btn" onClick={() => setShowMenu(!showMenu)}>
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                <circle cx="12" cy="12" r="1.5"></circle>
+                <circle cx="6" cy="12" r="1.5"></circle>
+                <circle cx="18" cy="12" r="1.5"></circle>
+              </svg>
+            </button>
+            {showMenu && (
+              <div className="post-dropdown-menu">
+                <button onClick={() => { setIsEditModalOpen(true); setShowMenu(false); }}>
+                  ✎ Edit Post
+                </button>
+                <button className="delete-option" onClick={handleDelete}>
+                  🗑 Delete Post
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Content Text - Above Image */}
       {post.content && (
         <div className="post-content">
           <p>{post.content}</p>
         </div>
       )}
 
-      {/* Post Media - Full Width */}
       {post.imageUrl && (
         <div className="post-image-container">
           <img src={post.imageUrl} alt="Post Content" className="post-image" />
         </div>
       )}
 
-      {/* Metadata Bar - Ratings (Keep this for the travel app functionality) */}
       {(post.rating || post.priceRating) && (
         <div className="post-rating-bar">
           {post.rating && (
@@ -171,7 +222,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate }) => {
         </div>
       )}
 
-      {/* Action Bar - Like and Comment */}
       <div className="post-actions">
         <button 
           className={`action-btn like-btn ${hasLiked ? 'liked' : ''}`} 
@@ -188,7 +238,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate }) => {
         </button>
       </div>
 
-      {/* Comments Section */}
       {showComments && (
         <div className="post-comments-section">
           {post.comments.length > 0 && (
@@ -216,6 +265,21 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate }) => {
             </form>
           )}
         </div>
+      )}
+
+      {isEditModalOpen && (
+        <CreatePostModal 
+          onClose={() => setIsEditModalOpen(false)}
+          onPostCreated={() => {
+            // Re-trigger post update (the parent will fetch or update state)
+            // For now we'll just refresh the specific post if we have the data
+            // But usually the parent handles this via onUpdate
+            setIsEditModalOpen(false);
+            // The submitPost in modal will call onPostCreated, which we should link to onUpdate/refresh
+            window.location.reload(); // Quickest way to see updates across the app for now
+          }}
+          postToEdit={post}
+        />
       )}
     </div>
   );

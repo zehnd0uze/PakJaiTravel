@@ -157,4 +157,60 @@ router.post('/:id/comment', authenticate, (req, res) => {
   }
 });
 
+// DELETE /api/posts/:id
+router.delete('/:id', authenticate, (req, res) => {
+  try {
+    const posts = getPosts();
+    const postIndex = posts.findIndex(p => p.id === req.params.id);
+    
+    if (postIndex === -1) return res.status(404).json({ error: 'Post not found' });
+    
+    const post = posts[postIndex];
+    // Check ownership (admins can delete anything if needed, but here simple user ownership)
+    if (post.userId !== req.user.id) {
+      return res.status(403).json({ error: 'Unauthorized to delete this post' });
+    }
+
+    posts.splice(postIndex, 1);
+    savePosts(posts);
+    res.json({ message: 'Post deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// PUT /api/posts/:id
+router.put('/:id', authenticate, (req, res) => {
+  try {
+    const { content, imageUrl, locationTag, rating, priceRating, lat, lng } = req.body;
+    const posts = getPosts();
+    const postIndex = posts.findIndex(p => p.id === req.params.id);
+    
+    if (postIndex === -1) return res.status(404).json({ error: 'Post not found' });
+    
+    const post = posts[postIndex];
+    if (post.userId !== req.user.id) {
+      return res.status(403).json({ error: 'Unauthorized to edit this post' });
+    }
+
+    // Update fields
+    posts[postIndex] = {
+      ...post,
+      content: content !== undefined ? content : post.content,
+      imageUrl: imageUrl !== undefined ? imageUrl : post.imageUrl,
+      locationTag: locationTag !== undefined ? locationTag : post.locationTag,
+      lat: lat !== undefined ? lat : post.lat,
+      lng: lng !== undefined ? lng : post.lng,
+      rating: rating !== undefined ? rating : post.rating,
+      priceRating: priceRating !== undefined ? priceRating : post.priceRating,
+      updatedAt: new Date().toISOString()
+    };
+
+    savePosts(posts);
+    res.json(posts[postIndex]);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 export default router;
