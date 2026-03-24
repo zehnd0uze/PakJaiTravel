@@ -1,56 +1,10 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import React from 'react';
 import { Button } from '../components/Button';
 import './BecomeHostPage.css';
 
 const BecomeHostPage: React.FC = () => {
-  const { user, token, logout } = useAuth();
-  const navigate = useNavigate();
-  const [isUpgrading, setIsUpgrading] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleGetStarted = async () => {
-    if (!user) {
-      navigate('/register?redirect=/become-host');
-      return;
-    }
-
-    if (user.role === 'host') {
-      navigate('/dashboard');
-      return;
-    }
-
-    // Role upgrade logic for logged-in regular users
-    setIsUpgrading(true);
-    setError('');
-    try {
-      const res = await fetch('/api/auth/upgrade-to-host', {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (res.ok) {
-        // We might need to refresh the local user state. 
-        // For simplicity, let's ask the user to re-login or just hope the context updates 
-        // if we implemented a refresh. Since we didn't implement a refresh in context yet, 
-        // let's just force a reload or re-login if needed.
-        // Better: Update context. But since I can't see AuthContext easily right now, I'll alert.
-        alert("Congratulations! You are now a Host. Please log in again to activate your dashboard.");
-        logout();
-        navigate('/login?redirect=/dashboard');
-      } else {
-        const data = await res.json();
-        setError(data.error || 'Failed to upgrade account.');
-      }
-    } catch (err) {
-      setError('Connection error. Please try again.');
-    } finally {
-      setIsUpgrading(false);
-    }
+  const handleGetStarted = () => {
+    alert("Host registration is coming soon! We are currently in a private beta. Please check back later.");
   };
 
   return (
@@ -60,10 +14,9 @@ const BecomeHostPage: React.FC = () => {
           <span className="bh-overline">Join the Community</span>
           <h1>Turn your space into a <br/><span>Nature Retreat.</span></h1>
           <p className="bh-lead">Share the beauty of Chiang Dao with travelers from around the world. List your property on PakJai today.</p>
-          <Button variant="primary" size="lg" onClick={handleGetStarted} disabled={isUpgrading}>
-            {isUpgrading ? 'Upgrading...' : 'Get Started'}
+          <Button variant="secondary" size="lg" onClick={handleGetStarted}>
+            Coming Soon
           </Button>
-          {error && <p className="bh-error">{error}</p>}
         </div>
       </section>
 
