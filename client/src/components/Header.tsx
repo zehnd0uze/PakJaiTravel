@@ -111,8 +111,11 @@ export const Header: React.FC = () => {
         {/* Desktop right: nav link + auth */}
         <div className="header-right-desktop">
           <div className="auth-actions">
-            <Link to="/community" className="nav-link" style={{ marginRight: '1rem', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.8rem' }}>
+            <Link to="/community" className="nav-link" style={{ marginRight: '1.5rem', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.8rem' }}>
               Journal
+            </Link>
+            <Link to="/dashboard" className="nav-link host-link" style={{ marginRight: '1.5rem', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.8rem', color: 'var(--accent-color)', fontWeight: '600' }}>
+              List your property
             </Link>
 
             {user ? (
@@ -211,6 +214,7 @@ export const Header: React.FC = () => {
               <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo('/')}>Home</button></li>
               <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo('/hotels')}>Hotels</button></li>
               <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo('/community')}>Community</button></li>
+              <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo('/dashboard')} style={{ color: 'var(--accent-color)', fontWeight: '600' }}>List your property</button></li>
               <li><button className="nav-link mobile-nav-link disabled-link" disabled title="Coming soon">Flights <span className="coming-soon-tag">Soon</span></button></li>
               <li><button className="nav-link mobile-nav-link disabled-link" disabled title="Coming soon">Activities <span className="coming-soon-tag">Soon</span></button></li>
             </ul>
