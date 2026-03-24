@@ -63,11 +63,12 @@ router.get('/:id', (req, res) => {
 });
 
 // POST /api/properties — create new
-router.post('/', (req, res) => {
+router.post('/', authenticate, (req, res) => {
   const properties = getProperties();
   const newProperty = {
     id: 'cd-' + Date.now() + '-' + Math.random().toString(36).substring(2, 9),
     ...req.body,
+    ownerId: req.user.id, // Auto-assign owner from token
     status: req.body.status || 'draft',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -78,16 +79,24 @@ router.post('/', (req, res) => {
 });
 
 // PUT /api/properties/:id — update
-router.put('/:id', (req, res) => {
+router.put('/:id', authenticate, (req, res) => {
   const properties = getProperties();
   const index = properties.findIndex(p => p.id === req.params.id);
+  
   if (index === -1) {
     return res.status(404).json({ error: 'Property not found.' });
   }
+
+  // Verify ownership (unless admin, but we'll stick to host for now)
+  if (properties[index].ownerId !== req.user.id && req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Unauthorized. You do not own this property.' });
+  }
+
   properties[index] = {
     ...properties[index],
     ...req.body,
     id: properties[index].id, // Prevent ID changes
+    ownerId: properties[index].ownerId, // Prevent ownerId changes
     updatedAt: new Date().toISOString()
   };
   saveProperties(properties);
@@ -95,12 +104,19 @@ router.put('/:id', (req, res) => {
 });
 
 // DELETE /api/properties/:id — delete
-router.delete('/:id', (req, res) => {
+router.delete('/:id', authenticate, (req, res) => {
   let properties = getProperties();
   const index = properties.findIndex(p => p.id === req.params.id);
+  
   if (index === -1) {
     return res.status(404).json({ error: 'Property not found.' });
   }
+
+  // Verify ownership
+  if (properties[index].ownerId !== req.user.id && req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Unauthorized. You do not own this property.' });
+  }
+
   const deleted = properties.splice(index, 1)[0];
   saveProperties(properties);
   res.json({ message: 'Property deleted.', property: deleted });

@@ -29,7 +29,14 @@ export interface Post {
 export interface Property {
   id: string;
   name: string;
-  type?: string;
-  ownerId?: string;
-  status?: string;
+  type: string;
+  price: string;
+  views?: number;
+  badge?: string;
+  images: string[];
+  amenities: string[];
+  ownerId: string;
+  status: 'active' | 'draft';
+  createdAt?: string;
+  updatedAt?: string;
 }
