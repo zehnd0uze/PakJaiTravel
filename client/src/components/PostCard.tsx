@@ -153,17 +153,16 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete }) => {
   };
 
   return (
-    <div className={`post-card ig-style ${isDeleting ? 'deleting' : ''}`}>
+    <div className={`post-card luxury-post-card ${isDeleting ? 'deleting' : ''}`}>
       {/* IG-style Header */}
       <div className="post-header">
         <div className="avatar-wrapper">
-          <div className="ig-ring"></div>
           <img src={post.authorAvatar} alt={post.authorName} className="post-avatar" />
         </div>
         <div className="post-header-info">
           <div className="name-row">
             <h3>{post.authorName}</h3>
-            <svg className="verified-icon-small" viewBox="0 0 24 24" fill="#0095f6" width="14" height="14">
+            <svg className="verified-icon-small" viewBox="0 0 24 24" fill="var(--accent-color)" width="14" height="14">
               <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-1.9 14.7L6 12.6l1.5-1.5 2.6 2.6 6.4-6.4 1.5 1.5-7.9 7.9z"/>
             </svg>
             <span className="dot-sep">•</span>
