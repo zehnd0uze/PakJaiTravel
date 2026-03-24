@@ -3,7 +3,7 @@
   position: relative;
   height: 85vh; /* Taller, more cinematic */
   min-height: 600px;
-  background-image: url('/assets/hero-bg.jpg'); /* Ensure this image feels premium */
+  background-image: url('/doiluangbg.jpg'); /* Ensure this image feels premium */
   background-size: cover;
   background-position: center 30%; /* Shifted slightly to feature horizon */
   display: flex;
