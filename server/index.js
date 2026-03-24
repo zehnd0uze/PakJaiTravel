@@ -21,6 +21,10 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// trust proxy is needed when running on Railway, Vercel, etc.
+// so that express-rate-limit can see the real user IP
+app.set('trust proxy', 1);
+
 // Security Middleware: Set security HTTP headers
 app.use(helmet({
   // Adjust cross-origin policies if you have external images (like from Firebase or Google)
