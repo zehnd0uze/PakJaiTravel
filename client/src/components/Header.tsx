@@ -89,49 +89,19 @@ export const Header: React.FC = () => {
           <span className="logo-text" style={{ letterSpacing: '0.1em' }}>PAKJAI</span>
         </div>
 
-        {/* Airbnb-style search pill — each section navigates to hotels */}
-        <div className="search-pill-container">
-          <div className="search-pill">
-            <div
-              className="search-pill-item"
-              role="button"
-              aria-label="Search by destination"
-              onClick={() => navigate('/hotels')}
+        {/* Minimalist Editorial Search (Replaces Airbnb Pill) */}
+        <div className="search-pill-container" onClick={() => navigate('/hotels')}>
+          <button className="minimal-search-btn" aria-label="Search destinations">
+            Search Destinations
+            <svg
+              viewBox="0 0 32 32"
+              aria-hidden="true"
+              focusable="false"
+              className="minimal-search-icon"
             >
-              <span className="label">Where</span>
-              <span className="value">Search destinations</span>
-            </div>
-            <div className="search-pill-divider" />
-            <div
-              className="search-pill-item"
-              role="button"
-              aria-label="Add travel dates"
-              onClick={() => navigate('/hotels')}
-            >
-              <span className="label">When</span>
-              <span className="value">Add dates</span>
-            </div>
-            <div className="search-pill-divider" />
-            <div
-              className="search-pill-item"
-              role="button"
-              aria-label="Add guests"
-              onClick={() => navigate('/hotels')}
-            >
-              <span className="label">Who</span>
-              <span className="value">Add guests</span>
-            </div>
-            <button className="search-pill-btn" onClick={() => navigate('/hotels')} aria-label="Search">
-              <svg
-                viewBox="0 0 32 32"
-                aria-hidden="true"
-                focusable="false"
-                style={{ display: 'block', fill: 'none', height: '16px', width: '16px', stroke: 'white', strokeWidth: 4, overflow: 'visible' }}
-              >
-                <path d="M13 24a11 11 0 1 0 0-22 11 11 0 0 0 0 22zm8-3 9 9" />
-              </svg>
-            </button>
-          </div>
+              <path d="M13 24a11 11 0 1 0 0-22 11 11 0 0 0 0 22zm8-3 9 9" />
+            </svg>
+          </button>
         </div>
 
         {/* Desktop right: nav link + auth */}
