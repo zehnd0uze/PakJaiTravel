@@ -27,8 +27,17 @@ app.set('trust proxy', 1);
 
 // Security Middleware: Set security HTTP headers
 app.use(helmet({
-  // Adjust cross-origin policies if you have external images (like from Firebase or Google)
-  crossOriginResourcePolicy: { policy: "cross-origin" } 
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://maps.googleapis.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://maps.googleapis.com"],
+      imgSrc: ["'self'", "data:", "https://maps.gstatic.com", "https://maps.googleapis.com", "https://*.googleusercontent.com", "https://images.unsplash.com", "https://ui-avatars.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      connectSrc: ["'self'", "https://maps.googleapis.com"]
+    }
+  }
 }));
 
 // Security Middleware: Restrict Cross-Origin Resource Sharing (CORS)
