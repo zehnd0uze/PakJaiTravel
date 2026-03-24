@@ -28,18 +28,34 @@ app.use(helmet({
 }));
 
 // Security Middleware: Restrict Cross-Origin Resource Sharing (CORS)
-const allowedOrigins = process.env.NODE_ENV === 'production' 
-  ? ['https://www.pakjaitravel.com', 'https://pakjaitravel.com'] 
-  : ['http://localhost:5173', 'http://localhost:5174'];
+const allowedOrigins = [
+  'http://localhost:5173', 
+  'http://localhost:5174',
+  'https://www.pakjaitravel.com', 
+  'https://pakjaitravel.com'
+];
+
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
 
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
+    
+    // In production MVP, if it's a generated domain (Vercel, Railway, Netlify), allow it temporarily
+    if (origin.endsWith('.vercel.app') || origin.endsWith('.up.railway.app') || origin.endsWith('.netlify.app')) {
+      return callback(null, true);
+    }
+
+    // Otherwise check the whitelist
+    if (allowedOrigins.indexOf(origin) === -1 && process.env.NODE_ENV === 'production') {
+      console.warn(`Blocked CORS request from origin: ${origin}`);
       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
       return callback(new Error(msg), false);
     }
+    
     return callback(null, true);
   },
   credentials: true
