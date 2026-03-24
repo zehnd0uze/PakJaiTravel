@@ -63,7 +63,7 @@ export const AdminHotels: React.FC = () => {
       <div className="admin-content">
         {alert && (
           <div className={`admin-alert ${alert.type}`}>
-            {alert.type === 'success' ? '✅' : '⚠️'} {alert.message}
+            {alert.message}
           </div>
         )}
 
@@ -97,7 +97,7 @@ export const AdminHotels: React.FC = () => {
                   </td>
                   <td>{p.type}</td>
                   <td>฿{p.pricePerNight.toLocaleString()}</td>
-                  <td>⭐ {p.rating} ({p.reviews})</td>
+                  <td>{p.rating} ({p.reviews})</td>
                   <td>
                     <span className={`status-badge ${p.status || 'published'}`}>
                       {p.status || 'published'}
@@ -109,19 +109,19 @@ export const AdminHotels: React.FC = () => {
                         className="table-action-btn"
                         onClick={() => navigate(`/admin/hotels/${p.id}/edit`)}
                       >
-                        ✏️ Edit
+                        Edit
                       </button>
                       <button
                         className="table-action-btn"
                         onClick={() => window.open(`/hotels/${p.id}`, '_blank')}
                       >
-                        👁️ View
+                        View
                       </button>
                       <button
                         className="table-action-btn danger"
                         onClick={() => handleDelete(p.id, p.name)}
                       >
-                        🗑️ Delete
+                        Delete
                       </button>
                     </div>
                   </td>

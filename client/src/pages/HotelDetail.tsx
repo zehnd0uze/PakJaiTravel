@@ -72,12 +72,12 @@ export const HotelDetail: React.FC = () => {
   }
 
   const amenityIcons: Record<string, string> = {
-    'Wi-Fi': '📶', 'Wifi': '📶', 'Breakfast': '🍳', 'Local Breakfast': '🍳', 'Mountain View': '🏔️',
-    'Balcony': '🌅', 'Terrace': '🌅', 'Hot Shower': '🚿', 'Parking': '🅿️',
-    'Garden': '🌿', 'Fan': '🌀', 'A/C': '❄️', 'Air Conditioning': '❄️',
-    'Pool': '🏊', 'Swimming Pool': '🏊', 'Restaurant': '🍽️', 'Bar': '🍸',
-    'Room Service': '🛎️', 'Spa': '💆', 'Gym': '🏋️', 'Bicycles': '🚲',
-    'Kitchen': '🍳', 'Library': '📚', 'Bird Watching': '🐦',
+    'Wi-Fi': '✓', 'Wifi': '✓', 'Breakfast': '✓', 'Local Breakfast': '✓', 'Mountain View': '✓',
+    'Balcony': '✓', 'Terrace': '✓', 'Hot Shower': '✓', 'Parking': '✓',
+    'Garden': '✓', 'Fan': '✓', 'A/C': '✓', 'Air Conditioning': '✓',
+    'Pool': '✓', 'Swimming Pool': '✓', 'Restaurant': '✓', 'Bar': '✓',
+    'Room Service': '✓', 'Spa': '✓', 'Gym': '✓', 'Bicycles': '✓',
+    'Kitchen': '✓', 'Library': '✓', 'Bird Watching': '✓',
   };
 
   const images = hotel.images?.length > 0 ? hotel.images : (hotel.imageUrl ? [hotel.imageUrl] : []);
@@ -103,7 +103,7 @@ export const HotelDetail: React.FC = () => {
               className="gallery-main-img"
             />
             <div className="gallery-photo-count">
-              📷 {selectedImage + 1} / {images.length}
+              Photo {selectedImage + 1} / {images.length}
             </div>
           </div>
           <div className="gallery-thumbs">
@@ -130,7 +130,7 @@ export const HotelDetail: React.FC = () => {
               <div>
                 <span className="detail-type-badge">{hotel.type}</span>
                 <h1 className="detail-title">{hotel.name}</h1>
-                <p className="detail-location">📍 {hotel.location}</p>
+                <p className="detail-location">{hotel.location}</p>
               </div>
               <div className="detail-rating-block">
                 <span className="detail-rating-score">{hotel.rating}</span>
@@ -179,14 +179,14 @@ export const HotelDetail: React.FC = () => {
               <h2>House Rules</h2>
               <div className="rules-grid">
                 <div className="rule-item">
-                  <span className="rule-icon">🔑</span>
+                  <span className="rule-icon"></span>
                   <div>
                     <strong>Check-in</strong>
                     <span>After {hotel.checkIn}</span>
                   </div>
                 </div>
                 <div className="rule-item">
-                  <span className="rule-icon">🚪</span>
+                  <span className="rule-icon"></span>
                   <div>
                     <strong>Check-out</strong>
                     <span>Before {hotel.checkOut}</span>
@@ -212,7 +212,7 @@ export const HotelDetail: React.FC = () => {
               ></iframe>
             </div>
             <p style={{ marginTop: '16px', fontSize: '0.95rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '1.2rem' }}>📍</span> {hotel.location}
+              {hotel.location}
             </p>
           </div>
 
@@ -223,7 +223,7 @@ export const HotelDetail: React.FC = () => {
               <div className="contact-grid">
                 {hotel.contact.phone && (
                   <div className="contact-item">
-                    <span className="contact-icon">📞</span>
+                    <span className="contact-icon"></span>
                     <div>
                       <strong>Phone</strong>
                       <a href={`tel:${hotel.contact.phone}`}>{hotel.contact.phone}</a>
@@ -232,7 +232,7 @@ export const HotelDetail: React.FC = () => {
                 )}
                 {hotel.contact.email && (
                   <div className="contact-item">
-                    <span className="contact-icon">✉️</span>
+                    <span className="contact-icon"></span>
                     <div>
                       <strong>Email</strong>
                       <a href={`mailto:${hotel.contact.email}`}>{hotel.contact.email}</a>
@@ -291,8 +291,7 @@ export const HotelDetail: React.FC = () => {
                 marginBottom: '16px',
                 fontSize: '0.85rem'
               }}>
-                <span style={{ fontSize: '1.2rem', marginRight: '8px' }}>🔒</span>
-                <strong>Verify your email</strong> to contact hosts and book this property.
+                Verify your email to contact hosts and book this property.
               </div>
             )}
 

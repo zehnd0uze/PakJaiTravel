@@ -195,7 +195,7 @@ export const AdminHotelEdit: React.FC = () => {
               className="admin-btn admin-btn-secondary"
               onClick={() => window.open(`/hotels/${id}`, '_blank')}
             >
-              👁️ Preview Live
+              Preview Live
             </button>
           )}
         </div>
@@ -204,7 +204,7 @@ export const AdminHotelEdit: React.FC = () => {
       <div className="admin-content">
         {alert && (
           <div className={`admin-alert ${alert.type}`} style={alert.type === 'info' ? { background: '#e0f2fe', color: '#0369a1', borderLeft: '4px solid #0284c7' } : {}}>
-            {alert.type === 'success' ? '✅' : alert.type === 'info' ? '⏳' : '⚠️'} {alert.message}
+            {alert.message}
           </div>
         )}
 
@@ -411,8 +411,8 @@ export const AdminHotelEdit: React.FC = () => {
                   value={form.isVerified ? 'true' : 'false'}
                   onChange={e => handleChange('isVerified', e.target.value === 'true')}
                 >
-                  <option value="true">✅ Verified</option>
-                  <option value="false">❌ Not Verified</option>
+                  <option value="true">Verified</option>
+                  <option value="false">Not Verified</option>
                 </select>
               </div>
             </div>

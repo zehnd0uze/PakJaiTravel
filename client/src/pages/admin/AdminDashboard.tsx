@@ -139,33 +139,27 @@ export const AdminDashboard: React.FC = () => {
         {/* Main Statistics Row */}
         <div className="stats-grid">
           <div className="stat-card live-traffic" style={{ border: '2px solid #1877F2', background: '#f0f7ff' }}>
-            <div className="stat-icon">📶</div>
             <div className="stat-value" style={{ color: '#1877F2' }}>{traffic.active5m}</div>
             <div className="stat-label">Active Users (5m)</div>
-            <div style={{ fontSize: '0.7rem', color: '#1877F2', fontWeight: 600, marginTop: '4px' }}>🔴 LIVE NOW</div>
+            <div style={{ fontSize: '0.7rem', color: '#1877F2', fontWeight: 600, marginTop: '4px' }}>LIVE NOW</div>
           </div>
           <div className="stat-card">
-            <div className="stat-icon">📈</div>
             <div className="stat-value">{traffic.total24h}</div>
             <div className="stat-label">Total Visits (24h)</div>
           </div>
            <div className="stat-card">
-            <div className="stat-icon">📢</div>
             <div className="stat-value">{publishedCount}</div>
             <div className="stat-label">Published Stays</div>
           </div>
           <div className="stat-card" onClick={() => navigate('/admin/users')} style={{ cursor: 'pointer' }}>
-            <div className="stat-icon">👥</div>
             <div className="stat-value">{usersCount}</div>
             <div className="stat-label">Total Users</div>
           </div>
           <div className="stat-card">
-            <div className="stat-icon">⭐</div>
             <div className="stat-value">{avgRating}</div>
             <div className="stat-label">Average Rating</div>
           </div>
           <div className="stat-card">
-            <div className="stat-icon">✅</div>
             <div className="stat-value">{verifiedCount}</div>
             <div className="stat-label">Verified Listings</div>
           </div>
@@ -184,17 +178,14 @@ export const AdminDashboard: React.FC = () => {
         <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: 16, color: '#1C2833', marginTop: '32px' }}>Quick Management</h2>
         <div className="quick-actions">
           <div className="quick-action-card" onClick={() => navigate('/admin/hotels/new')}>
-            <div className="quick-action-icon">➕</div>
             <div className="quick-action-label">Add Property</div>
             <div className="quick-action-desc">Create a new listing</div>
           </div>
           <div className="quick-action-card" onClick={() => navigate('/admin/hotels')}>
-            <div className="quick-action-icon">📋</div>
             <div className="quick-action-label">Manage Listings</div>
             <div className="quick-action-desc">View & edit all properties</div>
           </div>
           <div className="quick-action-card" onClick={() => window.open('/', '_blank')}>
-            <div className="quick-action-icon">🌐</div>
             <div className="quick-action-label">View Public Site</div>
             <div className="quick-action-desc">See the live website</div>
           </div>

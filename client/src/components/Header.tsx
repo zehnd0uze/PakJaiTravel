@@ -77,8 +77,12 @@ export const Header: React.FC = () => {
         </div>
 
         <div className="header-icons-mobile">
-          <button className="icon-btn" title="Map" onClick={() => navigate('/hotels')}>🗺️</button>
-          <button className="icon-btn" title="History">🕒</button>
+          <button className="icon-btn" title="Map" onClick={() => navigate('/hotels')}>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          </button>
+          <button className="icon-btn" title="History">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+          </button>
         </div>
       </div>
 
@@ -152,14 +156,14 @@ export const Header: React.FC = () => {
 
                     <div className="user-dropdown-divider" />
                     <button className="user-dropdown-item" role="menuitem" onClick={() => { setMenuOpen(false); navigate('/profile'); }}>
-                      <span className="dropdown-icon">👤</span>Profile
+                      Profile
                     </button>
                     <button className="user-dropdown-item" role="menuitem" onClick={() => { setMenuOpen(false); navigate('/community'); }}>
-                      <span className="dropdown-icon">📸</span>Community Feed
+                      Community Feed
                     </button>
                     <div className="user-dropdown-divider" />
                     <button className="user-dropdown-item logout-item" role="menuitem" onClick={handleLogout} id="logout-btn">
-                      <span className="dropdown-icon">↪</span>Log out
+                      Log out
                     </button>
                   </div>
                 )}
@@ -199,11 +203,11 @@ export const Header: React.FC = () => {
           <nav aria-label="Mobile navigation">
             <ul>
               {/* Real navigation — all use navigate() not href="#" */}
-              <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo('/')}>🏠 Home</button></li>
-              <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo('/hotels')}>🏨 Hotels</button></li>
-              <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo('/community')}>📸 Community</button></li>
-              <li><button className="nav-link mobile-nav-link disabled-link" disabled title="Coming soon">✈️ Flights <span className="coming-soon-tag">Soon</span></button></li>
-              <li><button className="nav-link mobile-nav-link disabled-link" disabled title="Coming soon">🎯 Activities <span className="coming-soon-tag">Soon</span></button></li>
+              <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo('/')}>Home</button></li>
+              <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo('/hotels')}>Hotels</button></li>
+              <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo('/community')}>Community</button></li>
+              <li><button className="nav-link mobile-nav-link disabled-link" disabled title="Coming soon">Flights <span className="coming-soon-tag">Soon</span></button></li>
+              <li><button className="nav-link mobile-nav-link disabled-link" disabled title="Coming soon">Activities <span className="coming-soon-tag">Soon</span></button></li>
             </ul>
           </nav>
 
@@ -219,10 +223,10 @@ export const Header: React.FC = () => {
                   </div>
                 </div>
                 <button className="mobile-nav-link mobile-profile-btn" onClick={() => mobileNavTo('/profile')}>
-                  👤 My Profile
+                  My Profile
                 </button>
                 <button className="mobile-nav-link mobile-logout-btn" onClick={handleLogout}>
-                  ↪ Log out
+                  Log out
                 </button>
               </div>
             ) : (

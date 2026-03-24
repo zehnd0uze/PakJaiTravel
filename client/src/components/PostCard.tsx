@@ -186,10 +186,10 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete }) => {
             {showMenu && (
               <div className="post-dropdown-menu">
                 <button onClick={() => { setIsEditModalOpen(true); setShowMenu(false); }}>
-                  ✎ Edit Post
+                  Edit Post
                 </button>
                 <button className="delete-option" onClick={handleDelete}>
-                  🗑 Delete Post
+                  Delete Post
                 </button>
               </div>
             )}
@@ -228,13 +228,13 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete }) => {
           onClick={handleLike}
           disabled={isLiking}
         >
-          {hasLiked ? '❤️' : '🤍'} <span>{post.likes.length}</span>
+          {hasLiked ? 'Liked' : 'Like'} <span>{post.likes.length}</span>
         </button>
         <button 
           className="action-btn comment-btn"
           onClick={() => setShowComments(!showComments)}
         >
-          💬 <span>{post.comments.length}</span>
+          Comments <span>{post.comments.length}</span>
         </button>
       </div>
 

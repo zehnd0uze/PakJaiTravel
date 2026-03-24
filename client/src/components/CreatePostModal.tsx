@@ -201,7 +201,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
                 <div className="fb-location-group">
                   <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
                     <div className="fb-location-input-wrapper">
-                      <span>📍</span>
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style={{ marginRight: '8px' }}><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
                       <input 
                         type="text" 
                         placeholder="เพิ่มสถานที่..."
@@ -234,7 +234,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
                 </div>
               ) : (
                 <div className="fb-location-input-wrapper">
-                  <span>📍</span>
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style={{ marginRight: '8px' }}><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
                   <input 
                     type="text" 
                     placeholder="เพิ่มสถานที่..."
