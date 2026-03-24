@@ -1,6 +1,8 @@
 import express from 'express';
 import fs from 'fs';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -19,8 +21,43 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+// Security Middleware: Set security HTTP headers
+app.use(helmet({
+  // Adjust cross-origin policies if you have external images (like from Firebase or Google)
+  crossOriginResourcePolicy: { policy: "cross-origin" } 
+}));
+
+// Security Middleware: Restrict Cross-Origin Resource Sharing (CORS)
+const allowedOrigins = process.env.NODE_ENV === 'production' 
+  ? ['https://www.pakjaitravel.com', 'https://pakjaitravel.com'] 
+  : ['http://localhost:5173', 'http://localhost:5174'];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true
+}));
+
 app.use(express.json());
+
+// Security Middleware: Global API Rate Limiting to prevent basic abuse
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 200, // Limit each IP to 200 requests per 15 minutes
+  message: { error: 'Too many requests from this IP, please try again after 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Apply rate limiter to all /api routes
+app.use('/api', apiLimiter);
 
 // Traffic Logging Middleware
 const TRAFFIC_FILE = path.resolve(__dirname, 'data/traffic.json');

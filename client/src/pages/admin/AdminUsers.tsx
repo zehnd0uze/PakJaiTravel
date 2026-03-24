@@ -5,6 +5,7 @@ interface User {
   name: string;
   email: string;
   createdAt: string;
+  isVerified: boolean;
 }
 
 export const AdminUsers: React.FC = () => {
@@ -48,6 +49,25 @@ export const AdminUsers: React.FC = () => {
     } catch (err) {
       console.error('Delete error:', err);
       alert('An error occurred while deleting the user.');
+    }
+  };
+
+  const handleVerify = async (id: string, name: string) => {
+    if (!window.confirm(`Are you sure you want to manually verify the email for "${name}"?`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/auth/users/${id}/verify`, { method: 'PATCH' });
+      if (res.ok) {
+        setUsers(users.map(u => u.id === id ? { ...u, isVerified: true } : u));
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to verify user');
+      }
+    } catch (err) {
+      console.error('Verify error:', err);
+      alert('An error occurred while verifying the user.');
     }
   };
 
@@ -101,6 +121,7 @@ export const AdminUsers: React.FC = () => {
                   <tr style={{ borderBottom: '2px solid #eee' }}>
                     <th style={{ padding: '12px' }}>Name</th>
                     <th style={{ padding: '12px' }}>Email</th>
+                    <th style={{ padding: '12px' }}>Status</th>
                     <th style={{ padding: '12px' }}>Joined Date</th>
                     <th style={{ padding: '12px' }}>User ID</th>
                     <th style={{ padding: '12px', textAlign: 'right' }}>Actions</th>
@@ -111,18 +132,33 @@ export const AdminUsers: React.FC = () => {
                     <tr key={user.id} style={{ borderBottom: '1px solid #eee' }}>
                       <td style={{ padding: '12px' }}><strong>{user.name}</strong></td>
                       <td style={{ padding: '12px' }}>{user.email}</td>
+                      <td style={{ padding: '12px' }}>
+                        {user.isVerified ? (
+                          <span style={{ background: '#d1fae5', color: '#065f46', padding: '4px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }}>Verified</span>
+                        ) : (
+                          <span style={{ background: '#f3f4f6', color: '#4b5563', padding: '4px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }}>Unverified</span>
+                        )}
+                      </td>
                       <td style={{ padding: '12px' }}>{new Date(user.createdAt).toLocaleDateString()}</td>
                       <td style={{ padding: '12px', color: '#666', fontSize: '0.85rem' }}>{user.id}</td>
                       <td style={{ padding: '12px', textAlign: 'right' }}>
+                        {!user.isVerified && (
+                          <button 
+                            onClick={() => handleVerify(user.id, user.name)}
+                            style={{ marginRight: '8px', padding: '6px 12px', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                          >
+                            Verify
+                          </button>
+                        )}
                         <button 
                           onClick={() => startEdit(user)}
-                          style={{ marginRight: '8px', padding: '6px 12px', background: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                          style={{ marginRight: '8px', padding: '6px 12px', background: '#e5e7eb', color: '#374151', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
                         >
                           Edit
                         </button>
                         <button 
                           onClick={() => handleDelete(user.id, user.name)}
-                          style={{ padding: '6px 12px', background: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                          style={{ padding: '6px 12px', background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
                         >
                           Delete
                         </button>

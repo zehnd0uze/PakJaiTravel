@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
+import rateLimit from 'express-rate-limit';
 
 dotenv.config();
 
@@ -86,8 +87,17 @@ function saveUsers(users) {
   fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
 }
 
+// Strict rate limiter for Authentication endpoints to prevent brute-force
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Limit each IP to 10 requests per windowMs
+  message: { error: 'Too many authentication attempts from this IP, please try again after 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // POST /api/auth/register
-router.post('/register', async (req, res) => {
+router.post('/register', authLimiter, async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -178,7 +188,7 @@ router.post('/register', async (req, res) => {
 });
 
 // POST /api/auth/login
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -210,7 +220,7 @@ router.post('/login', async (req, res) => {
 });
 
 // POST /api/auth/admin-login
-router.post('/admin-login', async (req, res) => {
+router.post('/admin-login', authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -432,7 +442,8 @@ router.get('/users', (req, res) => {
       id: u.id,
       name: u.name,
       email: u.email,
-      createdAt: u.createdAt
+      createdAt: u.createdAt,
+      isVerified: u.isVerified || false
     }));
     res.json(safeUsers);
   } catch (err) {
@@ -456,6 +467,31 @@ router.delete('/users/:id', (req, res) => {
     res.json({ message: 'User deleted successfully.' });
   } catch (err) {
     console.error('Delete user error:', err);
+    res.status(500).json({ error: 'Server error. Please try again.' });
+  }
+});
+
+// PATCH /api/auth/users/:id/verify - Admin manually verify user
+router.patch('/users/:id/verify', (req, res) => {
+  try {
+    const { id } = req.params;
+    let users = getUsers();
+    const user = users.find(u => u.id === id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+    
+    if (user.isVerified) {
+      return res.status(400).json({ error: 'User is already verified.' });
+    }
+
+    user.isVerified = true;
+    delete user.otp;
+    saveUsers(users);
+
+    res.json({ message: 'User manually verified successfully.' });
+  } catch (err) {
+    console.error('Verify user error:', err);
     res.status(500).json({ error: 'Server error. Please try again.' });
   }
 });
