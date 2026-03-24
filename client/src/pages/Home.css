@@ -40,8 +40,7 @@
 .hero-title {
   color: #FFFFFF;
   font-size: 4.5rem;
-  font-style: italic; /* Playfair Display looks highly premium italicized */
-  font-weight: 400;
+  font-weight: 700;
   line-height: 1.1;
   margin-bottom: var(--spacing-md);
   text-shadow: 0 4px 16px rgba(0,0,0,0.3);
@@ -122,7 +121,7 @@
 
 .mood-btn.active {
   color: var(--text-primary);
-  font-style: italic;
+  font-weight: 600;
   font-family: var(--font-heading);
 }
 
@@ -224,8 +223,7 @@
   color: #FFF;
   font-family: var(--font-heading);
   font-size: 1.8rem;
-  font-style: italic;
-  font-weight: 400;
+  font-weight: 500;
   margin: 0;
 }
 

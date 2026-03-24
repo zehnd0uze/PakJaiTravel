@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
 
 /* PakJaiTravel - Luxury Nature Retreat Design System */
 :root {
@@ -13,9 +13,9 @@
   --text-secondary: #686E69; /* Earthy Grey */
   --border-color: #E6EAE6;
   
-  /* Typography - Serif for Headings, Sans-serif for Body */
-  --font-heading: 'Playfair Display', Georgia, serif;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, Roboto, Helvetica Neue, sans-serif;
+  /* Typography - Modern Sans-serif for all */
+  --font-heading: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
   
   /* Spacing (Editorial Whitespace) */
   --spacing-xs: 6px;
