@@ -18,6 +18,7 @@ import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminHotels } from './pages/admin/AdminHotels';
 import { AdminHotelEdit } from './pages/admin/AdminHotelEdit';
 import { AdminUsers } from './pages/admin/AdminUsers';
+import { AdminLogin } from './pages/admin/AdminLogin';
 import { MobileBottomNav } from './components/MobileBottomNav';
 
 // Lightweight component to pig the server on every page navigation
@@ -42,8 +43,9 @@ function App() {
             <Route path="/verify-email" element={<VerifyEmailPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
 
-            {/* Admin panel — separate layout */}
+            {/* Admin panel — separate layout (Protected internally) */}
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
               <Route path="hotels" element={<AdminHotels />} />

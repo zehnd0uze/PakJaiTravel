@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import './Admin.css';
 
@@ -15,6 +15,18 @@ export const AdminLayout: React.FC = () => {
   const isActive = (path: string, exact?: boolean) => {
     if (exact) return location.pathname === path;
     return location.pathname.startsWith(path);
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem('admin_token');
+    if (!token) {
+      navigate('/admin/login');
+    }
+  }, [navigate, location.pathname]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('admin_token');
+    navigate('/admin/login');
   };
 
   return (
@@ -51,6 +63,9 @@ export const AdminLayout: React.FC = () => {
         </nav>
 
         <div className="admin-sidebar-footer">
+          <button className="admin-back-btn" onClick={handleLogout} style={{ color: '#dc2626', borderColor: '#fee2e2', background: '#fef2f2', marginBottom: '12px' }}>
+            Logout Admin
+          </button>
           <button className="admin-back-btn" onClick={() => navigate('/')}>
             ← Back to Public Site
           </button>

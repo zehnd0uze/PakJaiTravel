@@ -209,6 +209,39 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// POST /api/auth/admin-login
+router.post('/admin-login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required.' });
+    }
+
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@pakjaitravel.com';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'admin';
+
+    if (email.toLowerCase() !== adminEmail.toLowerCase() || password !== adminPassword) {
+      return res.status(401).json({ error: 'Invalid admin credentials.' });
+    }
+
+    // Issue a token with role: 'admin'
+    const token = jwt.sign(
+      { id: 'admin-master', email: adminEmail, role: 'admin' }, 
+      JWT_SECRET, 
+      { expiresIn: '24h' }
+    );
+
+    res.json({
+      token,
+      user: { id: 'admin-master', name: 'System Administrator', email: adminEmail, role: 'admin' }
+    });
+  } catch (err) {
+    console.error('Admin Login error:', err);
+    res.status(500).json({ error: 'Server error. Please try again.' });
+  }
+});
+
 // POST /api/auth/verify - Verify OTP
 router.post('/verify', async (req, res) => {
   try {
