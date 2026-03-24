@@ -4,6 +4,7 @@ interface User {
   id: string;
   name: string;
   email: string;
+  role?: string;
   isVerified: boolean;
   avatar: string | null;
   coverPhoto: string | null;

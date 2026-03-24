@@ -3,35 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import PostCard from '../components/PostCard';
 import CreatePostModal from '../components/CreatePostModal';
+import { type Post } from '../types';
 import './ProfilePage.css';
 
 const API_BASE = import.meta.env.PROD ? '' : 'http://localhost:5000';
 
-interface Comment {
-  id: string;
-  userId: string;
-  authorName: string;
-  authorAvatar: string;
-  text: string;
-  createdAt: string;
-}
 
-interface Post {
-  id: string;
-  userId: string;
-  authorName: string;
-  authorAvatar: string;
-  content: string;
-  imageUrl: string | null;
-  locationTag: string | null;
-  rating: number | null;
-  priceRating: string | null;
-  likes: string[];
-  comments: Comment[];
-  createdAt: string;
-  lat?: number | null;
-  lng?: number | null;
-}
 
 const ProfilePage: React.FC = () => {
   const { user, logout, updateProfile } = useAuth();

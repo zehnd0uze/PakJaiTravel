@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useJsApiLoader, Autocomplete, GoogleMap, Marker } from '@react-google-maps/api';
+import { type Post } from '../types';
 import './CreatePostModal.css';
 
 const libraries: ("places")[] = ["places"];
@@ -15,7 +16,7 @@ const mapContainerStyle = {
 interface CreatePostModalProps {
   onClose: () => void;
   onPostCreated: () => void;
-  postToEdit?: any; // Optional post object for editing
+  postToEdit?: Post; // Use shared Post type
 }
 
 const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreated, postToEdit }) => {

@@ -60,7 +60,7 @@ router.get('/', (req, res) => {
 // POST /api/posts
 router.post('/', authenticate, (req, res) => {
   try {
-    const { content, imageUrl, locationTag, rating, priceRating, lat, lng } = req.body;
+    const { content, imageUrl, locationTag, rating, priceRating, lat, lng, propertyId } = req.body;
     
     if (!content && !imageUrl) {
       return res.status(400).json({ error: 'Post must contain text or an image.' });
@@ -82,6 +82,7 @@ router.post('/', authenticate, (req, res) => {
       lng: lng || null,
       rating: rating || null,
       priceRating: priceRating || null,
+      propertyId: propertyId || null,
       likes: [],
       comments: [],
       createdAt: new Date().toISOString()
@@ -182,7 +183,7 @@ router.delete('/:id', authenticate, (req, res) => {
 // PUT /api/posts/:id
 router.put('/:id', authenticate, (req, res) => {
   try {
-    const { content, imageUrl, locationTag, rating, priceRating, lat, lng } = req.body;
+    const { content, imageUrl, locationTag, rating, priceRating, lat, lng, propertyId } = req.body;
     const posts = getPosts();
     const postIndex = posts.findIndex(p => p.id === req.params.id);
     
@@ -203,6 +204,7 @@ router.put('/:id', authenticate, (req, res) => {
       lng: lng !== undefined ? lng : post.lng,
       rating: rating !== undefined ? rating : post.rating,
       priceRating: priceRating !== undefined ? priceRating : post.priceRating,
+      propertyId: propertyId !== undefined ? propertyId : post.propertyId,
       updatedAt: new Date().toISOString()
     };
 

@@ -3,11 +3,12 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import PostCard from '../components/PostCard';
 import CreatePostModal from '../components/CreatePostModal';
+import { type Post } from '../types';
 import './CommunityPage.css';
 
 const CommunityPage: React.FC = () => {
   const { user } = useAuth();
-  const [posts, setPosts] = useState<any[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -30,7 +31,7 @@ const CommunityPage: React.FC = () => {
     fetchPosts();
   }, []);
 
-  const handlePostUpdate = (updatedPost: any) => {
+  const handlePostUpdate = (updatedPost: Post) => {
     setPosts(prev => prev.map(p => p.id === updatedPost.id ? updatedPost : p));
   };
 

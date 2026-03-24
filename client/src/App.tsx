@@ -13,6 +13,7 @@ import { Hotels } from './pages/Hotels';
 import { HotelDetail } from './pages/HotelDetail';
 import CommunityPage from './pages/CommunityPage';
 import ProfilePage from './pages/ProfilePage';
+import HostDashboard from './pages/HostDashboard';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminHotels } from './pages/admin/AdminHotels';
@@ -65,6 +66,7 @@ function App() {
                       <Route path="/" element={<Home />} />
                       <Route path="/community" element={<CommunityPage />} />
                       <Route path="/profile" element={<ProfilePage />} />
+                      <Route path="/dashboard" element={<HostDashboard />} />
                       <Route path="/hotels" element={<Hotels />} />
                       <Route path="/hotels/:id" element={<HotelDetail />} />
                     </Routes>

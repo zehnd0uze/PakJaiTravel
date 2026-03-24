@@ -1,33 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import CreatePostModal from './CreatePostModal';
+import { type Post } from '../types';
 import './PostCard.css';
-
-interface Comment {
-  id: string;
-  userId: string;
-  authorName: string;
-  authorAvatar: string;
-  text: string;
-  createdAt: string;
-}
-
-interface Post {
-  id: string;
-  userId: string;
-  authorName: string;
-  authorAvatar: string;
-  content: string;
-  imageUrl: string | null;
-  locationTag: string | null;
-  rating: number | null;
-  priceRating: string | null;
-  likes: string[];
-  comments: Comment[];
-  createdAt: string;
-  lat?: number | null;
-  lng?: number | null;
-}
 
 interface PostCardProps {
   post: Post;
@@ -241,6 +216,31 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClic
           )}
           {post.priceRating && (
             <span className="post-price">{post.priceRating.replace(/\$/g, '฿')}</span>
+          )}
+          {post.propertyId && (
+            <button 
+              className="view-listing-link"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.location.href = `/hotels/${post.propertyId}`;
+              }}
+              style={{
+                background: 'var(--primary-color)',
+                color: '#fff',
+                border: 'none',
+                padding: '4px 12px',
+                borderRadius: '16px',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                marginLeft: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              Book Now ↗
+            </button>
           )}
         </div>
       )}

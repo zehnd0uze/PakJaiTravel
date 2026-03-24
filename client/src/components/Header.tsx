@@ -158,6 +158,11 @@ export const Header: React.FC = () => {
                     <button className="user-dropdown-item" role="menuitem" onClick={() => { setMenuOpen(false); navigate('/profile'); }}>
                       Profile
                     </button>
+                    {user.role === 'host' && (
+                      <button className="user-dropdown-item" role="menuitem" onClick={() => { setMenuOpen(false); navigate('/dashboard'); }}>
+                        Host Dashboard
+                      </button>
+                    )}
                     <button className="user-dropdown-item" role="menuitem" onClick={() => { setMenuOpen(false); navigate('/community'); }}>
                       Community Feed
                     </button>
@@ -225,6 +230,11 @@ export const Header: React.FC = () => {
                 <button className="mobile-nav-link mobile-profile-btn" onClick={() => mobileNavTo('/profile')}>
                   My Profile
                 </button>
+                {user.role === 'host' && (
+                  <button className="mobile-nav-link" onClick={() => mobileNavTo('/dashboard')}>
+                    Host Dashboard
+                  </button>
+                )}
                 <button className="mobile-nav-link mobile-logout-btn" onClick={handleLogout}>
                   Log out
                 </button>

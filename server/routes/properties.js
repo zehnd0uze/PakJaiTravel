@@ -2,12 +2,27 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import jwt from 'jsonwebtoken';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const JWT_SECRET = process.env.JWT_SECRET || 'pakjai-secret-key-change-in-production';
 
 const router = express.Router();
 const DATA_FILE = path.join(__dirname, '../data/properties.json');
+
+// Auth Middleware
+const authenticate = (req, res, next) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  if (!token) return res.status(401).json({ error: 'Access denied. No token provided.' });
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded; 
+    next();
+  } catch (err) {
+    res.status(400).json({ error: 'Invalid token.' });
+  }
+};
 
 // Helper to read properties
 function getProperties() {
@@ -28,6 +43,13 @@ function saveProperties(properties) {
 router.get('/', (req, res) => {
   const properties = getProperties();
   res.json(properties);
+});
+
+// GET /api/properties/owned — list only for current host
+router.get('/owned', authenticate, (req, res) => {
+  const properties = getProperties();
+  const owned = properties.filter(p => p.ownerId === req.user.id);
+  res.json(owned);
 });
 
 // GET /api/properties/:id — get one

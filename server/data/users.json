@@ -4,7 +4,8 @@
     "name": "Test User",
     "email": "test@pakjai.com",
     "password": "$2b$10$xc9GzLOst/r4tLSuF5qzMeWxSnuzgW6PB09rXbRsbYDxU6zb9/KUG",
-    "createdAt": "2026-03-18T11:30:40.377Z"
+    "createdAt": "2026-03-18T11:30:40.377Z",
+    "role": "host"
   },
   {
     "id": "1774022685639",
