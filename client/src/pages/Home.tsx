@@ -38,68 +38,78 @@ export const Home: React.FC = () => {
       });
   }, []);
 
-  const categories = [
-    { label: 'โรงแรม', icon: '🏨', color: '#FFB300', path: '/hotels' },
-    { label: 'คาเฟ่', icon: '☕', color: '#8D6E63', path: '/hotels?type=Cafe' },
-    { label: 'ที่เที่ยว', icon: '⛰️', color: '#4CAF50', path: '/hotels?type=Nature' },
-    { label: 'ร้านอาหาร', icon: '🍴', color: '#FF7043', path: '/hotels?type=Restaurant' },
-    { label: 'แนะนำ', icon: '⭐', color: '#1E88E5', path: '/hotels' },
+  // Sleek, text-based mood categories replacing the cluttered emoji blocks
+  const moods = [
+    { label: 'All Stays', path: '/hotels' },
+    { label: 'Boutique Hotels', path: '/hotels' },
+    { label: 'Forest Retreats', path: '/hotels?type=Nature' },
+    { label: 'Artisan Cafes', path: '/hotels?type=Cafe' },
+    { label: 'Fine Dining', path: '/hotels?type=Restaurant' },
   ];
 
   return (
     <div className="home-page animate-fade-in">
 
-      {/* Hero Section - Restored beautiful background */}
-      <section className="hero chiang-dao-hero">
+      {/* ── Cinematic Hero Section ── */}
+      <section className="hero luxury-hero">
         <div className="hero-overlay"></div>
         <div className="container hero-content">
-          <h1 className="hero-title">Discover the Magic of <span style={{ color: '#ffffff' }}>Chiang Dao</span></h1>
-          <p className="hero-subtitle">Misty mountains, authentic homestays, and verified local hosts.</p>
+          <p className="hero-kicker animate-fade-in">WELCOME TO PAKJAI</p>
+          <h1 className="hero-title animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            The Art of<br />True Serenity
+          </h1>
+          <p className="hero-subtitle animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            Discover bespoke nature retreats and authentic heritage stays in the heart of Chiang Dao.
+          </p>
+          <button 
+            className="btn-luxury-primary animate-fade-in" 
+            style={{ animationDelay: '0.3s' }}
+            onClick={() => navigate('/hotels')}
+          >
+            Explore the Collection
+          </button>
         </div>
       </section>
 
-      {/* Mobile-Only Header Placeholder (Actual Header handled in Header.tsx) */}
       <div className="mobile-only-spacing"></div>
 
-      {/* Wongnai Category Grid (Mobile Primary) */}
-      <section className="category-grid-section container">
-        <div className="category-grid">
-          {categories.map((cat, i) => (
-            <div key={i} className="category-item" onClick={() => navigate(cat.path)}>
-              <div className="category-icon-circle" style={{ backgroundColor: cat.color }}>
-                {cat.icon}
-              </div>
-              <span className="category-label">{cat.label}</span>
-            </div>
+      {/* ── Discover by Mood (Replaces Wongnai Category Grid) ── */}
+      <section className="mood-navigation-section container">
+        <div className="mood-scroll-track">
+          {moods.map((mood, i) => (
+            <button key={i} className={`mood-btn ${i === 0 ? 'active' : ''}`} onClick={() => navigate(mood.path)}>
+              {mood.label}
+            </button>
           ))}
         </div>
       </section>
 
-      {/* Recommended For You Section (Horizontal Scroll) */}
-      <section className="recommended-section section-padding">
+      {/* ── Editorial Staggered Layout: The Curator's Edit (Replaces Horizontal Scroll) ── */}
+      <section className="editorial-section section-padding">
         <div className="container">
-          <div className="section-header-mobile">
-            <h2 className="section-title">แนะนำสำหรับคุณ</h2>
-            <div className="section-tabs">
-              <span className="tab active">ยอดนิยม</span>
-              <span className="tab">เปิดใหม่</span>
-            </div>
+          <div className="editorial-header">
+            <h2 className="editorial-title">The Curator's Edit</h2>
+            <p className="editorial-subtitle">A hand-selected portfolio of our most distinguished properties.</p>
           </div>
 
           {loading ? (
-            <div className="horizontal-scroll-loading"><p>Loading...</p></div>
+            <div className="editorial-loading">Preparing your collection...</div>
           ) : (
-            <div className="horizontal-scroll-container">
-              {properties.slice(0, 6).map(prop => (
-                <div key={prop.id} className="scroll-item" onClick={() => navigate(`/hotels/${prop.id}`)}>
-                  <div className="scroll-card">
-                    <img src={prop.imageUrl} alt={prop.name} />
-                    <div className="scroll-card-content">
-                      <h3 className="scroll-card-title">{prop.name}</h3>
-                      <div className="scroll-card-meta">
-                        <span className="type">{prop.type}</span>
-                        {prop.isVerified && <VerifiedBadge />}
+            <div className="editorial-mosaic">
+              {properties.slice(0, 3).map((prop, idx) => (
+                <div key={prop.id} className={`mosaic-item item-${idx}`} onClick={() => navigate(`/hotels/${prop.id}`)}>
+                  <div className="mosaic-image-wrapper hover-scale">
+                    <img src={prop.imageUrl} alt={prop.name} loading="lazy"/>
+                    <div className="mosaic-overlay">
+                      <div className="mosaic-text">
+                        <span className="mosaic-type">{prop.type}</span>
+                        <h3 className="mosaic-name">{prop.name}</h3>
                       </div>
+                      {prop.isVerified && (
+                        <div className="mosaic-badge">
+                          <VerifiedBadge />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -109,19 +119,20 @@ export const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Airbnb-Inspired Verified Destinations Section */}
-      <section className="destinations section-padding desktop-only">
+      {/* ── The Heritage Collection (Replaces generic Airbnb Grid) ── */}
+      <section className="heritage-collection section-padding">
         <div className="container">
-          <div className="section-header">
-            <h2 className="section-title">Verified Destinations</h2>
-            <p className="section-subtitle">Stays owned by real locals, verified for your safety.</p>
+          <div className="editorial-header centered">
+            <h2 className="editorial-title">The Heritage Collection</h2>
+            <p className="editorial-subtitle">Exclusively verified. Locally owned. Extraordinary experiences.</p>
           </div>
+          
           <div className="destinations-grid">
             {properties.map(prop => (
               <AirbnbCard
                 key={prop.id}
-                title={`${prop.type || 'Stay'} in ${prop.name || 'Unknown'}`}
-                subtitle={(prop.features || []).slice(0, 2).join(' • ') || 'Local Stay'}
+                title={prop.name}
+                subtitle={`${prop.type} • ${(prop.features || []).slice(0, 2).join(' • ') || 'Local Stay'}`}
                 image={prop.imageUrl || '/assets/placeholder-hotel.jpg'}
                 price={`฿${Number(prop.pricePerNight || 0).toLocaleString()}`}
                 rating={Number(prop.rating || 0)}
@@ -133,6 +144,7 @@ export const Home: React.FC = () => {
           </div>
         </div>
       </section>
+      
     </div>
   );
 };

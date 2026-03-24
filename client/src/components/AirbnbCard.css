@@ -1,110 +1,173 @@
-.airbnb-card {
+/* ── The Heritage Card (Formerly AirbnbCard) ── */
+.heritage-card {
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  background: white;
-  border-radius: var(--radius-lg);
-  transition: transform 0.2s ease;
+  gap: var(--spacing-sm);
+  background: transparent;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   width: 100%;
 }
 
-.airbnb-card-image-wrapper {
+.heritage-card:hover {
+  transform: translateY(-4px);
+}
+
+.heritage-card-image-wrapper {
   position: relative;
   width: 100%;
-  padding-top: 100%; /* 1:1 Aspect Ratio like Airbnb */
-  border-radius: var(--radius-lg);
+  padding-top: 133%; /* 3:4 Aspect Ratio (Editorial/Portrait) instead of 1:1 Airbnb square */
+  border-radius: var(--radius-sm); /* Minimal brutalist corner */
   overflow: hidden;
-  background-color: #f0f0f0;
+  background-color: var(--border-color);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.4s ease;
 }
 
-.airbnb-card-image {
+.heritage-card:hover .heritage-card-image-wrapper {
+  box-shadow: var(--shadow-lg);
+}
+
+.heritage-card-image {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.airbnb-card:hover .airbnb-card-image {
-  transform: scale(1.05);
+.heritage-card:hover .heritage-card-image {
+  transform: scale(1.04);
 }
 
-.airbnb-card-heart {
+/* Heart Icon (Save) */
+.heritage-card-heart {
   position: absolute;
   top: 12px;
   right: 12px;
   z-index: 2;
-  color: rgba(0, 0, 0, 0.5);
-  transition: transform 0.2s ease, color 0.2s ease;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  transition: all 0.3s ease;
 }
 
-.airbnb-card-heart:hover {
-  transform: scale(1.1);
-  color: #FF385C;
+.heritage-card-heart svg {
+  width: 16px;
+  height: 16px;
+  fill: rgba(0,0,0,0.3);
+  stroke: #FFF;
+  stroke-width: 2px;
 }
 
-.airbnb-card-badge {
+.heritage-card-heart:hover {
+  background: var(--surface-color);
+  transform: scale(1.05);
+}
+
+.heritage-card-heart:hover svg {
+  fill: var(--primary-color);
+  stroke: var(--primary-color);
+}
+
+/* Luxury Badge */
+.heritage-card-badge {
   position: absolute;
   top: 12px;
   left: 12px;
-  background: white;
-  padding: 4px 12px;
-  border-radius: 99px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #222;
-  box-shadow: var(--shadow-sm);
+  background: var(--surface-color);
+  padding: 6px 14px;
+  border-radius: 2px;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+  color: var(--text-primary);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   z-index: 2;
 }
 
-.airbnb-card-content {
+/* ── Content ── */
+.heritage-card-content {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+  padding: var(--spacing-xs) 0;
 }
 
-.airbnb-card-header {
+.heritage-card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  margin-bottom: 2px;
 }
 
-.airbnb-card-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: #222;
+.heritage-card-title {
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
   margin: 0;
+  line-height: 1.3;
 }
 
-.airbnb-card-rating {
+.heritage-card-rating {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 14px;
-  color: #222;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
 }
 
-.airbnb-card-subtitle {
-  font-size: 14px;
-  color: #717171;
+.heritage-card-rating .star {
+  color: var(--secondary-color); /* Champagne Gold star */
+  font-size: 0.9rem;
+}
+
+.reviews-count {
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.heritage-card-subtitle {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
   margin: 0;
 }
 
-.airbnb-card-distance {
-  font-size: 14px;
-  color: #717171;
+.heritage-card-distance {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0 0 6px 0;
 }
 
-.airbnb-card-price {
-  font-size: 15px;
-  color: #222;
-  margin-top: 4px;
+.heritage-card-price {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-top: 2px;
 }
 
-.airbnb-card-price span {
-  font-weight: 700;
+.heritage-card-price span {
+  font-weight: 600;
+}
+
+.heritage-card-price .price-suffix {
+  font-weight: 400;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
 }

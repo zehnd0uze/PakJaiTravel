@@ -86,7 +86,7 @@ export const Header: React.FC = () => {
       <div className="container header-content desktop-only-header">
         {/* Logo */}
         <div className="logo-container" onClick={() => navigate('/')}>
-          <span className="logo-text">PakJai<span className="logo-accent">Travel</span></span>
+          <span className="logo-text" style={{ letterSpacing: '0.1em' }}>PAKJAI</span>
         </div>
 
         {/* Airbnb-style search pill — each section navigates to hotels */}
@@ -137,8 +137,8 @@ export const Header: React.FC = () => {
         {/* Desktop right: nav link + auth */}
         <div className="header-right-desktop">
           <div className="auth-actions">
-            <Link to="/community" className="nav-link" style={{ marginRight: '1rem' }}>
-              Community
+            <Link to="/community" className="nav-link" style={{ marginRight: '1rem', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.8rem' }}>
+              Journal
             </Link>
 
             {user ? (
