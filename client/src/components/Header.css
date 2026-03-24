@@ -478,7 +478,88 @@
   }
   .mobile-menu-btn {
     display: block;
+    /* Position in top-right corner, above the mobile-top-bar */
+    position: fixed;
+    top: 14px;
+    right: 16px;
+    z-index: 2001;
   }
+}
+
+/* ── Mobile nav backdrop — tap to close ── */
+.mobile-nav-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1999;
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Mobile nav link buttons (replaced dead <a href='#'> tags) ── */
+.mobile-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+  padding: var(--spacing-sm) 0;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.2s;
+}
+
+.mobile-nav-link:hover:not(:disabled) {
+  color: var(--primary-color);
+}
+
+.mobile-nav-link.disabled-link {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.coming-soon-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: var(--primary-color);
+  color: #fff;
+  padding: 2px 7px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: auto;
+}
+
+/* Profile + Logout buttons in slide-out */
+.mobile-profile-btn {
+  margin-top: 12px;
+  font-size: 1rem;
+}
+
+.mobile-logout-btn {
+  color: #dc2626;
+  font-size: 1rem;
+  border-bottom: none;
+}
+
+.mobile-logout-btn:hover {
+  color: #b91c1c;
+}
+
+/* Logout item in desktop dropdown — subtle red tint on hover */
+.user-dropdown-item.logout-item:hover {
+  background: #fff1f2;
+  color: #dc2626;
 }
 
 /* Unverified Account Indicators */

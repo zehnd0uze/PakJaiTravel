@@ -45,13 +45,13 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* Wongnai Active Color - Signature Blue */
+/* Active colour matches site brand palette */
 .mobile-nav-item.active {
-  color: #1877F2;
+  color: var(--primary-color);
 }
 
 .mobile-nav-item.active .mobile-nav-icon svg {
-  fill: #1877F2;
+  fill: var(--primary-color);
 }
 
 /* Hide on desktop */

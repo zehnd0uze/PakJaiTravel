@@ -5,6 +5,8 @@ interface User {
   name: string;
   email: string;
   isVerified: boolean;
+  avatar: string | null;
+  coverPhoto: string | null;
 }
 
 interface AuthContextType {
@@ -16,6 +18,7 @@ interface AuthContextType {
   verify: (email: string, otp: string) => Promise<void>;
   resendOtp: (email: string) => Promise<void>;
   logout: () => void;
+  updateProfile: (fields: { avatar?: string; coverPhoto?: string }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -78,7 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Registration failed');
-    
+
     // Log them in immediately (Soft Verification)
     localStorage.setItem('pakjai_token', data.token);
     setToken(data.token);
@@ -93,7 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Verification failed');
-    
+
     localStorage.setItem('pakjai_token', data.token);
     setToken(data.token);
     setUser(data.user);
@@ -115,8 +118,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   }, []);
 
+  const updateProfile = useCallback(async (fields: { avatar?: string; coverPhoto?: string }) => {
+    const stored = localStorage.getItem('pakjai_token');
+    if (!stored) throw new Error('Not authenticated');
+
+    const res = await fetch(`${API_BASE}/api/auth/profile`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${stored}`,
+      },
+      body: JSON.stringify(fields),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to update profile');
+    setUser(data.user);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, verify, resendOtp, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, verify, resendOtp, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

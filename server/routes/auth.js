@@ -339,7 +339,53 @@ router.get('/me', (req, res) => {
     if (!user) {
       return res.status(404).json({ error: 'User not found.' });
     }
-    res.json({ user: { id: user.id, name: user.name, email: user.email, isVerified: user.isVerified } });
+    res.json({
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        isVerified: user.isVerified,
+        avatar: user.avatar || null,
+        coverPhoto: user.coverPhoto || null,
+      }
+    });
+  } catch {
+    res.status(401).json({ error: 'Invalid or expired token.' });
+  }
+});
+
+// PATCH /api/auth/profile - Update avatar and/or cover photo for the logged-in user
+router.patch('/profile', (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'No token provided.' });
+  }
+
+  try {
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const users = getUsers();
+    const user = users.find(u => u.id === decoded.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    const { avatar, coverPhoto } = req.body;
+    if (avatar !== undefined) user.avatar = avatar;
+    if (coverPhoto !== undefined) user.coverPhoto = coverPhoto;
+
+    saveUsers(users);
+
+    res.json({
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        isVerified: user.isVerified,
+        avatar: user.avatar || null,
+        coverPhoto: user.coverPhoto || null,
+      }
+    });
   } catch {
     res.status(401).json({ error: 'Invalid or expired token.' });
   }

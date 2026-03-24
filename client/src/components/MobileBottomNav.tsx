@@ -7,23 +7,24 @@ export const MobileBottomNav: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  
-  // Do not show on admin routes
-  if (location.pathname.startsWith('/admin')) {
-    return null;
-  }
+
+  // Hide on admin routes
+  if (location.pathname.startsWith('/admin')) return null;
 
   const isActive = (path: string) => {
-    if (path === '/' && location.pathname === '/') return true;
-    if (path !== '/' && location.pathname.startsWith(path)) return true;
-    return false;
+    if (path === '/') return location.pathname === '/';
+    return location.pathname.startsWith(path);
   };
 
   return (
-    <nav className="mobile-bottom-nav">
-      <div 
+    <nav className="mobile-bottom-nav" aria-label="Bottom navigation">
+
+      {/* Home */}
+      <div
         className={`mobile-nav-item ${isActive('/') ? 'active' : ''}`}
         onClick={() => navigate('/')}
+        role="button"
+        aria-label="Home"
       >
         <span className="mobile-nav-icon">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
@@ -32,10 +33,13 @@ export const MobileBottomNav: React.FC = () => {
         </span>
         <span className="mobile-nav-label">หน้าแรก</span>
       </div>
-      
-      <div 
-        className={`mobile-nav-item ${isActive('/hotels') || isActive('/hotels/search') ? 'active' : ''}`}
+
+      {/* Search / Hotels */}
+      <div
+        className={`mobile-nav-item ${isActive('/hotels') ? 'active' : ''}`}
         onClick={() => navigate('/hotels')}
+        role="button"
+        aria-label="Search hotels"
       >
         <span className="mobile-nav-icon">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
@@ -45,9 +49,12 @@ export const MobileBottomNav: React.FC = () => {
         <span className="mobile-nav-label">ค้นหา</span>
       </div>
 
-      <div 
+      {/* Saved — requires login */}
+      <div
         className={`mobile-nav-item ${isActive('/saved') ? 'active' : ''}`}
         onClick={() => user ? navigate('/saved') : navigate('/login')}
+        role="button"
+        aria-label="Saved places"
       >
         <span className="mobile-nav-icon">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
@@ -56,10 +63,13 @@ export const MobileBottomNav: React.FC = () => {
         </span>
         <span className="mobile-nav-label">ที่บันทึกไว้</span>
       </div>
-      
-      <div 
-        className={`mobile-nav-item ${isActive('/profile') || isActive('/login') ? 'active' : ''}`}
+
+      {/* Profile — active ONLY on /profile, not /login (bug fix) */}
+      <div
+        className={`mobile-nav-item ${isActive('/profile') ? 'active' : ''}`}
         onClick={() => user ? navigate('/profile') : navigate('/login')}
+        role="button"
+        aria-label={user ? 'My profile' : 'Log in'}
       >
         <span className="mobile-nav-icon">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
@@ -68,6 +78,7 @@ export const MobileBottomNav: React.FC = () => {
         </span>
         <span className="mobile-nav-label">ฉัน</span>
       </div>
+
     </nav>
   );
 };
