@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import PostCard from '../components/PostCard';
 import CreatePostModal from '../components/CreatePostModal';
@@ -9,6 +10,9 @@ const CommunityPage: React.FC = () => {
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const locationFilter = searchParams.get('location');
 
   const fetchPosts = async () => {
     try {
@@ -50,13 +54,35 @@ const CommunityPage: React.FC = () => {
         </div>
       </div>
 
+      {locationFilter && (
+        <div className="filter-active-banner container" style={{ padding: '16px 20px', backgroundColor: '#fff', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+          <div>
+            <span style={{ color: '#6b7280', fontSize: '0.9rem' }}>Showing reviews for:</span>
+            <strong style={{ display: 'block', fontSize: '1.1rem', color: 'var(--primary-color)' }}>{locationFilter}</strong>
+          </div>
+          <button 
+            onClick={() => setSearchParams({})} 
+            style={{ padding: '6px 16px', background: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db', borderRadius: '20px', cursor: 'pointer', fontWeight: 500, fontSize: '0.85rem' }}
+          >
+            Clear Filter &times;
+          </button>
+        </div>
+      )}
+
       <div className="community-feed container">
         {loading ? (
           <div className="community-loading">Loading community feed...</div>
         ) : posts.length > 0 ? (
           <div className="posts-container">
-            {posts.map(post => (
-              <PostCard key={post.id} post={post} onUpdate={handlePostUpdate} />
+            {posts
+              .filter(p => !locationFilter || p.locationTag === locationFilter)
+              .map(post => (
+              <PostCard 
+                key={post.id} 
+                post={post} 
+                onUpdate={handlePostUpdate} 
+                onTagClick={(tag) => setSearchParams({ location: tag })}
+              />
             ))}
           </div>
         ) : (

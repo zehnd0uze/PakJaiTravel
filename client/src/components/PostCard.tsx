@@ -33,9 +33,10 @@ interface PostCardProps {
   post: Post;
   onUpdate: (updatedPost: Post) => void;
   onDelete?: (postId: string) => void;
+  onTagClick?: (tag: string) => void;
 }
 
-const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete }) => {
+const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClick }) => {
   const { user, token } = useAuth();
   const [commentText, setCommentText] = useState('');
   const [showComments, setShowComments] = useState(false);
@@ -169,7 +170,30 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete }) => {
             <span className="post-date">{formatTimeAgo(post.createdAt)}</span>
           </div>
           {post.locationTag && (
-            <div className="location-row">{post.locationTag}</div>
+            <div className="location-row" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span 
+                className="location-tag-link" 
+                onClick={() => onTagClick && onTagClick(post.locationTag!)}
+                style={{ cursor: 'pointer', color: 'var(--accent-color)', fontWeight: 500 }}
+                title="View all reviews for this location"
+              >
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" style={{ marginRight: '4px' }}>
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                </svg>
+                {post.locationTag}
+              </span>
+              <a 
+                href={post.lat && post.lng ? `https://www.google.com/maps/search/?api=1&query=${post.lat},${post.lng}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(post.locationTag)}`}
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="map-external-link"
+                style={{ fontSize: '0.75rem', color: '#6b7280', border: '1px solid #e5e7eb', padding: '2px 8px', borderRadius: '12px', textDecoration: 'none', backgroundColor: '#f9fafb', display: 'flex', alignItems: 'center', gap: '4px' }}
+                onClick={(e) => e.stopPropagation()}
+                title="View on Google Maps"
+              >
+                Map ↗
+              </a>
+            </div>
           )}
         </div>
         
@@ -216,7 +240,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete }) => {
             </span>
           )}
           {post.priceRating && (
-            <span className="post-price">{post.priceRating}</span>
+            <span className="post-price">{post.priceRating.replace(/\$/g, '฿')}</span>
           )}
         </div>
       )}

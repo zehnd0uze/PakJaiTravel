@@ -268,10 +268,10 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
                   onChange={e => setPriceRating(e.target.value)}
                 >
                   <option value="">เลือก</option>
-                  <option value="$">ประหยัด ($)</option>
-                  <option value="$$">ทั่วไป ($$)</option>
-                  <option value="$$$">แพง ($$$)</option>
-                  <option value="$$$$">หรูหรา ($$$$)</option>
+                  <option value="฿">ประหยัด (฿)</option>
+                  <option value="฿฿">ทั่วไป (฿฿)</option>
+                  <option value="฿฿฿">แพง (฿฿฿)</option>
+                  <option value="฿฿฿฿">หรูหรา (฿฿฿฿)</option>
                 </select>
               </div>
             </div>
