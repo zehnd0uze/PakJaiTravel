@@ -13,12 +13,51 @@ export const Header: React.FC = () => {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
   const menuRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  // Autocomplete fetcher
+  useEffect(() => {
+    if (searchQuery.trim().length > 1) {
+      const timer = setTimeout(() => {
+        fetch(`/api/properties?q=${encodeURIComponent(searchQuery)}`)
+          .then(r => r.json())
+          .then(data => {
+            setSearchResults(data.slice(0, 5));
+            setShowDropdown(true);
+          })
+          .catch(() => {});
+      }, 300);
+      return () => clearTimeout(timer);
+    } else {
+      setSearchResults([]);
+      setShowDropdown(false);
+    }
+  }, [searchQuery]);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      // For user menu
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+      // For search dropdown
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    setShowDropdown(false);
     if (searchQuery.trim()) {
       navigate(`/hotels?q=${encodeURIComponent(searchQuery.trim())}`);
     } else {
@@ -32,23 +71,11 @@ export const Header: React.FC = () => {
     }
   };
 
-  // Darken header after scrolling 50px
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Close desktop dropdown when clicking outside its container
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  const handleResultClick = (id: string) => {
+    setSearchQuery('');
+    setShowDropdown(false);
+    navigate(`/hotels/${id}`);
+  };
 
   // Prevent body scroll while mobile slide-out is open
   useEffect(() => {
@@ -68,6 +95,13 @@ export const Header: React.FC = () => {
     setMobileMenuOpen(false);
     navigate(path);
   };
+
+  // Darken header after scrolling 50px
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <header className={`header ${scrolled || !isHomePage ? 'header-scrolled glass-panel' : ''}`}>
@@ -112,7 +146,7 @@ export const Header: React.FC = () => {
         </div>
 
         {/* Minimalist Editorial Search (Replaces Airbnb Pill) */}
-        <div className="search-pill-container">
+        <div className="search-pill-container" ref={searchRef}>
           <div className="minimal-search-wrapper">
             <input
               type="text"
@@ -122,6 +156,7 @@ export const Header: React.FC = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               aria-label="Search destinations"
+              onFocus={() => searchQuery.length > 1 && setShowDropdown(true)}
             />
             <button className="minimal-search-icon-btn" onClick={handleSearch} aria-label="Search">
               <svg
@@ -133,6 +168,31 @@ export const Header: React.FC = () => {
                 <path d="M13 24a11 11 0 1 0 0-22 11 11 0 0 0 0 22zm8-3 9 9" />
               </svg>
             </button>
+
+            {/* Dropdown Results */}
+            {showDropdown && (
+              <div className="search-dropdown">
+                {searchResults.length > 0 ? (
+                  searchResults.map(result => (
+                    <button 
+                      key={result.id} 
+                      className="search-result-item"
+                      onClick={() => handleResultClick(result.id)}
+                    >
+                      <div className="result-icon">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                      </div>
+                      <div className="result-info">
+                        <span className="result-name">{result.name}</span>
+                        <span className="result-loc">{result.location} • {result.type}</span>
+                      </div>
+                    </button>
+                  ))
+                ) : (
+                  <div className="no-results-msg">No destinations found matching your search.</div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
