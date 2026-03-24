@@ -39,9 +39,21 @@ function saveProperties(properties) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(properties, null, 2));
 }
 
-// GET /api/properties — list all
+// GET /api/properties — list all (with optional search)
 router.get('/', (req, res) => {
-  const properties = getProperties();
+  const { q } = req.query;
+  let properties = getProperties();
+
+  if (q && typeof q === 'string') {
+    const query = q.toLowerCase();
+    properties = properties.filter(p => 
+      p.name?.toLowerCase().includes(query) ||
+      p.description?.toLowerCase().includes(query) ||
+      p.location?.toLowerCase().includes(query) ||
+      p.type?.toLowerCase().includes(query)
+    );
+  }
+
   res.json(properties);
 });
 

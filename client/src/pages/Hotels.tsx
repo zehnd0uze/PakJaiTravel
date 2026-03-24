@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card } from '../components/Card';
 import './Hotels.css';
 
@@ -21,6 +21,9 @@ interface Hotel {
 
 export const Hotels: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const q = searchParams.get('q') || '';
+  
   const [allHotels, setAllHotels] = useState<Hotel[]>([]);
   const [selectedProvince, setSelectedProvince] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('');
@@ -28,7 +31,8 @@ export const Hotels: React.FC = () => {
 
   // Fetch from API instead of static data
   useEffect(() => {
-    fetch('/api/properties')
+    const url = q ? `/api/properties?q=${encodeURIComponent(q)}` : '/api/properties';
+    fetch(url)
       .then(r => r.json())
       .then(data => {
         // Only show published properties on public site
@@ -36,7 +40,7 @@ export const Hotels: React.FC = () => {
         setAllHotels(published);
       })
       .catch(err => console.error('Failed to fetch properties:', err));
-  }, []);
+  }, [q]);
 
   // Extract unique provinces
   const provinces = useMemo(() => Array.from(new Set(allHotels.map(h => h.province))), [allHotels]);

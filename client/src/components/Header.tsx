@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Header.css';
 import { Button } from './Button';
@@ -13,6 +13,24 @@ export const Header: React.FC = () => {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const [searchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
+
+  const handleSearch = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/hotels?q=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      navigate('/hotels');
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   // Darken header after scrolling 50px
   useEffect(() => {
@@ -94,18 +112,28 @@ export const Header: React.FC = () => {
         </div>
 
         {/* Minimalist Editorial Search (Replaces Airbnb Pill) */}
-        <div className="search-pill-container" onClick={() => navigate('/hotels')}>
-          <button className="minimal-search-btn" aria-label="Search destinations">
-            Search Destinations
-            <svg
-              viewBox="0 0 32 32"
-              aria-hidden="true"
-              focusable="false"
-              className="minimal-search-icon"
-            >
-              <path d="M13 24a11 11 0 1 0 0-22 11 11 0 0 0 0 22zm8-3 9 9" />
-            </svg>
-          </button>
+        <div className="search-pill-container">
+          <div className="minimal-search-wrapper">
+            <input
+              type="text"
+              className="minimal-search-input"
+              placeholder="Search Destinations"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              aria-label="Search destinations"
+            />
+            <button className="minimal-search-icon-btn" onClick={handleSearch} aria-label="Search">
+              <svg
+                viewBox="0 0 32 32"
+                aria-hidden="true"
+                focusable="false"
+                className="minimal-search-icon"
+              >
+                <path d="M13 24a11 11 0 1 0 0-22 11 11 0 0 0 0 22zm8-3 9 9" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Desktop right: nav link + auth */}
