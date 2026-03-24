@@ -26,17 +26,17 @@
   --spacing-2xl: 72px;
   --spacing-3xl: 96px;
   
-  /* Radii */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 24px;
+  /* Radii - Increased for a "friendlier" modern feel */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 32px;
   
-  /* Diffused Luxury Shadows (Not harsh) */
-  --shadow-sm: 0 4px 12px rgba(26, 28, 26, 0.04);
-  --shadow-md: 0 8px 24px rgba(26, 28, 26, 0.06);
-  --shadow-lg: 0 16px 40px rgba(26, 28, 26, 0.08);
-  --shadow-hover: 0 20px 48px rgba(26, 28, 26, 0.12);
+  /* Diffused Luxury Shadows (Softer and more inviting) */
+  --shadow-sm: 0 2px 8px rgba(26, 28, 26, 0.04);
+  --shadow-md: 0 10px 30px rgba(26, 28, 26, 0.05);
+  --shadow-lg: 0 20px 50px rgba(26, 28, 26, 0.07);
+  --shadow-hover: 0 30px 60px rgba(26, 28, 26, 0.1);
 }
 
 * {

@@ -22,11 +22,11 @@
 }
 
 .create-post-modal {
-  background: #ffffff;
+  background: var(--surface-color);
   width: 100%;
   max-width: 500px;
-  border-radius: 8px; /* Facebook uses smaller border-radius for modals */
-  box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-lg); /* Modern friendly rounded corners */
+  box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -127,7 +127,7 @@
 .visibility-badge {
   background: #e4e6eb;
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   font-size: 12px;
   font-weight: 600;
   color: #050505;
@@ -161,8 +161,8 @@
 /* Image Preview */
 .image-preview-container {
   position: relative;
-  border: 1px solid #ced0d4;
-  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
   margin-bottom: 16px;
   overflow: hidden;
 }
@@ -204,10 +204,10 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #f0f2f5;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid #ced0d4;
+  background: var(--bg-color);
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
   position: relative;
 }
 
@@ -236,15 +236,15 @@
 
 .fb-map-preview {
   margin-top: 12px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   overflow: hidden;
-  border: 1px solid #ced0d4;
+  border: 1px solid var(--border-color);
 }
 
 /* Add to Post Bar */
 .add-to-post-container {
-  border: 1px solid #ced0d4;
-  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
   padding: 12px 16px;
   display: flex;
   align-items: center;
@@ -291,8 +291,8 @@
   gap: 16px;
   margin-bottom: 16px;
   padding: 12px;
-  background: #f0f2f5;
-  border-radius: 8px;
+  background: var(--bg-color);
+  border-radius: var(--radius-md);
 }
 
 .ratings-item {
@@ -326,8 +326,8 @@
 
 .fb-price-select {
   background: white;
-  border: 1px solid #ced0d4;
-  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
   padding: 4px;
   font-size: 14px;
 }
@@ -339,19 +339,20 @@
 
 .fb-post-btn {
   width: 100%;
-  padding: 12px;
-  border-radius: 6px;
+  padding: 14px;
+  border-radius: var(--radius-md);
   border: none;
-  background: #1b74e4;
+  background: var(--primary-color);
   color: white;
   font-weight: 600;
   font-size: 15px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, box-shadow 0.2s;
 }
 
 .fb-post-btn:hover:not(:disabled) {
-  background: #1565c0;
+  background: var(--primary-hover);
+  box-shadow: var(--shadow-sm);
 }
 
 .fb-post-btn:disabled {

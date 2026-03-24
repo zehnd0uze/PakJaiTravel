@@ -17,7 +17,7 @@
   position: relative;
   width: 100%;
   padding-top: 133%; /* 3:4 Aspect Ratio (Editorial/Portrait) instead of 1:1 Airbnb square */
-  border-radius: var(--radius-sm); /* Minimal brutalist corner */
+  border-radius: var(--radius-lg); /* Modern friendly rounded corners */
   overflow: hidden;
   background-color: var(--border-color);
   box-shadow: var(--shadow-sm);
@@ -25,7 +25,7 @@
 }
 
 .heritage-card:hover .heritage-card-image-wrapper {
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-md);
 }
 
 .heritage-card-image {
@@ -86,7 +86,7 @@
   left: 12px;
   background: var(--surface-color);
   padding: 6px 14px;
-  border-radius: 2px;
+  border-radius: var(--radius-md);
   font-family: var(--font-body);
   font-size: 0.75rem;
   text-transform: uppercase;

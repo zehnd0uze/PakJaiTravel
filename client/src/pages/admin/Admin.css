@@ -47,7 +47,7 @@
   color: var(--primary-color);
   font-size: 0.65rem;
   font-weight: 700;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   vertical-align: middle;
@@ -89,6 +89,7 @@
   width: 100%;
   text-align: left;
   font-family: var(--font-body);
+  border-radius: var(--radius-md);
 }
 
 .admin-nav-item:hover {
@@ -175,14 +176,15 @@
 
 .stat-card {
   background: #fff;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 24px;
-  border: 1px solid #EAECEE;
-  transition: box-shadow 0.2s ease;
+  border: 1px solid var(--border-color);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .stat-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .stat-icon {
@@ -208,9 +210,10 @@
 /* ---- Table ---- */
 .admin-table-wrapper {
   background: #fff;
-  border-radius: 16px;
-  border: 1px solid #EAECEE;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
   overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
 .admin-table-header {
@@ -269,7 +272,7 @@
 .table-property-thumb {
   width: 56px;
   height: 40px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   object-fit: cover;
 }
 
@@ -337,10 +340,11 @@
 /* ---- Edit Form ---- */
 .admin-form-container {
   background: #fff;
-  border-radius: 16px;
-  border: 1px solid #EAECEE;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
   padding: 32px;
   max-width: 900px;
+  box-shadow: var(--shadow-sm);
 }
 
 .admin-form-section {
