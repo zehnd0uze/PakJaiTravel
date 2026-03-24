@@ -7,15 +7,34 @@ import './ProfilePage.css';
 
 const API_BASE = import.meta.env.PROD ? '' : 'http://localhost:5000';
 
+interface Comment {
+  id: string;
+  userId: string;
+  authorName: string;
+  authorAvatar: string;
+  text: string;
+  createdAt: string;
+}
+
 interface Post {
   id: string;
   userId: string;
-  likes?: string[];
-  [key: string]: unknown;
+  authorName: string;
+  authorAvatar: string;
+  content: string;
+  imageUrl: string | null;
+  locationTag: string | null;
+  rating: number | null;
+  priceRating: string | null;
+  likes: string[];
+  comments: Comment[];
+  createdAt: string;
+  lat?: number | null;
+  lng?: number | null;
 }
 
 const ProfilePage: React.FC = () => {
-  const { user, token, logout, updateProfile } = useAuth();
+  const { user, logout, updateProfile } = useAuth();
   const navigate = useNavigate();
   const [userPosts, setUserPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
