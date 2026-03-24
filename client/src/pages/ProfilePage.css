@@ -1,7 +1,7 @@
 /* ── Profile Page ──────────────────────────────────────── */
 
 .profile-page {
-  background-color: #f1f5f9;
+  background-color: var(--bg-color);
   min-height: 100vh;
   padding-bottom: 80px;
 }
@@ -66,7 +66,7 @@
 }
 
 .cover-upload-btn:hover:not(:disabled) {
-  background: rgba(14, 165, 233, 0.8);
+  background: var(--primary-color);
   transform: translateY(-1px);
 }
 
@@ -86,15 +86,16 @@
 
 /* ── Profile Header Card ─────────────────────────────── */
 .profile-header-card {
-  background: white;
-  border-radius: 20px;
-  padding: 30px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  background: var(--surface-color);
+  border-radius: var(--radius-lg, 12px);
+  padding: 40px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 }
 
 /* ── Avatar ─────────────────────────────────────────── */
@@ -105,31 +106,31 @@
 }
 
 .profile-avatar-large {
-  width: 130px;
-  height: 130px;
+  width: 140px;
+  height: 140px;
   border-radius: 50%;
-  border: 5px solid white;
+  border: 4px solid var(--surface-color);
   object-fit: cover;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-md);
   display: block;
   transition: opacity 0.3s;
 }
 
 .verified-badge-icon {
   position: absolute;
-  bottom: 32px;
-  right: 0;
-  background: #22c55e;
+  bottom: 24px;
+  right: 4px;
+  background: var(--secondary-color);
   color: white;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
-  border: 3px solid white;
+  border: 3px solid var(--surface-color);
 }
 
 /* Avatar camera button */
@@ -155,7 +156,7 @@
 
 .avatar-upload-btn:hover:not(:disabled) {
   transform: scale(1.1);
-  background: #0284c7;
+  background: var(--primary-hover);
 }
 
 .avatar-upload-btn:disabled {
@@ -177,28 +178,32 @@
 }
 
 .profile-name-section h1 {
-  font-size: 2rem;
-  color: #0f172a;
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  color: var(--text-primary);
   margin: 0 0 4px 0;
-  font-weight: 800;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .profile-email {
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 1rem;
-  margin: 0 0 12px 0;
+  margin: 0 0 16px 0;
 }
 
 .profile-level {
   display: inline-block;
-  background: #fdf4ff;
-  color: #c026d3;
-  padding: 4px 12px;
-  border-radius: 20px;
+  background: transparent;
+  color: var(--secondary-color);
+  padding: 6px 16px;
+  border-radius: 30px;
   font-size: 0.85rem;
   font-weight: 600;
-  border: 1px solid #fae8ff;
-  margin-bottom: 24px;
+  border: 1px solid var(--secondary-color);
+  margin-bottom: 32px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* ── Stats ───────────────────────────────────────────── */
@@ -207,10 +212,9 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  margin-top: 10px;
-  padding-top: 24px;
-  border-top: 1px solid #f1f5f9;
-  margin-bottom: 20px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border-color);
+  margin-bottom: 24px;
 }
 
 .stat-box {
@@ -221,48 +225,49 @@
 }
 
 .stat-number {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: #0f172a;
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .stat-label {
-  font-size: 0.8rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.08em;
   font-weight: 600;
 }
 
 .stat-divider {
   width: 1px;
   height: 40px;
-  background-color: #e2e8f0;
-  margin: 0 20px;
+  background-color: var(--border-color);
+  margin: 0 32px;
 }
 
 /* ── Log Out Button ──────────────────────────────────── */
 .logout-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 28px;
+  justify-content: center;
+  padding: 10px 32px;
   border-radius: 30px;
-  border: 2px solid #fca5a5;
-  background: #fff1f2;
-  color: #dc2626;
-  font-size: 0.95rem;
-  font-weight: 700;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-  margin-top: 4px;
+  transition: all var(--transition-fast, 0.2s);
+  margin-top: 8px;
 }
 
 .logout-btn:hover {
-  background: #fee2e2;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
-  transform: translateY(-1px);
+  background: var(--bg-color);
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
 }
 
 .logout-btn:active {
@@ -282,10 +287,11 @@
   display: flex;
   flex: 1;
   gap: 8px;
-  background: white;
+  background: var(--surface-color);
   padding: 8px;
-  border-radius: 16px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  border-radius: var(--radius-xl, 24px);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
   min-width: 0;
 }
 
@@ -293,24 +299,24 @@
   flex: 1;
   background: transparent;
   border: none;
-  padding: 10px 8px;
+  padding: 12px 16px;
   font-size: 0.95rem;
-  font-weight: 600;
-  color: #64748b;
-  border-radius: 10px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-radius: var(--radius-lg, 12px);
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
 }
 
 .profile-tab:hover {
-  background: #f8fafc;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .profile-tab.active {
-  background: var(--primary-color, #0ea5e9);
-  color: white;
+  background: var(--primary-color);
+  color: var(--surface-color);
+  font-weight: 600;
 }
 
 .create-post-btn {
@@ -330,26 +336,24 @@
 }
 
 .profile-empty-state {
-  background: white;
-  border-radius: 20px;
+  background: var(--surface-color);
+  border-radius: var(--radius-lg, 12px);
   padding: 60px 20px;
   text-align: center;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
-}
-
-.empty-icon {
-  font-size: 4rem;
-  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
 }
 
 .profile-empty-state h2 {
-  font-size: 1.8rem;
-  color: #0f172a;
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  color: var(--text-primary);
   margin-bottom: 12px;
+  font-weight: 600;
 }
 
 .profile-empty-state p {
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 1.1rem;
   margin-bottom: 32px;
   max-width: 400px;

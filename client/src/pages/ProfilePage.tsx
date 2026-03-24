@@ -141,7 +141,7 @@ const ProfilePage: React.FC = () => {
           disabled={uploadingCover}
           title="Change cover photo"
         >
-          {uploadingCover ? '⏳ Saving…' : '📷 Change Cover'}
+          {uploadingCover ? 'Saving...' : 'Change Cover'}
         </button>
         <input
           ref={coverInputRef}
@@ -178,7 +178,7 @@ const ProfilePage: React.FC = () => {
               disabled={uploadingAvatar}
               title="Change profile photo"
             >
-              {uploadingAvatar ? '⏳' : '📷'}
+              {uploadingAvatar ? '...' : '+'}
             </button>
             <input
               ref={avatarInputRef}
@@ -199,7 +199,7 @@ const ProfilePage: React.FC = () => {
             <div className="profile-name-section">
               <h1>{user.name}</h1>
               <p className="profile-email">{user.email}</p>
-              <span className="profile-level">🌟 Explorer</span>
+              <span className="profile-level">Explorer</span>
             </div>
 
             <div className="profile-stats">
@@ -221,7 +221,7 @@ const ProfilePage: React.FC = () => {
 
             {/* ── Log Out Button — always visible ── */}
             <button className="logout-btn" onClick={handleLogout}>
-              🚪 Log Out
+              Log Out
             </button>
           </div>
         </div>
@@ -253,8 +253,7 @@ const ProfilePage: React.FC = () => {
             </div>
           ) : (
             <div className="profile-empty-state">
-              <div className="empty-icon">🗺️</div>
-              <h2>No reviews yet!</h2>
+              <h2>No reviews yet.</h2>
               <p>Share your favourite places, tips, and photos with the travel community.</p>
               <button onClick={() => setIsModalOpen(true)} className="btn btn-primary start-review-btn">
                 Write a Review
