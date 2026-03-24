@@ -434,6 +434,40 @@ router.patch('/profile', (req, res) => {
   }
 });
 
+// PATCH /api/auth/upgrade-to-host - Upgrade the logged-in user to 'host' role
+router.patch('/upgrade-to-host', (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'No token provided.' });
+  }
+
+  try {
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const users = getUsers();
+    const user = users.find(u => u.id === decoded.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    user.role = 'host';
+    saveUsers(users);
+
+    res.json({
+      message: 'Self-upgrade to Host successful.',
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isVerified: user.isVerified
+      }
+    });
+  } catch {
+    res.status(401).json({ error: 'Invalid or expired token.' });
+  }
+});
+
 // GET /api/auth/users - Admin fetch all users
 router.get('/users', (req, res) => {
   try {

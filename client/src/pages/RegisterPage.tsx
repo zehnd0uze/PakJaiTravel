@@ -53,7 +53,10 @@ export const RegisterPage: React.FC = () => {
     setLoading(true);
     try {
       await register(name, email, password);
-      navigate('/');
+      // Check for redirect param
+      const params = new URLSearchParams(window.location.search);
+      const redirectTo = params.get('redirect') || '/community';
+      navigate(redirectTo);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);

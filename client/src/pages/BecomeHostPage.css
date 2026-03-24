@@ -1,0 +1,113 @@
+.become-host-page {
+  padding-top: 80px;
+}
+
+.bh-hero {
+  background: white;
+  padding: 120px 0 80px;
+  text-align: center;
+}
+
+.bh-overline {
+  display: block;
+  font-size: 0.9rem;
+  letter-spacing: 0.2rem;
+  text-transform: uppercase;
+  color: var(--accent-color);
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+.bh-hero h1 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 4rem;
+  line-height: 1.1;
+  color: #1a1a1a;
+  margin-bottom: 32px;
+}
+
+.bh-hero h1 span {
+  color: var(--primary-color);
+  font-style: italic;
+}
+
+.bh-lead {
+  font-size: 1.25rem;
+  color: #666;
+  max-width: 600px;
+  margin: 0 auto 48px;
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+.bh-error {
+  color: #e53e3e;
+  margin-top: 16px;
+  font-size: 0.9rem;
+}
+
+.bh-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  padding-bottom: 120px;
+}
+
+.bh-step-card {
+  padding: 40px;
+  background: #fcfcfc;
+  border-radius: 24px;
+  transition: all 0.3s;
+}
+
+.bh-step-card:hover {
+  background: white;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+  transform: translateY(-8px);
+}
+
+.step-num {
+  font-family: 'Outfit', sans-serif;
+  font-size: 3rem;
+  font-weight: 700;
+  color: #eee;
+  margin-bottom: 16px;
+}
+
+.bh-step-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+}
+
+.bh-step-card p {
+  color: #666;
+  line-height: 1.6;
+}
+
+.bh-quote {
+  max-width: 900px;
+  margin: 0 auto 120px;
+  padding: 80px;
+  text-align: center;
+}
+
+.bh-quote blockquote {
+  font-family: 'Outfit', sans-serif;
+  font-size: 2rem;
+  font-style: italic;
+  line-height: 1.4;
+  margin-bottom: 32px;
+  color: var(--primary-color);
+}
+
+.bh-quote cite {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #888;
+  font-style: normal;
+}
+
+@media (max-width: 1024px) {
+  .bh-hero h1 { font-size: 3rem; }
+  .bh-steps { grid-template-columns: 1fr; }
+}
