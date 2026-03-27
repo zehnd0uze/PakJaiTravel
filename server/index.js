@@ -35,7 +35,8 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://maps.googleapis.com"],
       imgSrc: ["'self'", "data:", "https://maps.gstatic.com", "https://maps.googleapis.com", "https://*.googleusercontent.com", "https://images.unsplash.com", "https://ui-avatars.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      connectSrc: ["'self'", "https://maps.googleapis.com"]
+      connectSrc: ["'self'", "https://maps.googleapis.com"],
+      frameSrc: ["'self'", "https://maps.google.com", "https://www.google.com"]
     }
   }
 }));
