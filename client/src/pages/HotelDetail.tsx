@@ -208,7 +208,7 @@ export const HotelDetail: React.FC = () => {
                 loading="lazy"
                 allowFullScreen
                 referrerPolicy="no-referrer-when-downgrade"
-                src={`https://maps.google.com/maps?q=${encodeURIComponent(hotel.name + ' ' + (hotel.location || 'Chiang Dao, Thailand'))}&z=15&output=embed`}
+                src={`https://maps.google.com/maps?width=100%25&height=600&hl=en&q=${encodeURIComponent(hotel.name + ', ' + (hotel.location || 'Chiang Dao, Thailand'))}&t=&z=14&ie=UTF8&iwloc=B&output=embed`}
               ></iframe>
             </div>
             <p style={{ marginTop: '16px', fontSize: '0.95rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}>
