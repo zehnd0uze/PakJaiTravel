@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { supabase } from '../utils/supabase';
 import { useAuth } from '../context/AuthContext';
 import PostCard from '../components/PostCard';
 import CreatePostModal from '../components/CreatePostModal';
@@ -17,9 +18,26 @@ const CommunityPage: React.FC = () => {
 
   const fetchPosts = async () => {
     try {
-      const res = await fetch('/api/posts');
-      const data = await res.json();
-      setPosts(data || []);
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      
+      const formatted = (data || []).map(p => ({
+        ...p,
+        userId: p.user_id,
+        authorName: p.author_name,
+        authorAvatar: p.author_avatar,
+        imageUrl: p.image_url,
+        locationTag: p.location_tag,
+        priceRating: p.price_rating,
+        propertyId: p.property_id,
+        createdAt: p.created_at,
+        updatedAt: p.updated_at
+      }));
+      setPosts(formatted);
     } catch (err) {
       console.error("Failed to fetch posts", err);
     } finally {

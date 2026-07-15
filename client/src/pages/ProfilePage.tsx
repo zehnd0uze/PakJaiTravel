@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../utils/supabase';
+import { uploadToCloudinary } from '../utils/cloudinary';
 import PostCard from '../components/PostCard';
 import CreatePostModal from '../components/CreatePostModal';
 import { type Post } from '../types';
@@ -31,12 +33,29 @@ const ProfilePage: React.FC = () => {
   }, [isLoggedIn, navigate]);
 
   const fetchUserPosts = async () => {
+    if (!user) return;
     try {
-      const res = await fetch(`${API_BASE}/api/posts`);
-      if (res.ok) {
-        const data: Post[] = await res.json();
-        setUserPosts(data.filter((p) => p.userId === user?.id));
-      }
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      
+      const formatted = (data || []).map(p => ({
+        ...p,
+        userId: p.user_id,
+        authorName: p.author_name,
+        authorAvatar: p.author_avatar,
+        imageUrl: p.image_url,
+        locationTag: p.location_tag,
+        priceRating: p.price_rating,
+        propertyId: p.property_id,
+        createdAt: p.created_at,
+        updatedAt: p.updated_at
+      }));
+      setUserPosts(formatted);
     } catch (err) {
       console.error('Failed to fetch user posts', err);
     } finally {
@@ -59,20 +78,11 @@ const ProfilePage: React.FC = () => {
     field: 'avatar' | 'coverPhoto',
     setUploading: (v: boolean) => void
   ) => {
+    if (!user) return;
     setUploading(true);
     setUploadError(null);
     try {
-      const formData = new FormData();
-      formData.append('images', file);
-
-      const uploadRes = await fetch(`${API_BASE}/api/upload`, {
-        method: 'POST',
-        body: formData,
-      });
-      if (!uploadRes.ok) throw new Error('Upload failed');
-      const { urls } = await uploadRes.json();
-      const url: string = urls[0];
-
+      const url = await uploadToCloudinary(file);
       await updateProfile({ [field]: url });
     } catch (err) {
       console.error(`Failed to upload ${field}:`, err);

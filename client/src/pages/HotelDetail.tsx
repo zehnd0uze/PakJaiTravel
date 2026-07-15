@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { supabase } from '../utils/supabase';
 import { VerifiedBadge } from '../components/VerifiedBadge';
 import { Button } from '../components/Button';
 import { useAuth } from '../context/AuthContext';
@@ -37,16 +38,39 @@ export const HotelDetail: React.FC = () => {
   // Fetch from API
   useEffect(() => {
     if (!id) return;
-    fetch(`/api/properties/${id}`)
-      .then(r => {
-        if (!r.ok) throw new Error('Not found');
-        return r.json();
-      })
-      .then(data => {
-        setHotel(data);
+    const fetchHotel = async () => {
+      const { data, error } = await supabase
+        .from('properties')
+        .select(`
+          *,
+          profiles ( name, created_at )
+        `)
+        .eq('id', id)
+        .single();
+        
+      if (error || !data) {
         setLoading(false);
-      })
-      .catch(() => setLoading(false));
+        return;
+      }
+      
+      const formatted = {
+        ...data,
+        pricePerNight: data.price_per_night,
+        imageUrl: data.image_url,
+        isVerified: data.is_verified,
+        checkIn: data.check_in,
+        checkOut: data.check_out,
+        host: {
+          name: data.profiles?.name || data.host_info?.name || 'Unknown',
+          since: new Date(data.profiles?.created_at || new Date()).getFullYear().toString()
+        }
+      };
+      
+      setHotel(formatted);
+      setLoading(false);
+    };
+    
+    fetchHotel();
   }, [id]);
 
   if (loading) {

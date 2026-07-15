@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { supabase } from '../utils/supabase';
 import { Card } from '../components/Card';
 import './Hotels.css';
 
@@ -31,15 +32,29 @@ export const Hotels: React.FC = () => {
 
   // Fetch from API instead of static data
   useEffect(() => {
-    const url = q ? `/api/properties?q=${encodeURIComponent(q)}` : '/api/properties';
-    fetch(url)
-      .then(r => r.json())
-      .then(data => {
-        // Only show published properties on public site
-        const published = data.filter((h: Hotel) => h.status !== 'draft');
-        setAllHotels(published);
-      })
-      .catch(err => console.error('Failed to fetch properties:', err));
+    const fetchHotels = async () => {
+      let query = supabase.from('properties').select('*').neq('status', 'draft');
+      
+      if (q) {
+        query = query.or(`name.ilike.%${q}%,location.ilike.%${q}%,province.ilike.%${q}%,district.ilike.%${q}%`);
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) {
+        console.error('Failed to fetch properties:', error);
+      } else {
+        const formatted = (data || []).map(p => ({
+          ...p,
+          pricePerNight: p.price_per_night,
+          imageUrl: p.image_url,
+          isVerified: p.is_verified
+        }));
+        setAllHotels(formatted);
+      }
+    };
+    
+    fetchHotels();
   }, [q]);
 
   // Extract unique provinces

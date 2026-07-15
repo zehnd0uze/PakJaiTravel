@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { uploadToCloudinary } from '../../utils/cloudinary';
 
 interface PropertyForm {
   name: string;
@@ -104,21 +105,19 @@ export const AdminHotelEdit: React.FC = () => {
     setUploading(true);
     setAlert({ type: 'info', message: 'Uploading image(s)...' });
     try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await res.json();
+      const urls = [];
+      for (let i = 0; i < Array.from(e.target.files).length; i++) {
+        const url = await uploadToCloudinary(Array.from(e.target.files)[i]);
+        urls.push(url);
+      }
       
-      if (res.ok && data.urls) {
+      if (urls.length > 0) {
         if (field === 'imageUrl') {
-          handleChange('imageUrl', data.urls[0]);
+          handleChange('imageUrl', urls[0]);
         } else {
-          setForm(prev => ({ ...prev, images: [...prev.images, ...data.urls] }));
+          setForm(prev => ({ ...prev, images: [...prev.images, ...urls] }));
         }
         setAlert({ type: 'success', message: 'Image(s) uploaded successfully!' });
-      } else {
-        throw new Error(data.error || 'Upload failed');
       }
     } catch (err: any) {
       setAlert({ type: 'error', message: err.message });

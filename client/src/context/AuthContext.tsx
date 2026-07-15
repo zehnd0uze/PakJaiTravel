@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { supabase } from '../utils/supabase';
 
 interface User {
   id: string;
@@ -12,129 +13,160 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
+  token: string | null; // Keep for backward compatibility if needed, though Supabase handles sessions
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   verify: (email: string, otp: string) => Promise<void>;
   resendOtp: (email: string) => Promise<void>;
   logout: () => void;
-  updateProfile: (fields: { avatar?: string; coverPhoto?: string }) => Promise<void>;
+  updateProfile: (fields: { avatar?: string; coverPhoto?: string; name?: string }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const API_BASE = import.meta.env.PROD ? '' : 'http://localhost:5000';
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('pakjai_token'));
+  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const fetchProfile = async (userId: string, email: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+      
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error fetching profile:', error);
+    }
+    
+    if (data) {
+      setUser({
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        role: data.role,
+        isVerified: data.is_verified,
+        avatar: data.avatar,
+        coverPhoto: data.cover_photo
+      });
+    } else {
+      // Fallback if profile not created yet
+      setUser({
+        id: userId,
+        name: email.split('@')[0],
+        email: email,
+        isVerified: false,
+        avatar: null,
+        coverPhoto: null
+      });
+    }
+  };
 
   // Restore session on mount
   useEffect(() => {
     const restoreSession = async () => {
-      const stored = localStorage.getItem('pakjai_token');
-      if (!stored) {
-        setLoading(false);
-        return;
-      }
-      try {
-        const res = await fetch(`${API_BASE}/api/auth/me`, {
-          headers: { Authorization: `Bearer ${stored}` },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data.user);
-          setToken(stored);
-        } else {
-          localStorage.removeItem('pakjai_token');
-          setToken(null);
-        }
-      } catch {
-        localStorage.removeItem('pakjai_token');
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.user) {
+        setToken(session.access_token);
+        await fetchProfile(session.user.id, session.user.email!);
+      } else {
+        setUser(null);
         setToken(null);
-      } finally {
-        setLoading(false);
       }
+      setLoading(false);
     };
+
     restoreSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        setToken(session.access_token);
+        await fetchProfile(session.user.id, session.user.email!);
+      } else {
+        setUser(null);
+        setToken(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const res = await fetch(`${API_BASE}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+    const { error, data } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Login failed');
-    localStorage.setItem('pakjai_token', data.token);
-    setToken(data.token);
-    setUser(data.user);
+    if (error) throw new Error(error.message);
   }, []);
 
   const register = useCallback(async (name: string, email: string, password: string) => {
-    const res = await fetch(`${API_BASE}/api/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password }),
+    const { error, data } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name,
+          role: 'user'
+        }
+      }
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Registration failed');
-
-    // Log them in immediately (Soft Verification)
-    localStorage.setItem('pakjai_token', data.token);
-    setToken(data.token);
-    setUser(data.user);
+    
+    if (error) throw new Error(error.message);
   }, []);
 
   const verify = useCallback(async (email: string, otp: string) => {
-    const res = await fetch(`${API_BASE}/api/auth/verify`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, otp }),
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: otp,
+      type: 'signup'
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Verification failed');
-
-    localStorage.setItem('pakjai_token', data.token);
-    setToken(data.token);
-    setUser(data.user);
+    if (error) throw new Error(error.message);
   }, []);
 
   const resendOtp = useCallback(async (email: string) => {
-    const res = await fetch(`${API_BASE}/api/auth/resend-otp`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to resend code');
+    if (error) throw new Error(error.message);
   }, []);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem('pakjai_token');
-    setToken(null);
-    setUser(null);
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
   }, []);
 
-  const updateProfile = useCallback(async (fields: { avatar?: string; coverPhoto?: string }) => {
-    const stored = localStorage.getItem('pakjai_token');
-    if (!stored) throw new Error('Not authenticated');
+  const updateProfile = useCallback(async (fields: { avatar?: string; coverPhoto?: string; name?: string }) => {
+    if (!user) throw new Error('Not authenticated');
 
-    const res = await fetch(`${API_BASE}/api/auth/profile`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${stored}`,
-      },
-      body: JSON.stringify(fields),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to update profile');
-    setUser(data.user);
-  }, []);
+    const dbFields: any = {};
+    if (fields.avatar !== undefined) dbFields.avatar = fields.avatar;
+    if (fields.coverPhoto !== undefined) dbFields.cover_photo = fields.coverPhoto;
+    if (fields.name !== undefined) dbFields.name = fields.name;
+
+    const { error, data } = await supabase
+      .from('profiles')
+      .update(dbFields)
+      .eq('id', user.id)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    
+    if (data) {
+      setUser(prev => prev ? {
+        ...prev,
+        avatar: data.avatar,
+        coverPhoto: data.cover_photo,
+        name: data.name
+      } : null);
+    }
+  }, [user]);
 
   return (
     <AuthContext.Provider value={{ user, token, loading, login, register, verify, resendOtp, logout, updateProfile }}>

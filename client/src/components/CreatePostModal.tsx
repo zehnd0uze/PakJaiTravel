@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useJsApiLoader, Autocomplete, GoogleMap, Marker } from '@react-google-maps/api';
 import { type Post } from '../types';
+import { uploadToCloudinary } from '../utils/cloudinary';
 import './CreatePostModal.css';
 
 const libraries: ("places")[] = ["places"];
@@ -95,23 +96,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
     try {
       let imageUrl = imagePreview || null;
       if (imageFile) {
-        const formData = new FormData();
-        formData.append('images', imageFile); 
-        
-        const uploadRes = await fetch('/api/upload', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` },
-          body: formData
-        });
-        
-        if (!uploadRes.ok) throw new Error('Failed to upload image');
-        
-        const uploadData = await uploadRes.json();
-        if (uploadData.urls && uploadData.urls.length > 0) {
-          imageUrl = uploadData.urls[0];
-        } else {
-          throw new Error('Image upload failed to return a URL');
-        }
+        imageUrl = await uploadToCloudinary(imageFile);
       }
 
       const url = isEditing ? `/api/posts/${postToEdit.id}` : '/api/posts';

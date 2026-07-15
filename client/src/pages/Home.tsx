@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../utils/supabase';
 import './Home.css';
 import { AirbnbCard } from '../components/AirbnbCard';
 import { VerifiedBadge } from '../components/VerifiedBadge';
@@ -25,17 +26,28 @@ export const Home: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/properties')
-      .then(res => res.json())
-      .then(data => {
-        const published = data.filter((p: Property) => p.status !== 'draft');
-        setProperties(published);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Failed to fetch properties:", err);
-        setLoading(false);
-      });
+    const fetchProperties = async () => {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .neq('status', 'draft');
+        
+      if (error) {
+        console.error("Failed to fetch properties:", error);
+      } else {
+        // Map database snake_case to frontend camelCase if needed
+        const formatted = (data || []).map(p => ({
+          ...p,
+          pricePerNight: p.price_per_night,
+          imageUrl: p.image_url,
+          isVerified: p.is_verified
+        }));
+        setProperties(formatted);
+      }
+      setLoading(false);
+    };
+    
+    fetchProperties();
   }, []);
 
   // Sleek, text-based mood categories replacing the cluttered emoji blocks
