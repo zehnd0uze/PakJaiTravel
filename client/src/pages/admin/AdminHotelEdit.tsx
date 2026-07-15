@@ -105,7 +105,7 @@ export const AdminHotelEdit: React.FC = () => {
     setUploading(true);
     setAlert({ type: 'info', message: 'Uploading image(s)...' });
     try {
-      const urls = [];
+      const urls: string[] = [];
       for (let i = 0; i < Array.from(e.target.files).length; i++) {
         const url = await uploadToCloudinary(Array.from(e.target.files)[i]);
         urls.push(url);

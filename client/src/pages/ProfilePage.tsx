@@ -8,7 +8,6 @@ import CreatePostModal from '../components/CreatePostModal';
 import { type Post } from '../types';
 import './ProfilePage.css';
 
-const API_BASE = import.meta.env.PROD ? '' : 'http://localhost:5000';
 
 
 
