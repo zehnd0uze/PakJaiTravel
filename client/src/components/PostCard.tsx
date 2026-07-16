@@ -24,7 +24,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClic
 
   const menuRef = useRef<HTMLDivElement>(null);
   const isOwner = user && post.userId === user.id;
-  const hasLiked = user && post.likes.includes(user.id);
+  const hasLiked = user && (post.likes || []).includes(user.id);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -269,21 +269,19 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClic
           onClick={handleLike}
           disabled={isLiking}
         >
-          {hasLiked ? 'Liked' : 'Like'} <span>{post.likes.length}</span>
+          {hasLiked ? 'Liked' : 'Like'} <span>{(post.likes || []).length}</span>
         </button>
-        <button 
-          className="action-btn comment-btn"
-          onClick={() => setShowComments(!showComments)}
-        >
-          Comments <span>{post.comments.length}</span>
+        <button className="action-btn" onClick={() => setShowComments(!showComments)}>
+          <i className="fas fa-comment"></i>
+          Comments <span>{(post.comments || []).length}</span>
         </button>
       </div>
 
       {showComments && (
         <div className="post-comments-section">
-          {post.comments.length > 0 && (
+          {(post.comments || []).length > 0 && (
             <div className="comments-list">
-              {post.comments.map(c => (
+              {(post.comments || []).map(c => (
                 <div key={c.id} className="comment-item">
                   <div className="comment-body">
                     <strong>{c.authorName}</strong> {c.text}
