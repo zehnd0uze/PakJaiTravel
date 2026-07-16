@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../utils/supabase';
 
 interface Property {
   id: string;
@@ -20,11 +21,24 @@ export const AdminHotels: React.FC = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [alert, setAlert] = useState<{ type: string; message: string } | null>(null);
 
-  const fetchProperties = () => {
-    fetch('/api/properties')
-      .then(r => r.json())
-      .then(data => setProperties(data))
-      .catch(() => setAlert({ type: 'error', message: 'Failed to load properties.' }));
+  const fetchProperties = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*');
+      if (error) throw error;
+      if (data) {
+        const formatted = data.map(p => ({
+          ...p,
+          pricePerNight: p.price_per_night,
+          imageUrl: p.image_url,
+          isVerified: p.is_verified
+        }));
+        setProperties(formatted);
+      }
+    } catch {
+      setAlert({ type: 'error', message: 'Failed to load properties.' });
+    }
   };
 
   useEffect(() => {
@@ -35,15 +49,16 @@ export const AdminHotels: React.FC = () => {
     if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return;
 
     try {
-      const res = await fetch(`/api/properties/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        setAlert({ type: 'success', message: `"${name}" has been deleted.` });
-        fetchProperties();
-      } else {
-        setAlert({ type: 'error', message: 'Failed to delete property.' });
-      }
+      const { error } = await supabase
+        .from('properties')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+
+      setAlert({ type: 'success', message: `"${name}" has been deleted.` });
+      fetchProperties();
     } catch {
-      setAlert({ type: 'error', message: 'Network error.' });
+      setAlert({ type: 'error', message: 'Failed to delete property.' });
     }
 
     setTimeout(() => setAlert(null), 3000);

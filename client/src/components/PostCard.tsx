@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import CreatePostModal from './CreatePostModal';
+import { supabase } from '../utils/supabase';
 import { type Post } from '../types';
 import './PostCard.css';
 
@@ -37,21 +38,27 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClic
   }, []);
 
   const handleLike = async () => {
-    if (!user || !token) {
+    if (!user) {
       alert("Please login to like this post.");
       return;
     }
     setIsLiking(true);
     try {
-      const res = await fetch(`/api/posts/${post.id}/like`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        onUpdate({ ...post, likes: data.likes });
-      }
-    } catch (err) {
+      const likes = post.likes || [];
+      const hasLiked = likes.includes(user.id);
+      const updatedLikes = hasLiked
+        ? likes.filter(id => id !== user.id)
+        : [...likes, user.id];
+
+      const { error } = await supabase
+        .from('posts')
+        .update({ likes: updatedLikes })
+        .eq('id', post.id);
+
+      if (error) throw error;
+
+      onUpdate({ ...post, likes: updatedLikes });
+    } catch (err: any) {
       console.error('Failed to like post', err);
     } finally {
       setIsLiking(false);
@@ -60,7 +67,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClic
 
   const handleComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !token) {
+    if (!user) {
       alert("Please login to comment.");
       return;
     }
@@ -68,23 +75,35 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClic
 
     setIsCommenting(true);
     try {
-      const res = await fetch(`/api/posts/${post.id}/comment`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ text: commentText })
-      });
-      if (res.ok) {
-        const newComment = await res.json();
+      const { data, error } = await supabase
+        .from('comments')
+        .insert({
+          post_id: post.id,
+          user_id: user.id,
+          author_name: user.name,
+          author_avatar: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`,
+          text: commentText.trim()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        const newComment = {
+          id: data.id,
+          userId: data.user_id,
+          authorName: data.author_name,
+          authorAvatar: data.author_avatar,
+          text: data.text,
+          createdAt: data.created_at
+        };
         onUpdate({ ...post, comments: [...post.comments, newComment] });
         setCommentText('');
-      } else {
-        alert("Failed to add comment.");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to comment', err);
+      alert("Failed to add comment.");
     } finally {
       setIsCommenting(false);
     }
@@ -95,16 +114,15 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClic
     
     setIsDeleting(true);
     try {
-      const res = await fetch(`/api/posts/${post.id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        if (onDelete) onDelete(post.id);
-      } else {
-        alert("Failed to delete post");
-      }
-    } catch (err) {
+      const { error } = await supabase
+        .from('posts')
+        .delete()
+        .eq('id', post.id);
+
+      if (error) throw error;
+
+      if (onDelete) onDelete(post.id);
+    } catch (err: any) {
       alert("Error deleting post");
     } finally {
       setIsDeleting(false);

@@ -5,6 +5,7 @@ import PostCard from '../components/PostCard';
 import HostPropertyCard from '../components/HostPropertyCard';
 import PropertyEditModalComp from '../components/PropertyEditModal';
 import { type Post, type Property } from '../types';
+import { supabase } from '../utils/supabase';
 import './HostDashboard.css';
 
 const HostDashboard: React.FC = () => {
@@ -17,20 +18,67 @@ const HostDashboard: React.FC = () => {
   const [propertyToEdit, setPropertyToEdit] = useState<Property | undefined>(undefined);
 
   const fetchData = async () => {
+    if (!user) return;
     setLoading(true);
     try {
       // Fetch Posts
-      const postsRes = await fetch('/api/posts');
-      const allPosts = await postsRes.json();
-      setPosts(allPosts.filter((p: Post) => p.userId === user?.id));
+      const { data: postsData, error: postsError } = await supabase
+        .from('posts')
+        .select('*, comments(*)')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (postsError) throw postsError;
+
+      const formattedPosts = (postsData || []).map(p => ({
+        ...p,
+        userId: p.user_id,
+        authorName: p.author_name,
+        authorAvatar: p.author_avatar,
+        imageUrl: p.image_url,
+        locationTag: p.location_tag,
+        priceRating: p.price_rating,
+        propertyId: p.property_id,
+        createdAt: p.created_at,
+        updatedAt: p.updated_at,
+        likes: p.likes || [],
+        comments: (p.comments || []).map((c: any) => ({
+          id: c.id,
+          userId: c.user_id,
+          authorName: c.author_name,
+          authorAvatar: c.author_avatar,
+          text: c.text,
+          createdAt: c.created_at
+        })).sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+      }));
+      setPosts(formattedPosts);
 
       // Fetch Owned Properties
-      const propRes = await fetch('/api/properties/owned', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (propRes.ok) {
-        setProperties(await propRes.json());
-      }
+      const { data: propData, error: propError } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('owner_id', user.id);
+
+      if (propError) throw propError;
+
+      const formattedProps = (propData || []).map(p => ({
+        ...p,
+        pricePerNight: p.price_per_night,
+        imageUrl: p.image_url,
+        isVerified: p.is_verified,
+        checkIn: p.check_in,
+        checkOut: p.check_out,
+        host: {
+          name: p.host_info?.name || 'Unknown',
+          since: p.host_info?.since || ''
+        },
+        contact: {
+          phone: p.contact?.phone || '',
+          email: p.contact?.email || '',
+          line: p.contact?.line || ''
+        }
+      }));
+      setProperties(formattedProps);
     } catch (err) {
       console.error("Dashboard fetch error", err);
     } finally {
@@ -39,16 +87,17 @@ const HostDashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    if (user && token) fetchData();
-  }, [user, token]);
+    if (user) fetchData();
+  }, [user]);
 
   const handleDeleteProperty = async (id: string) => {
     try {
-      const res = await fetch(`/api/properties/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) fetchData();
+      const { error } = await supabase
+        .from('properties')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+      fetchData();
     } catch (err) {
       alert("Failed to delete property");
     }

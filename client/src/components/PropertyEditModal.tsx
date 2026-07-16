@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { type Property } from '../types';
+import { supabase } from '../utils/supabase';
 import './PropertyEditModal.css';
 
 interface PropertyEditModalProps {
@@ -25,6 +26,8 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
 
   const isEditing = !!property;
 
+  const { user } = useAuth();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -37,27 +40,36 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
     };
 
     try {
-      const url = isEditing ? `/api/properties/${property.id}` : '/api/properties';
-      const method = isEditing ? 'PUT' : 'POST';
+      const dbData: any = {
+        name: formData.name,
+        type: formData.type,
+        price_per_night: Number(formData.price.toString().replace(/,/g, '')),
+        description: formData.description,
+        images: payload.images,
+        image_url: payload.images[0] || '',
+        amenities: payload.amenities,
+        status: formData.status === 'active' ? 'published' : 'draft',
+      };
 
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (res.ok) {
-        onSave();
-        onClose();
+      if (isEditing) {
+        const { error } = await supabase
+          .from('properties')
+          .update(dbData)
+          .eq('id', property.id);
+        if (error) throw error;
       } else {
-        const data = await res.json();
-        setError(data.error || 'Failed to save property');
+        if (!user) throw new Error("Not authenticated");
+        dbData.owner_id = user.id;
+        const { error } = await supabase
+          .from('properties')
+          .insert(dbData);
+        if (error) throw error;
       }
-    } catch (err) {
-      setError('Connection error. Please try again.');
+
+      onSave();
+      onClose();
+    } catch (err: any) {
+      setError(err.message || 'Failed to save property');
     } finally {
       setIsSubmitting(false);
     }

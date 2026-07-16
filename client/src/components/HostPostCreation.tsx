@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { type Property } from '../types';
+import { supabase } from '../utils/supabase';
 import './HostPostCreation.css';
 
 
@@ -31,20 +32,28 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated }) =>
   // Fetch host's properties
   useEffect(() => {
     const fetchMyProperties = async () => {
+      if (!user) return;
       try {
-        const res = await fetch('/api/properties/owned', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setMyProperties(data);
+        const { data, error } = await supabase
+          .from('properties')
+          .select('*')
+          .eq('owner_id', user.id);
+        if (error) throw error;
+        if (data) {
+          const formatted = data.map(p => ({
+            ...p,
+            pricePerNight: p.price_per_night,
+            imageUrl: p.image_url,
+            isVerified: p.is_verified
+          }));
+          setMyProperties(formatted);
         }
       } catch (err) {
         console.error("Failed to fetch owned properties", err);
       }
     };
-    if (token) fetchMyProperties();
-  }, [token]);
+    fetchMyProperties();
+  }, [user]);
 
   const handlePublish = async () => {
     if (!content.trim() && !imageUrl) {
@@ -56,31 +65,29 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated }) =>
     setError('');
 
     try {
-      const res = await fetch('/api/posts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          content,
-          imageUrl,
-          propertyId: propertyId || null,
-          locationTag: myProperties.find(p => p.id === propertyId)?.name || null
-        })
-      });
+      if (!user) throw new Error("Not authenticated");
+      const postData = {
+        content: content.trim(),
+        image_url: imageUrl || null,
+        property_id: propertyId || null,
+        location_tag: myProperties.find(p => p.id === propertyId)?.name || null,
+        user_id: user.id,
+        author_name: user.name,
+        author_avatar: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`
+      };
 
-      if (res.ok) {
-        setContent('');
-        setImageUrl('');
-        setPropertyId('');
-        if (onPostCreated) onPostCreated();
-      } else {
-        const data = await res.json();
-        setError(data.error || 'Failed to publish post');
-      }
-    } catch (err) {
-      setError('Connection error. Please try again.');
+      const { error } = await supabase
+        .from('posts')
+        .insert(postData);
+
+      if (error) throw error;
+
+      setContent('');
+      setImageUrl('');
+      setPropertyId('');
+      if (onPostCreated) onPostCreated();
+    } catch (err: any) {
+      setError(err.message || 'Failed to publish post');
     } finally {
       setIsSubmitting(false);
     }

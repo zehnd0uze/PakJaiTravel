@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { supabase } from '../utils/supabase';
 import './LoginPage.css';
 
 export const ResetPasswordPage: React.FC = () => {
@@ -8,20 +9,19 @@ export const ResetPasswordPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const token = searchParams.get('token');
 
   useEffect(() => {
-    if (!token) {
-      setError('Invalid or missing password reset token.');
-    }
-  }, [token]);
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setError('Invalid or expired password reset session.');
+      }
+    };
+    checkSession();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!token) return;
     
     if (newPassword.length < 6) {
       setError('Password must be at least 6 characters.');
@@ -37,19 +37,10 @@ export const ResetPasswordPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, newPassword })
-      });
-      
-      const data = await res.json();
-      
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to reset password');
-      }
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
 
-      setMessage(data.message);
+      setMessage('Your password has been successfully reset.');
       setNewPassword('');
       setConfirmPassword('');
     } catch (err: any) {
@@ -64,7 +55,7 @@ export const ResetPasswordPage: React.FC = () => {
       <div className="auth-container">
         <h2>Set New Password</h2>
         <p className="auth-subtitle">Please enter your new secure password below.</p>
-
+ 
         {error && <div className="error-message">{error}</div>}
         {message && (
           <div className="success-message" style={{ background: '#dcfce7', color: '#166534', padding: '16px', borderRadius: '8px', marginBottom: '20px', textAlign: 'center' }}>
@@ -72,8 +63,8 @@ export const ResetPasswordPage: React.FC = () => {
             <Link to="/login" className="btn btn-primary">Go to Login</Link>
           </div>
         )}
-
-        {!message && token && (
+ 
+        {!message && !error && (
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
               <label>New Password</label>

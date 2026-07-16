@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { supabase } from '../utils/supabase';
 import './LoginPage.css'; // Reusing standard auth styling
 
 export const ForgotPasswordPage: React.FC = () => {
@@ -19,19 +20,13 @@ export const ForgotPasswordPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
       });
-      
-      const data = await res.json();
-      
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to request reset link');
-      }
 
-      setMessage(data.message);
+      if (error) throw error;
+
+      setMessage('A password reset link has been sent to your email.');
       setEmail('');
     } catch (err: any) {
       setError(err.message);

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../utils/supabase';
 
 interface Property {
   id: string;
@@ -104,21 +105,36 @@ export const AdminDashboard: React.FC = () => {
   const [traffic, setTraffic] = useState<TrafficStats>({ active5m: 0, total24h: 0, chartData: [], lastUpdated: '' });
 
   useEffect(() => {
-    const fetchData = () => {
-      fetch('/api/properties')
-        .then(r => r.json())
-        .then(data => setProperties(data))
-        .catch(() => {});
+    const fetchData = async () => {
+      try {
+        const { data: propData } = await supabase
+          .from('properties')
+          .select('*');
+        if (propData) {
+          const formatted = propData.map(p => ({
+            ...p,
+            pricePerNight: p.price_per_night,
+            imageUrl: p.image_url,
+            isVerified: p.is_verified
+          }));
+          setProperties(formatted);
+        }
 
-      // Need to fetch users (might require admin token now, but we'll try)
-      fetch('/api/auth/users', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
-      })
-        .then(r => r.json())
-        .then(data => {
-          if (Array.isArray(data)) setUsers(data);
-        })
-        .catch(() => {});
+        const { data: userData } = await supabase
+          .from('profiles')
+          .select('*');
+        if (userData) {
+          const formatted = userData.map(u => ({
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            createdAt: u.created_at
+          }));
+          setUsers(formatted);
+        }
+      } catch (err) {
+        console.error("Dashboard database fetch error", err);
+      }
 
       fetch('/api/admin/traffic')
         .then(r => r.json())

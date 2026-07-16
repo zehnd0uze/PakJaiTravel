@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../utils/supabase';
 import './Header.css';
 import { Button } from './Button';
 
@@ -23,14 +24,24 @@ export const Header: React.FC = () => {
   // Autocomplete fetcher
   useEffect(() => {
     if (searchQuery.trim().length > 1) {
-      const timer = setTimeout(() => {
-        fetch(`/api/properties?q=${encodeURIComponent(searchQuery)}`)
-          .then(r => r.json())
-          .then(data => {
-            setSearchResults(data.slice(0, 5));
+      const timer = setTimeout(async () => {
+        try {
+          const { data, error } = await supabase
+            .from('properties')
+            .select('*')
+            .neq('status', 'draft')
+            .or(`name.ilike.%${searchQuery}%,location.ilike.%${searchQuery}%,province.ilike.%${searchQuery}%,district.ilike.%${searchQuery}%`)
+            .limit(5);
+
+          if (error) throw error;
+
+          if (data) {
+            setSearchResults(data);
             setShowDropdown(true);
-          })
-          .catch(() => {});
+          }
+        } catch (err) {
+          console.error("Autocomplete fetch failed", err);
+        }
       }, 300);
       return () => clearTimeout(timer);
     } else {

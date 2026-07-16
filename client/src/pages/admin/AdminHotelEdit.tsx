@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { uploadToCloudinary } from '../../utils/cloudinary';
+import { supabase } from '../../utils/supabase';
+import { useAuth } from '../../context/AuthContext';
 
 interface PropertyForm {
   name: string;
@@ -50,36 +52,48 @@ export const AdminHotelEdit: React.FC = () => {
 
   useEffect(() => {
     if (!isNew && id) {
-      fetch(`/api/properties/${id}`)
-        .then(r => r.json())
-        .then(data => {
-          setForm({
-            name: data.name || '',
-            type: data.type || 'Homestay',
-            pricePerNight: data.pricePerNight || 0,
-            currency: data.currency || 'THB',
-            rating: data.rating || 0,
-            reviews: data.reviews || 0,
-            imageUrl: data.imageUrl || '',
-            images: data.images || [],
-            isVerified: data.isVerified ?? true,
-            features: data.features || [],
-            amenities: data.amenities || [],
-            location: data.location || '',
-            province: data.province || '',
-            district: data.district || '',
-            description: data.description || '',
-            checkIn: data.checkIn || '14:00',
-            checkOut: data.checkOut || '11:00',
-            hostName: data.host?.name || '',
-            hostSince: data.host?.since || '',
-            phone: data.contact?.phone || '',
-            email: data.contact?.email || '',
-            line: data.contact?.line || '',
-            status: data.status || 'published',
-          });
-        })
-        .catch(() => setAlert({ type: 'error', message: 'Failed to load property.' }));
+      const fetchProperty = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('properties')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+          if (error) throw error;
+
+          if (data) {
+            setForm({
+              name: data.name || '',
+              type: data.type || 'Homestay',
+              pricePerNight: data.price_per_night || 0,
+              currency: data.currency || 'THB',
+              rating: data.rating || 0,
+              reviews: data.reviews || 0,
+              imageUrl: data.image_url || '',
+              images: data.images || [],
+              isVerified: data.is_verified ?? true,
+              features: data.features || [],
+              amenities: data.amenities || [],
+              location: data.location || '',
+              province: data.province || '',
+              district: data.district || '',
+              description: data.description || '',
+              checkIn: data.check_in || '14:00',
+              checkOut: data.check_out || '11:00',
+              hostName: data.host_info?.name || '',
+              hostSince: data.host_info?.since || '',
+              phone: data.contact?.phone || '',
+              email: data.contact?.email || '',
+              line: data.contact?.line || '',
+              status: data.status || 'published',
+            });
+          }
+        } catch {
+          setAlert({ type: 'error', message: 'Failed to load property.' });
+        }
+      };
+      fetchProperty();
     }
   }, [id, isNew]);
 
@@ -127,6 +141,8 @@ export const AdminHotelEdit: React.FC = () => {
     }
   };
 
+  const { user } = useAuth();
+
   const handleSubmit = async () => {
     if (!form.name || !form.pricePerNight) {
       setAlert({ type: 'error', message: 'Name and price are required.' });
@@ -134,51 +150,55 @@ export const AdminHotelEdit: React.FC = () => {
     }
 
     setSaving(true);
-    const body = {
+    const dbData: any = {
       name: form.name,
       type: form.type,
-      pricePerNight: Number(form.pricePerNight),
+      price_per_night: Number(form.pricePerNight),
       currency: form.currency,
       rating: Number(form.rating),
       reviews: Number(form.reviews),
-      imageUrl: form.imageUrl || form.images[0] || '',
+      image_url: form.imageUrl || form.images[0] || '',
       images: form.images,
-      isVerified: form.isVerified,
+      is_verified: form.isVerified,
       features: form.features,
       amenities: form.amenities,
       location: form.location || `${form.district}, ${form.province}`,
       province: form.province,
       district: form.district,
       description: form.description,
-      checkIn: form.checkIn,
-      checkOut: form.checkOut,
-      host: { name: form.hostName, since: form.hostSince },
+      check_in: form.checkIn,
+      check_out: form.checkOut,
+      host_info: { name: form.hostName, since: form.hostSince },
       contact: {
         phone: form.phone,
         email: form.email,
-        ...(form.line ? { line: form.line } : {}),
+        line: form.line,
       },
       status: form.status,
     };
 
-    try {
-      const url = isNew ? '/api/properties' : `/api/properties/${id}`;
-      const method = isNew ? 'POST' : 'PUT';
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
+    if (isNew && user) {
+      dbData.owner_id = user.id;
+    }
 
-      if (res.ok) {
-        setAlert({ type: 'success', message: isNew ? 'Property created!' : 'Property updated!' });
-        setTimeout(() => navigate('/admin/hotels'), 1000);
+    try {
+      if (isNew) {
+        const { error } = await supabase
+          .from('properties')
+          .insert(dbData);
+        if (error) throw error;
+        setAlert({ type: 'success', message: 'Property created!' });
       } else {
-        const errData = await res.json().catch(() => null);
-        setAlert({ type: 'error', message: errData?.error || `Failed to save (${res.status}).` });
+        const { error } = await supabase
+          .from('properties')
+          .update(dbData)
+          .eq('id', id);
+        if (error) throw error;
+        setAlert({ type: 'success', message: 'Property updated!' });
       }
-    } catch (err) {
-      setAlert({ type: 'error', message: 'Network error — is the backend server running?' });
+      setTimeout(() => navigate('/admin/hotels'), 1000);
+    } catch (err: any) {
+      setAlert({ type: 'error', message: err.message || 'Failed to save property.' });
     } finally {
       setSaving(false);
     }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../../utils/supabase';
 
 interface User {
   id: string;
@@ -15,18 +16,28 @@ export const AdminUsers: React.FC = () => {
   const [editForm, setEditForm] = useState({ name: '', email: '' });
   const [error, setError] = useState('');
 
-  const fetchUsers = () => {
+  const fetchUsers = async () => {
     setLoading(true);
-    fetch('/api/auth/users')
-      .then(res => res.json())
-      .then(data => {
-        setUsers(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Failed to fetch users', err);
-        setLoading(false);
-      });
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*');
+      if (error) throw error;
+      if (data) {
+        const formatted = data.map(u => ({
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          createdAt: u.created_at,
+          isVerified: u.is_verified
+        }));
+        setUsers(formatted);
+      }
+    } catch (err) {
+      console.error('Failed to fetch users', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -39,13 +50,14 @@ export const AdminUsers: React.FC = () => {
     }
 
     try {
-      const res = await fetch(`/api/auth/users/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        setUsers(users.filter(u => u.id !== id));
-      } else {
-        const data = await res.json();
-        alert(data.error || 'Failed to delete user');
-      }
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setUsers(users.filter(u => u.id !== id));
     } catch (err) {
       console.error('Delete error:', err);
       alert('An error occurred while deleting the user.');
@@ -58,13 +70,14 @@ export const AdminUsers: React.FC = () => {
     }
 
     try {
-      const res = await fetch(`/api/auth/users/${id}/verify`, { method: 'PATCH' });
-      if (res.ok) {
-        setUsers(users.map(u => u.id === id ? { ...u, isVerified: true } : u));
-      } else {
-        const data = await res.json();
-        alert(data.error || 'Failed to verify user');
-      }
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_verified: true })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setUsers(users.map(u => u.id === id ? { ...u, isVerified: true } : u));
     } catch (err) {
       console.error('Verify error:', err);
       alert('An error occurred while verifying the user.');
@@ -82,20 +95,18 @@ export const AdminUsers: React.FC = () => {
     if (!editingUser) return;
 
     try {
-      const res = await fetch(`/api/auth/users/${editingUser.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editForm),
-      });
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          name: editForm.name,
+          email: editForm.email
+        })
+        .eq('id', editingUser.id);
 
-      if (res.ok) {
-        await res.json();
-        setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...editForm } : u));
-        setEditingUser(null);
-      } else {
-        const data = await res.json();
-        setError(data.error || 'Failed to update user');
-      }
+      if (error) throw error;
+
+      setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...editForm } : u));
+      setEditingUser(null);
     } catch (err) {
       console.error('Update error:', err);
       setError('An error occurred while updating the user.');

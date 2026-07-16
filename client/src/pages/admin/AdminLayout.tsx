@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { supabase } from '../../utils/supabase';
 import './Admin.css';
 
 export const AdminLayout: React.FC = () => {
@@ -18,10 +19,33 @@ export const AdminLayout: React.FC = () => {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('admin_token');
-    if (!token) {
-      navigate('/admin/login');
-    }
+    const checkAdmin = async () => {
+      const token = localStorage.getItem('admin_token');
+      if (!token) {
+        navigate('/admin/login');
+        return;
+      }
+      
+      const { data: { user }, error } = await supabase.auth.getUser(token);
+      if (error || !user) {
+        localStorage.removeItem('admin_token');
+        navigate('/admin/login');
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile || profile.role !== 'admin') {
+        localStorage.removeItem('admin_token');
+        navigate('/admin/login');
+      }
+    };
+
+    checkAdmin();
   }, [navigate, location.pathname]);
 
   const handleLogout = () => {

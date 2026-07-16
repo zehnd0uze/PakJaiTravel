@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useJsApiLoader, Autocomplete, GoogleMap, Marker } from '@react-google-maps/api';
 import { type Post } from '../types';
 import { uploadToCloudinary } from '../utils/cloudinary';
+import { supabase } from '../utils/supabase';
 import './CreatePostModal.css';
 
 const libraries: ("places")[] = ["places"];
@@ -99,27 +100,33 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
         imageUrl = await uploadToCloudinary(imageFile);
       }
 
-      const url = isEditing ? `/api/posts/${postToEdit.id}` : '/api/posts';
-      const method = isEditing ? 'PUT' : 'POST';
+      if (!user) throw new Error('Not authenticated');
 
-      const postRes = await fetch(url, {
-        method: method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          content: content.trim(),
-          imageUrl,
-          locationTag: locationTag.trim() || null,
-          lat: coordinates?.lat || null,
-          lng: coordinates?.lng || null,
-          rating: rating > 0 ? rating : null,
-          priceRating: priceRating || null
-        })
-      });
+      const postData = {
+        content: content.trim(),
+        image_url: imageUrl,
+        location_tag: locationTag.trim() || null,
+        lat: coordinates?.lat || null,
+        lng: coordinates?.lng || null,
+        rating: rating > 0 ? rating : null,
+        price_rating: priceRating || null,
+        user_id: user.id,
+        author_name: user.name,
+        author_avatar: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`
+      };
 
-      if (!postRes.ok) throw new Error(`Failed to ${isEditing ? 'update' : 'create'} post`);
+      if (isEditing) {
+        const { error } = await supabase
+          .from('posts')
+          .update(postData)
+          .eq('id', postToEdit.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('posts')
+          .insert(postData);
+        if (error) throw error;
+      }
 
       onPostCreated();
       onClose();
