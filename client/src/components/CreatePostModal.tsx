@@ -149,31 +149,31 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
     }
   };
 
+  const avatarUrl = user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&background=random&bold=true`;
+
   return (
-    <div className="modal-backdrop">
+    <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget && !isSubmitting) onClose(); }}>
       <div className="create-post-modal">
         <div className="modal-header">
-          <h2>{isEditing ? 'แก้ไขโพสต์' : 'สร้างโพสต์'}</h2>
+          <h2>{isEditing ? '✏️ แก้ไขโพสต์' : '✨ สร้างโพสต์ใหม่'}</h2>
           <button className="close-btn" onClick={onClose} disabled={isSubmitting}>&times;</button>
         </div>
 
         <div className="modal-body">
-          {error && <div className="error-message">{error}</div>}
+          {error && <div className="error-message">⚠️ {error}</div>}
           
           <div className="user-section">
             <div className="user-avatar">
-              {user?.name?.charAt(0) || 'U'}
+              {user?.avatar ? (
+                <img src={avatarUrl} alt={user?.name || 'User'} />
+              ) : (
+                user?.name?.charAt(0)?.toUpperCase() || 'U'
+              )}
             </div>
             <div className="user-info">
               <span className="user-name">{user?.name || 'User'}</span>
               <div className="visibility-badge">
-                <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
-                  <path d="M8 0a8 8 0 100 16A8 8 0 008 0zm0 14.5a6.5 6.5 0 110-13 6.5 6.5 0 010 13zM11.5 8a3.5 3.5 0 11-7 0 3.5 3.5 0 017 0z"/>
-                </svg>
-                สาธารณะ
-                <svg width="8" height="8" viewBox="0 0 10 6" fill="currentColor">
-                  <path d="M0 0l5 6 5-6H0z"/>
-                </svg>
+                🌐 สาธารณะ
               </div>
             </div>
           </div>
@@ -182,9 +182,10 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
             <div className="textarea-container">
               <textarea 
                 className="create-post-textarea"
-                placeholder={isEditing ? 'แก้ไขข้อความของคุณ...' : `คุณคิดอะไรอยู่ ${user?.name?.split(' ')[0] || ''}?`}
+                placeholder={isEditing ? 'แก้ไขข้อความของคุณ...' : `คุณคิดอะไรอยู่ ${user?.name?.split(' ')[0] || ''}? เล่าประสบการณ์การเดินทางของคุณ...`}
                 value={content}
                 onChange={e => setContent(e.target.value)}
+                autoFocus
               />
             </div>
 
@@ -195,6 +196,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
                   type="button" 
                   className="remove-image-btn" 
                   onClick={() => { setImageFile(null); setImagePreview(null); }}
+                  title="ลบรูปภาพ"
                 >
                   &times;
                 </button>
@@ -206,7 +208,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
                 <div className="fb-location-group">
                   <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
                     <div className="fb-location-input-wrapper">
-                      <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style={{ marginRight: '8px' }}><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="#ef4444"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
                       <input 
                         type="text" 
                         placeholder="เพิ่มสถานที่..."
@@ -239,7 +241,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
                 </div>
               ) : (
                 <div className="fb-location-input-wrapper">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style={{ marginRight: '8px' }}><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="#ef4444"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
                   <input 
                     type="text" 
                     placeholder="เพิ่มสถานที่..."
@@ -252,13 +254,13 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
 
             <div className="fb-ratings-bar">
               <div className="ratings-item">
-                <label>คะแนน</label>
+                <label>⭐ คะแนน</label>
                 <div className="fb-star-selector">
                   {[1, 2, 3, 4, 5].map(star => (
                     <span 
                       key={star} 
                       className={star <= rating ? 'fb-star active' : 'fb-star'}
-                      onClick={() => setRating(star)}
+                      onClick={() => setRating(star === rating ? 0 : star)}
                     >
                       ★
                     </span>
@@ -266,13 +268,13 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
                 </div>
               </div>
               <div className="ratings-item">
-                <label>ราคา</label>
+                <label>💰 ราคา</label>
                 <select 
                   className="fb-price-select"
                   value={priceRating} 
                   onChange={e => setPriceRating(e.target.value)}
                 >
-                  <option value="">เลือก</option>
+                  <option value="">เลือกระดับราคา</option>
                   <option value="฿">ประหยัด (฿)</option>
                   <option value="฿฿">ทั่วไป (฿฿)</option>
                   <option value="฿฿฿">แพง (฿฿฿)</option>
@@ -282,7 +284,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
             </div>
 
             <div className="add-to-post-container">
-              <span className="add-to-post-label">เพิ่มลงในโพสต์ของคุณ</span>
+              <span className="add-to-post-label">เพิ่มลงในโพสต์</span>
               <div className="add-to-post-options">
                 <input 
                   type="file" 
@@ -294,18 +296,18 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
                 <button 
                   type="button" 
                   className="option-btn" 
-                  title="Photo/Video"
+                  title="เพิ่มรูปภาพ"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <svg viewBox="0 0 24 24" fill="#45BD62"><path d="M18 13v5c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2v-5c0-1.1.9-2 2-2h12c1.1 0 2 .9 2 2zm-4.5-1c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zM4 11v6l3-3.01L10 17l4-4v4h2v-6H4zM20 4H6c-1.1 0-2 .9-2 2v2h2V6h14v12h-2v2h2c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z"/></svg>
                 </button>
-                <button type="button" className="option-btn" title="Tag Friends">
+                <button type="button" className="option-btn" title="แท็กเพื่อน">
                   <svg viewBox="0 0 24 24" fill="#1877F2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08s5.97 1.09 6 3.08c-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
                 </button>
-                <button type="button" className="option-btn" title="Feeling/Activity">
+                <button type="button" className="option-btn" title="ความรู้สึก">
                   <svg viewBox="0 0 24 24" fill="#F7B928"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9c.83 0 1.5-.67 1.5-1.5S7.83 8 7 8s-1.5.67-1.5 1.5S6.17 11 7 11zm10 0c.83 0 1.5-.67 1.5-1.5S17.83 8 17 8s-1.5.67-1.5 1.5.67 1.5 1.5 1.5zM7 14c1.66 2.01 3.33 3 5 3s3.34-.99 5-3H7z"/></svg>
                 </button>
-                <button type="button" className="option-btn" title="Check-in">
+                <button type="button" className="option-btn" title="เช็คอิน">
                   <svg viewBox="0 0 24 24" fill="#F3425F"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
                 </button>
               </div>
@@ -317,10 +319,13 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
           <button 
             type="submit" 
             form="fb-post-form" 
-            className="fb-post-btn" 
+            className={`fb-post-btn ${isSubmitting ? 'submitting' : ''}`}
             disabled={isSubmitting || (!content.trim() && !imageFile && !imagePreview)}
           >
-            {isSubmitting ? (isEditing ? 'กำลังบันทึก...' : 'กำลังโพสต์...') : (isEditing ? 'บันทึก' : 'โพสต์')}
+            {isSubmitting
+              ? (isEditing ? '⏳ กำลังบันทึก...' : '⏳ กำลังโพสต์...')
+              : (isEditing ? '💾 บันทึกการแก้ไข' : '📝 โพสต์')
+            }
           </button>
         </div>
       </div>
