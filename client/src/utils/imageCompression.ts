@@ -2,7 +2,7 @@ export const compressImage = async (file: File): Promise<File> => {
   // If file is already small enough, just return it
   if (file.size <= 2 * 1024 * 1024) return file;
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = (event) => {
