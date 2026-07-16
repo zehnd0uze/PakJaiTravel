@@ -11,7 +11,7 @@ interface HostPostCreationProps {
 }
 
 const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated }) => {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const [content, setContent] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [propertyId, setPropertyId] = useState('');

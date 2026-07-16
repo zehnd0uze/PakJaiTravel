@@ -9,7 +9,7 @@ import { supabase } from '../utils/supabase';
 import './HostDashboard.css';
 
 const HostDashboard: React.FC = () => {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'properties' | 'updates'>('properties');
   const [posts, setPosts] = useState<Post[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);

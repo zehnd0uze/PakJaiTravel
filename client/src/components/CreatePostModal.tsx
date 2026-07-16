@@ -22,7 +22,7 @@ interface CreatePostModalProps {
 }
 
 const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreated, postToEdit }) => {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const [content, setContent] = useState(postToEdit?.content || '');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(postToEdit?.imageUrl || null);

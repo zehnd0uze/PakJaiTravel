@@ -11,7 +11,7 @@ interface PropertyEditModalProps {
 }
 
 const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose, onSave }) => {
-  const { token } = useAuth();
+
   const [formData, setFormData] = useState({
     name: property?.name || '',
     type: property?.type || 'Guesthouse',

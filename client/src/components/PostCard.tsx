@@ -13,7 +13,7 @@ interface PostCardProps {
 }
 
 const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClick }) => {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const [commentText, setCommentText] = useState('');
   const [showComments, setShowComments] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
