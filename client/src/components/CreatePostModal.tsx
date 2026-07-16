@@ -4,6 +4,7 @@ import { useJsApiLoader, Autocomplete, GoogleMap, Marker } from '@react-google-m
 import { type Post } from '../types';
 import { uploadToCloudinary } from '../utils/cloudinary';
 import { supabase } from '../utils/supabase';
+import { compressImage } from '../utils/imageCompression';
 import './CreatePostModal.css';
 
 const libraries: ("places")[] = ["places"];
@@ -73,13 +74,16 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
     setCoordinates(null);
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+      const originalFile = e.target.files[0];
       
+      // Auto-compress the image to prevent upload limits
+      const file = await compressImage(originalFile);
+
       // Cloudinary unsigned upload limit is usually 10MB
       if (file.size > 10 * 1024 * 1024) {
-        setError('File size is too large. Please select an image under 10MB.');
+        setError('Image could not be compressed enough. Please select a smaller image under 10MB.');
         return;
       }
       

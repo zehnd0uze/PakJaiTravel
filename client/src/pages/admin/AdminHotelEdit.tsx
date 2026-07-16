@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { uploadToCloudinary } from '../../utils/cloudinary';
 import { supabase } from '../../utils/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { compressImage } from '../../utils/imageCompression';
 
 interface PropertyForm {
   name: string;
@@ -111,21 +112,29 @@ export const AdminHotelEdit: React.FC = () => {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'imageUrl' | 'images') => {
     if (!e.target.files?.length) return;
     
-    const files = Array.from(e.target.files);
-    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB limit for Cloudinary
-    for (const file of files) {
-      if (file.size > MAX_FILE_SIZE) {
-        setAlert({ type: 'error', message: `File "${file.name}" is too large. Maximum size is 10MB.` });
-        return;
-      }
-    }
-
     setUploading(true);
-    setAlert({ type: 'info', message: 'Uploading image(s)...' });
+    setAlert({ type: 'info', message: 'Compressing and uploading image(s)...' });
+    
     try {
+      const originalFiles = Array.from(e.target.files);
+      const files: File[] = [];
+      
+      for (const orig of originalFiles) {
+        files.push(await compressImage(orig));
+      }
+
+      const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB limit for Cloudinary
+      for (const file of files) {
+        if (file.size > MAX_FILE_SIZE) {
+          setAlert({ type: 'error', message: `File "${file.name}" is still too large after compression. Maximum size is 10MB.` });
+          setUploading(false);
+          return;
+        }
+      }
+
       const urls: string[] = [];
-      for (let i = 0; i < Array.from(e.target.files).length; i++) {
-        const url = await uploadToCloudinary(Array.from(e.target.files)[i]);
+      for (let i = 0; i < files.length; i++) {
+        const url = await uploadToCloudinary(files[i]);
         urls.push(url);
       }
       
