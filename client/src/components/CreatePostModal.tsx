@@ -29,6 +29,32 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
   const [imagePreview, setImagePreview] = useState<string | null>(postToEdit?.imageUrl || null);
   const [rating, setRating] = useState<number>(postToEdit?.rating || 0);
   const [priceRating, setPriceRating] = useState<string>(postToEdit?.priceRating || '');
+  const [priceValue, setPriceValue] = useState<number>(() => {
+    const pr = postToEdit?.priceRating || '';
+    if (pr === '฿฿฿฿') return 5000;
+    if (pr === '฿฿฿') return 3000;
+    if (pr === '฿฿') return 1500;
+    if (pr === '฿') return 500;
+    return 0;
+  });
+
+  const getPriceLabel = (val: number): string => {
+    if (val === 0) return 'ไม่ระบุ';
+    if (val <= 500) return '0 - 500 THB';
+    if (val <= 1000) return '500 - 1,000 THB';
+    if (val <= 1500) return '1,000 - 1,500 THB';
+    if (val <= 2000) return '1,500 - 2,000 THB';
+    if (val <= 3000) return '2,000 - 3,000 THB';
+    return '3,000+ THB';
+  };
+
+  const getPriceSymbol = (val: number): string => {
+    if (val === 0) return '';
+    if (val <= 500) return '฿';
+    if (val <= 1500) return '฿฿';
+    if (val <= 3000) return '฿฿฿';
+    return '฿฿฿฿';
+  };
   const [locationTag, setLocationTag] = useState(postToEdit?.locationTag || '');
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(
     postToEdit?.lat && postToEdit?.lng ? { lat: postToEdit.lat, lng: postToEdit.lng } : null
@@ -155,12 +181,12 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
     <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget && !isSubmitting) onClose(); }}>
       <div className="create-post-modal">
         <div className="modal-header">
-          <h2>{isEditing ? '✏️ แก้ไขโพสต์' : '✨ สร้างโพสต์ใหม่'}</h2>
+          <h2>{isEditing ? 'แก้ไขโพสต์' : 'สร้างโพสต์ใหม่'}</h2>
           <button className="close-btn" onClick={onClose} disabled={isSubmitting}>&times;</button>
         </div>
 
         <div className="modal-body">
-          {error && <div className="error-message">⚠️ {error}</div>}
+          {error && <div className="error-message">{error}</div>}
           
           <div className="user-section">
             <div className="user-avatar">
@@ -173,7 +199,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
             <div className="user-info">
               <span className="user-name">{user?.name || 'User'}</span>
               <div className="visibility-badge">
-                🌐 สาธารณะ
+                สาธารณะ
               </div>
             </div>
           </div>
@@ -254,7 +280,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
 
             <div className="fb-ratings-bar">
               <div className="ratings-item">
-                <label>⭐ คะแนน</label>
+                <label>คะแนน</label>
                 <div className="fb-star-selector">
                   {[1, 2, 3, 4, 5].map(star => (
                     <span 
@@ -267,19 +293,35 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
                   ))}
                 </div>
               </div>
-              <div className="ratings-item">
-                <label>💰 ราคา</label>
-                <select 
-                  className="fb-price-select"
-                  value={priceRating} 
-                  onChange={e => setPriceRating(e.target.value)}
-                >
-                  <option value="">เลือกระดับราคา</option>
-                  <option value="฿">ประหยัด (฿)</option>
-                  <option value="฿฿">ทั่วไป (฿฿)</option>
-                  <option value="฿฿฿">แพง (฿฿฿)</option>
-                  <option value="฿฿฿฿">หรูหรา (฿฿฿฿)</option>
-                </select>
+            </div>
+
+            <div className="fb-price-slider-container">
+              <div className="fb-price-slider-header">
+                <label>ระดับราคา</label>
+                <span className="fb-price-slider-value">{getPriceLabel(priceValue)}</span>
+              </div>
+              <input
+                type="range"
+                className="fb-price-slider"
+                min={0}
+                max={5000}
+                step={500}
+                value={priceValue}
+                style={{ '--slider-pct': `${(priceValue / 5000) * 100}%` } as React.CSSProperties}
+                onChange={e => {
+                  const val = Number(e.target.value);
+                  setPriceValue(val);
+                  setPriceRating(getPriceSymbol(val));
+                }}
+              />
+              <div className="fb-price-slider-labels">
+                <span>ไม่ระบุ</span>
+                <span>500</span>
+                <span>1,000</span>
+                <span>1,500</span>
+                <span>2,000</span>
+                <span>3,000</span>
+                <span>3,000+</span>
               </div>
             </div>
 
@@ -323,8 +365,8 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
             disabled={isSubmitting || (!content.trim() && !imageFile && !imagePreview)}
           >
             {isSubmitting
-              ? (isEditing ? '⏳ กำลังบันทึก...' : '⏳ กำลังโพสต์...')
-              : (isEditing ? '💾 บันทึกการแก้ไข' : '📝 โพสต์')
+              ? (isEditing ? 'กำลังบันทึก...' : 'กำลังโพสต์...')
+              : (isEditing ? 'บันทึกการแก้ไข' : 'โพสต์')
             }
           </button>
         </div>

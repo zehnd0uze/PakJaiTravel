@@ -380,21 +380,100 @@
   color: #f59e0b;
 }
 
-.fb-price-select {
-  background: #ffffff;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 6px 10px;
-  font-size: 13px;
-  color: #333;
-  cursor: pointer;
-  transition: border-color 0.2s;
-  outline: none;
+/* ===== Price Slider ===== */
+.fb-price-slider-container {
+  margin: 0 16px 12px;
+  padding: 14px 16px;
+  background: #f8f9fa;
+  border-radius: 14px;
+  border: 1px solid #eee;
 }
 
-.fb-price-select:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+.fb-price-slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.fb-price-slider-header label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #8e8e93;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.fb-price-slider-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #2d6a4f;
+  background: rgba(45, 106, 79, 0.08);
+  padding: 3px 10px;
+  border-radius: 6px;
+}
+
+.fb-price-slider {
+  width: 100%;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #e0e0e0;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+  background: linear-gradient(to right, 
+    #2d6a4f 0%, 
+    #2d6a4f var(--slider-pct, 0%), 
+    #e0e0e0 var(--slider-pct, 0%), 
+    #e0e0e0 100%
+  );
+}
+
+.fb-price-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 3px solid #2d6a4f;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.fb-price-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 10px rgba(45, 106, 79, 0.3);
+}
+
+.fb-price-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 3px solid #2d6a4f;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.fb-price-slider::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: #e0e0e0;
+}
+
+.fb-price-slider-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.fb-price-slider-labels span {
+  font-size: 10px;
+  color: #aaa;
+  font-weight: 500;
 }
 
 /* ===== Add to Post Bar ===== */
