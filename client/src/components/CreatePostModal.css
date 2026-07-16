@@ -9,10 +9,11 @@
   background-color: rgba(244, 244, 244, 0.8); /* Facebook's light-colored backdrop */
   backdrop-filter: blur(4px);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   z-index: 9999;
-  padding: 16px;
+  padding: 80px 16px 16px; /* top padding to clear the fixed header */
+  overflow-y: auto;
   animation: fadeIn 0.2s ease-out forwards;
 }
 
