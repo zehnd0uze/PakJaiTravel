@@ -111,10 +111,14 @@ export const AdminHotelEdit: React.FC = () => {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'imageUrl' | 'images') => {
     if (!e.target.files?.length) return;
     
-    const formData = new FormData();
-    Array.from(e.target.files).forEach(file => {
-      formData.append('images', file);
-    });
+    const files = Array.from(e.target.files);
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB limit for Cloudinary
+    for (const file of files) {
+      if (file.size > MAX_FILE_SIZE) {
+        setAlert({ type: 'error', message: `File "${file.name}" is too large. Maximum size is 10MB.` });
+        return;
+      }
+    }
 
     setUploading(true);
     setAlert({ type: 'info', message: 'Uploading image(s)...' });

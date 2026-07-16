@@ -6,6 +6,11 @@ export const uploadToCloudinary = async (file: File): Promise<string> => {
     throw new Error('Cloudinary environment variables are not set.');
   }
 
+  // Enforce 10MB limit for unsigned Cloudinary uploads
+  if (file.size > 10 * 1024 * 1024) {
+    throw new Error('File size is too large. Maximum size allowed is 10MB.');
+  }
+
   const formData = new FormData();
   formData.append('file', file);
   formData.append('upload_preset', uploadPreset);
