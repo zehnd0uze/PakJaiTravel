@@ -90,8 +90,9 @@ export const AdminHotelEdit: React.FC = () => {
               status: data.status || 'published',
             });
           }
-        } catch {
-          setAlert({ type: 'error', message: 'Failed to load property.' });
+        } catch (err: any) {
+          console.error("Fetch property error:", err);
+          setAlert({ type: 'error', message: err.message || 'Failed to load property.' });
         }
       };
       fetchProperty();
@@ -190,8 +191,15 @@ export const AdminHotelEdit: React.FC = () => {
       status: form.status,
     };
 
-    if (isNew && user) {
-      dbData.owner_id = user.id;
+    if (isNew) {
+      if (user?.id) {
+        dbData.owner_id = user.id;
+      } else {
+        const { data: { user: sessionUser } } = await supabase.auth.getUser();
+        if (sessionUser?.id) {
+          dbData.owner_id = sessionUser.id;
+        }
+      }
     }
 
     try {

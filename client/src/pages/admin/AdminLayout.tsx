@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../utils/supabase';
 import './Admin.css';
@@ -6,6 +6,7 @@ import './Admin.css';
 export const AdminLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [checking, setChecking] = useState(true);
 
   const navItems = [
     { path: '/admin', label: 'Dashboard', exact: true },
@@ -19,39 +20,75 @@ export const AdminLayout: React.FC = () => {
   };
 
   useEffect(() => {
+    let isMounted = true;
     const checkAdmin = async () => {
-      const token = localStorage.getItem('admin_token');
-      if (!token) {
-        navigate('/admin/login');
-        return;
-      }
-      
-      const { data: { user }, error } = await supabase.auth.getUser(token);
-      if (error || !user) {
-        localStorage.removeItem('admin_token');
-        navigate('/admin/login');
-        return;
-      }
+      try {
+        const token = localStorage.getItem('admin_token');
+        
+        let userId: string | null = null;
+        if (token) {
+          const { data: { user } } = await supabase.auth.getUser(token);
+          if (user) userId = user.id;
+        }
+        
+        if (!userId) {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) userId = user.id;
+        }
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
+        if (!userId) {
+          if (isMounted) {
+            localStorage.removeItem('admin_token');
+            navigate('/admin/login');
+          }
+          return;
+        }
 
-      if (!profile || profile.role !== 'admin') {
-        localStorage.removeItem('admin_token');
-        navigate('/admin/login');
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', userId)
+          .single();
+
+        if (!profile || profile.role !== 'admin') {
+          if (isMounted) {
+            localStorage.removeItem('admin_token');
+            navigate('/admin/login');
+          }
+          return;
+        }
+
+        if (isMounted) {
+          setChecking(false);
+        }
+      } catch (err) {
+        console.error('Admin check error:', err);
+        if (isMounted) {
+          navigate('/admin/login');
+        }
       }
     };
 
     checkAdmin();
+    return () => { isMounted = false; };
   }, [navigate, location.pathname]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     localStorage.removeItem('admin_token');
+    await supabase.auth.signOut();
     navigate('/admin/login');
   };
+
+  if (checking) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', fontFamily: 'var(--font-body)' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div className="spinner" style={{ width: '40px', height: '40px', margin: '0 auto 16px' }} />
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Verifying admin access...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="admin-layout">

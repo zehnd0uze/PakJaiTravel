@@ -85,15 +85,15 @@ export const RegisterPage: React.FC = () => {
           {error && <div className="auth-error">{error}</div>}
 
           <div className="form-group">
-            <label htmlFor="register-name">Full name</label>
+            <label htmlFor="register-name">Username</label>
             <input
               id="register-name"
               type="text"
               className="form-input"
-              placeholder="Enter your full name"
+              placeholder="Enter your username"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              autoComplete="name"
+              autoComplete="username"
             />
           </div>
 
