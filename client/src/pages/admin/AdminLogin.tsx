@@ -41,7 +41,11 @@ export const AdminLogin: React.FC = () => {
       localStorage.setItem('admin_token', data.session.access_token);
       navigate('/admin');
     } catch (err: any) {
-      setError(err.message);
+      if (err?.message?.includes('Failed to fetch')) {
+        setError('Unable to connect to database server. Please check your Supabase project status or network.');
+      } else {
+        setError(err.message || 'Authentication failed');
+      }
     } finally {
       setLoading(false);
     }

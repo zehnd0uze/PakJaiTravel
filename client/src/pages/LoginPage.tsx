@@ -27,7 +27,11 @@ export const LoginPage: React.FC = () => {
       navigate('/');
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message);
+        if (err.message.includes('Failed to fetch')) {
+          setError('Unable to connect to database server. Please check your Supabase project status or network.');
+        } else {
+          setError(err.message);
+        }
       } else {
         setError('Something went wrong. Please try again.');
       }

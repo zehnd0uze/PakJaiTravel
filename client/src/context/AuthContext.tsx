@@ -67,28 +67,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Restore session on mount
   useEffect(() => {
     const restoreSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session?.user) {
-        setToken(session.access_token);
-        await fetchProfile(session.user.id, session.user.email!);
-      } else {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.warn('Session retrieval error:', error.message);
+        }
+        
+        if (session?.user) {
+          setToken(session.access_token);
+          await fetchProfile(session.user.id, session.user.email!);
+        } else {
+          setUser(null);
+          setToken(null);
+        }
+      } catch (err) {
+        console.warn('Failed to restore Supabase auth session:', err);
         setUser(null);
         setToken(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     restoreSession();
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: any, session: any) => {
-      if (session?.user) {
-        setToken(session.access_token);
-        await fetchProfile(session.user.id, session.user.email!);
-      } else {
-        setUser(null);
-        setToken(null);
+      try {
+        if (session?.user) {
+          setToken(session.access_token);
+          await fetchProfile(session.user.id, session.user.email!);
+        } else {
+          setUser(null);
+          setToken(null);
+        }
+      } catch (err) {
+        console.warn('Auth state change profile fetch error:', err);
       }
     });
 
