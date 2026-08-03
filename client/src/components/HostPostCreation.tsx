@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { type Property } from '../types';
 import { supabase } from '../utils/supabase';
+import { uploadToCloudinary } from '../utils/cloudinary';
+import { compressImage } from '../utils/imageCompression';
 import './HostPostCreation.css';
-
-
 
 interface HostPostCreationProps {
   onPostCreated?: () => void;
@@ -17,9 +17,11 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated }) =>
   const [propertyId, setPropertyId] = useState('');
   const [myProperties, setMyProperties] = useState<Property[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
   
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Auto-expand textarea
   useEffect(() => {
@@ -40,7 +42,7 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated }) =>
           .eq('owner_id', user.id);
         if (error) throw error;
         if (data) {
-          const formatted = data.map(p => ({
+          const formatted = (data as any[]).map(p => ({
             ...p,
             pricePerNight: p.price_per_night,
             imageUrl: p.image_url,
@@ -55,9 +57,38 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated }) =>
     fetchMyProperties();
   }, [user]);
 
+  const handleImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    setError('');
+
+    try {
+      let compressed = file;
+      if (file.type.startsWith('image/')) {
+        try {
+          compressed = await compressImage(file);
+        } catch (cErr) {
+          console.warn('Compression fallback:', cErr);
+        }
+      }
+
+      const url = await uploadToCloudinary(compressed);
+      if (url) {
+        setImageUrl(url);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to upload photo');
+    } finally {
+      setIsUploading(false);
+      e.target.value = '';
+    }
+  };
+
   const handlePublish = async () => {
     if (!content.trim() && !imageUrl) {
-      setError('Please add some content to your post');
+      setError('Please add some content or an image to your post');
       return;
     }
 
@@ -73,7 +104,7 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated }) =>
         location_tag: myProperties.find(p => p.id === propertyId)?.name || null,
         user_id: user.id,
         author_name: user.name,
-        author_avatar: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`
+        author_avatar: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=2c4c3b&color=fff`
       };
 
       const { error } = await supabase
@@ -123,11 +154,23 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated }) =>
 
       <div className="post-box-actions">
         <div className="left-actions">
-          <button className="action-tool-btn" onClick={() => {
-            const url = prompt('Enter image URL:');
-            if (url) setImageUrl(url);
-          }} title="Add Media">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19.75 12.04c-.07-.07-.15-.14-.24-.19L17 10.67V6.5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h7.08c-.05-.33-.08-.66-.08-1 0-3.31 2.69-6 6-6 .25 0 .5.02.75.04zm-14.75-5.54h10v3.46l-2.02 1.17c-.36.21-.57.59-.57 1.01v.96L10 14.5l-2-2-4.22 4.22V6.5zM18 16c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm1 5h-2v2h-2v-2h-2v-2h2v-2h2v2h2v2z"/></svg>
+          <input 
+            type="file"
+            ref={fileInputRef}
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleImageFile}
+          />
+          <button 
+            type="button"
+            className="action-tool-btn" 
+            onClick={() => fileInputRef.current?.click()} 
+            disabled={isUploading}
+            title="Upload Photo"
+          >
+            {isUploading ? '...' : (
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19.75 12.04c-.07-.07-.15-.14-.24-.19L17 10.67V6.5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h7.08c-.05-.33-.08-.66-.08-1 0-3.31 2.69-6 6-6 .25 0 .5.02.75.04zm-14.75-5.54h10v3.46l-2.02 1.17c-.36.21-.57.59-.57 1.01v.96L10 14.5l-2-2-4.22 4.22V6.5zM18 16c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm1 5h-2v2h-2v-2h-2v-2h2v-2h2v2h2v2z"/></svg>
+            )}
           </button>
           
           <div className="property-tag-selector">

@@ -20,7 +20,7 @@ interface AuthContextType {
   verify: (email: string, otp: string) => Promise<void>;
   resendOtp: (email: string) => Promise<void>;
   logout: () => void;
-  updateProfile: (fields: { avatar?: string; coverPhoto?: string; name?: string }) => Promise<void>;
+  updateProfile: (fields: { avatar?: string; coverPhoto?: string; name?: string; role?: string }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -82,7 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     restoreSession();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: any, session: any) => {
       if (session?.user) {
         setToken(session.access_token);
         await fetchProfile(session.user.id, session.user.email!);
@@ -141,13 +141,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await supabase.auth.signOut();
   }, []);
 
-  const updateProfile = useCallback(async (fields: { avatar?: string; coverPhoto?: string; name?: string }) => {
+  const updateProfile = useCallback(async (fields: { avatar?: string; coverPhoto?: string; name?: string; role?: string }) => {
     if (!user) throw new Error('Not authenticated');
 
     const dbFields: any = {};
     if (fields.avatar !== undefined) dbFields.avatar = fields.avatar;
     if (fields.coverPhoto !== undefined) dbFields.cover_photo = fields.coverPhoto;
     if (fields.name !== undefined) dbFields.name = fields.name;
+    if (fields.role !== undefined) dbFields.role = fields.role;
 
     const { error, data } = await supabase
       .from('profiles')
@@ -163,7 +164,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ...prev,
         avatar: data.avatar,
         coverPhoto: data.cover_photo,
-        name: data.name
+        name: data.name,
+        role: data.role
       } : null);
     }
   }, [user]);

@@ -90,6 +90,20 @@
   background: white;
 }
 
+.h-action-btn.view-live {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  color: #2c4c3b;
+  border-color: #d1ded7;
+  background: #f4f8f6;
+}
+
+.h-action-btn.view-live:hover {
+  background: #e6f0eb;
+  border-color: #2c4c3b;
+}
+
 .h-action-btn.promote {
   background: var(--accent-color);
   color: white;

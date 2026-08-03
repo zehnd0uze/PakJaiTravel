@@ -58,19 +58,21 @@ export const Hotels: React.FC = () => {
   }, [q]);
 
   // Extract unique provinces
-  const provinces = useMemo(() => Array.from(new Set(allHotels.map(h => h.province))), [allHotels]);
+  const provinces = useMemo(() => Array.from(new Set(allHotels.map(h => h.province).filter(Boolean))), [allHotels]);
   
-  // Extract unique districts based on selected province
+  // Extract unique districts based on selected province or all
   const districts = useMemo(() => {
-    if (!selectedProvince) return [];
-    return Array.from(new Set(allHotels.filter(h => h.province === selectedProvince).map(h => h.district)));
+    const pool = selectedProvince ? allHotels.filter(h => h.province === selectedProvince) : allHotels;
+    return Array.from(new Set(pool.map(h => h.district).filter(Boolean)));
   }, [selectedProvince, allHotels]);
   
-  // Extract unique types based on selected district
+  // Extract unique types based on selected district or all
   const types = useMemo(() => {
-    if (!selectedDistrict) return [];
-    return Array.from(new Set(allHotels.filter(h => h.district === selectedDistrict).map(h => h.type)));
-  }, [selectedDistrict, allHotels]);
+    let pool = allHotels;
+    if (selectedProvince) pool = pool.filter(h => h.province === selectedProvince);
+    if (selectedDistrict) pool = pool.filter(h => h.district === selectedDistrict);
+    return Array.from(new Set(pool.map(h => h.type).filter(Boolean)));
+  }, [selectedProvince, selectedDistrict, allHotels]);
 
   // Filter hotels
   const filteredHotels = useMemo(() => {
@@ -92,7 +94,7 @@ export const Hotels: React.FC = () => {
       <div className="hotels-layout">
         {/* Sidebar Filters */}
         <aside className="hotels-sidebar">
-          <h3>Categories</h3>
+          <h3>Filter Stays</h3>
           
           <div className="filter-group">
             <label>Province</label>
@@ -110,14 +112,12 @@ export const Hotels: React.FC = () => {
           </div>
 
           <div className="filter-group">
-            <label>District</label>
+            <label>District / Area</label>
             <select 
               value={selectedDistrict} 
               onChange={(e) => {
                 setSelectedDistrict(e.target.value);
-                setSelectedType('');
               }}
-              disabled={!selectedProvince}
             >
               <option value="">All Districts</option>
               {districts.map(d => <option key={d} value={d}>{d}</option>)}
@@ -129,11 +129,47 @@ export const Hotels: React.FC = () => {
             <select 
               value={selectedType} 
               onChange={(e) => setSelectedType(e.target.value)}
-              disabled={!selectedDistrict}
             >
               <option value="">All Types</option>
               {types.map(t => <option key={t} value={t}>{t}</option>)}
             </select>
+          </div>
+
+          {(selectedProvince || selectedDistrict || selectedType) && (
+            <button 
+              className="btn btn-outline" 
+              style={{ width: '100%', marginTop: '12px', fontSize: '0.85rem' }}
+              onClick={() => {
+                setSelectedProvince('');
+                setSelectedDistrict('');
+                setSelectedType('');
+              }}
+            >
+              Reset Filters
+            </button>
+          )}
+
+          {/* Host Promo Box */}
+          <div className="host-sidebar-cta" style={{
+            marginTop: '30px',
+            padding: '20px',
+            background: '#f4f8f6',
+            borderRadius: '16px',
+            border: '1px solid #d1ded7',
+            textAlign: 'center'
+          }}>
+            <span style={{ fontSize: '1.8rem', display: 'block', marginBottom: '8px' }}>🏡</span>
+            <h4 style={{ margin: '0 0 6px 0', fontSize: '1rem', color: '#2c4c3b' }}>Own an Accommodation?</h4>
+            <p style={{ fontSize: '0.8rem', color: '#555', margin: '0 0 14px 0', lineHeight: 1.4 }}>
+              List your homestay, resort, or villa to connect directly with travelers across Thailand.
+            </p>
+            <button 
+              onClick={() => navigate('/become-host')}
+              className="btn btn-primary"
+              style={{ width: '100%', fontSize: '0.85rem', padding: '10px 14px' }}
+            >
+              List Your Place ↗
+            </button>
           </div>
         </aside>
 

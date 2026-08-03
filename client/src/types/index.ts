@@ -30,13 +30,45 @@ export interface Property {
   id: string;
   name: string;
   type: string;
-  price: string;
+  price?: string | number;
+  pricePerNight?: number;
+  price_per_night?: number;
+  currency?: string;
+  rating?: number;
+  reviews?: number;
   views?: number;
   badge?: string;
+  imageUrl?: string;
+  image_url?: string;
   images: string[];
+  features?: string[];
   amenities: string[];
-  ownerId: string;
-  status: 'active' | 'draft';
+  location?: string;
+  province?: string;
+  district?: string;
+  description?: string;
+  checkIn?: string;
+  checkOut?: string;
+  check_in?: string;
+  check_out?: string;
+  isVerified?: boolean;
+  is_verified?: boolean;
+  host?: {
+    name: string;
+    since: string;
+  };
+  host_info?: {
+    name: string;
+    since: string;
+  };
+  contact?: {
+    phone?: string;
+    email?: string;
+    line?: string;
+  };
+  ownerId?: string;
+  owner_id?: string;
+  status: 'active' | 'draft' | 'published';
   createdAt?: string;
   updatedAt?: string;
 }

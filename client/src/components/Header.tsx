@@ -213,8 +213,12 @@ export const Header: React.FC = () => {
             <Link to="/community" className="nav-link" style={{ marginRight: '1.5rem', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.8rem' }}>
               Journal
             </Link>
-            <Link to="/become-host" className="nav-link host-link" style={{ marginRight: '1.5rem', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.8rem', color: 'var(--accent-color)', fontWeight: '600' }}>
-              List your property
+            <Link 
+              to={user?.role === 'host' ? "/dashboard?new=1" : "/become-host"} 
+              className="nav-link host-link" 
+              style={{ marginRight: '1.5rem', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.8rem', color: 'var(--accent-color)', fontWeight: '600' }}
+            >
+              {user?.role === 'host' ? "+ Add Listing" : "List your property"}
             </Link>
 
             {user ? (
@@ -239,6 +243,11 @@ export const Header: React.FC = () => {
                     <div className="user-dropdown-header">
                       <span className="user-dropdown-name">{user.name || 'User'}</span>
                       <span className="user-dropdown-email">{user.email}</span>
+                      {user.role === 'host' && (
+                        <div className="verified-host-tag" style={{ color: '#2c4c3b', fontSize: '0.75rem', fontWeight: 700, marginTop: '4px' }}>
+                          ✓ Certified Host
+                        </div>
+                      )}
                       {!user.isVerified && (
                         <div className="unverified-badge">Unverified Account</div>
                       )}
@@ -260,9 +269,13 @@ export const Header: React.FC = () => {
                     <button className="user-dropdown-item" role="menuitem" onClick={() => { setMenuOpen(false); navigate('/profile'); }}>
                       Profile
                     </button>
-                    {user.role === 'host' && (
-                      <button className="user-dropdown-item" role="menuitem" onClick={() => { setMenuOpen(false); navigate('/dashboard'); }}>
-                        Host Dashboard
+                    {user.role === 'host' ? (
+                      <button className="user-dropdown-item" role="menuitem" onClick={() => { setMenuOpen(false); navigate('/dashboard'); }} style={{ fontWeight: 600, color: '#2c4c3b' }}>
+                        🏡 Host Dashboard
+                      </button>
+                    ) : (
+                      <button className="user-dropdown-item" role="menuitem" onClick={() => { setMenuOpen(false); navigate('/become-host'); }} style={{ color: 'var(--accent-color)', fontWeight: 600 }}>
+                        ✨ Become a Host
                       </button>
                     )}
                     <button className="user-dropdown-item" role="menuitem" onClick={() => { setMenuOpen(false); navigate('/community'); }}>
@@ -313,7 +326,7 @@ export const Header: React.FC = () => {
               <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo('/')}>Home</button></li>
               <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo('/hotels')}>Hotels</button></li>
               <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo('/community')}>Community</button></li>
-              <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo('/become-host')} style={{ color: 'var(--accent-color)', fontWeight: '600' }}>List your property</button></li>
+              <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo(user?.role === 'host' ? '/dashboard?new=1' : '/become-host')} style={{ color: 'var(--accent-color)', fontWeight: '600' }}>{user?.role === 'host' ? '+ Add Listing' : 'List your property'}</button></li>
               <li><button className="nav-link mobile-nav-link disabled-link" disabled title="Coming soon">Flights <span className="coming-soon-tag">Soon</span></button></li>
               <li><button className="nav-link mobile-nav-link disabled-link" disabled title="Coming soon">Activities <span className="coming-soon-tag">Soon</span></button></li>
             </ul>
@@ -333,9 +346,13 @@ export const Header: React.FC = () => {
                 <button className="mobile-nav-link mobile-profile-btn" onClick={() => mobileNavTo('/profile')}>
                   My Profile
                 </button>
-                {user.role === 'host' && (
-                  <button className="mobile-nav-link" onClick={() => mobileNavTo('/dashboard')}>
-                    Host Dashboard
+                {user.role === 'host' ? (
+                  <button className="mobile-nav-link" onClick={() => mobileNavTo('/dashboard')} style={{ fontWeight: 600, color: '#2c4c3b' }}>
+                    🏡 Host Dashboard
+                  </button>
+                ) : (
+                  <button className="mobile-nav-link" onClick={() => mobileNavTo('/become-host')} style={{ fontWeight: 600, color: 'var(--accent-color)' }}>
+                    ✨ Become a Host
                   </button>
                 )}
                 <button className="mobile-nav-link mobile-logout-btn" onClick={handleLogout}>

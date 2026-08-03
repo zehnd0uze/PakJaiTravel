@@ -44,6 +44,65 @@
   color: #e53e3e;
   margin-top: 16px;
   font-size: 0.9rem;
+  background: #fff5f5;
+  padding: 10px 20px;
+  border-radius: 8px;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+.bh-cta-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 48px;
+}
+
+.bh-main-cta {
+  padding: 16px 36px !important;
+  font-size: 1.05rem !important;
+  box-shadow: 0 8px 24px rgba(44, 76, 59, 0.25) !important;
+  border-radius: 30px !important;
+}
+
+.bh-secondary-link {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: opacity 0.2s;
+}
+
+.bh-secondary-link:hover {
+  opacity: 0.8;
+}
+
+.bh-badges {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 32px;
+  margin-top: 20px;
+}
+
+.bh-badge-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: #555;
+  background: #f8faf9;
+  padding: 8px 18px;
+  border-radius: 20px;
+  border: 1px solid #eef2f0;
+}
+
+.badge-icon {
+  font-size: 1.1rem;
 }
 
 .bh-steps {

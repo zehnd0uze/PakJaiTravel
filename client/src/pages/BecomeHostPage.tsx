@@ -1,10 +1,34 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/Button';
 import './BecomeHostPage.css';
 
 const BecomeHostPage: React.FC = () => {
-  const handleGetStarted = () => {
-    alert("Host registration is coming soon! We are currently in a private beta. Please check back later.");
+  const { user, updateProfile } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleGetStarted = async () => {
+    setError('');
+    
+    if (!user) {
+      navigate('/login?redirect=/become-host');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      if (user.role !== 'host') {
+        await updateProfile({ role: 'host' });
+      }
+      navigate('/dashboard?new=true');
+    } catch (err: any) {
+      setError(err.message || 'Failed to activate host account.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -13,10 +37,47 @@ const BecomeHostPage: React.FC = () => {
         <div className="container bh-hero-content">
           <span className="bh-overline">Join the Community</span>
           <h1>Turn your space into a <br/><span>Nature Retreat.</span></h1>
-          <p className="bh-lead">Share the beauty of Chiang Dao with travelers from around the world. List your property on PakJai today.</p>
-          <Button variant="secondary" size="lg" onClick={handleGetStarted}>
-            Coming Soon
-          </Button>
+          <p className="bh-lead">
+            Share the authentic beauty of Chiang Dao and northern Thailand with travelers from around the world. List your homestay, resort, or villa on PakJai today.
+          </p>
+
+          {error && <div className="bh-error">{error}</div>}
+
+          <div className="bh-cta-wrapper">
+            <Button 
+              variant="primary" 
+              size="lg" 
+              onClick={handleGetStarted}
+              disabled={loading}
+              className="bh-main-cta"
+            >
+              {loading ? 'Setting up your space...' : 
+                !user ? 'Get Started & List Your Space' : 
+                user.role === 'host' ? 'Go to Host Dashboard (+ Add Listing)' : 
+                'Activate Host Mode & List Accommodation'}
+            </Button>
+
+            {user && user.role === 'host' && (
+              <button className="bh-secondary-link" onClick={() => navigate('/dashboard')}>
+                View My Current Listings →
+              </button>
+            )}
+          </div>
+
+          <div className="bh-badges">
+            <div className="bh-badge-item">
+              <span className="badge-icon">🌿</span>
+              <span>0% Listing Fee during launch</span>
+            </div>
+            <div className="bh-badge-item">
+              <span className="badge-icon">📍</span>
+              <span>Direct connection with travelers</span>
+            </div>
+            <div className="bh-badge-item">
+              <span className="badge-icon">✨</span>
+              <span>Verified Owner guarantee</span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -24,26 +85,26 @@ const BecomeHostPage: React.FC = () => {
         <div className="bh-step-card">
           <div className="step-num">01</div>
           <h3>Create Account</h3>
-          <p>Sign up in seconds. We only need your basic info to get you started.</p>
+          <p>Sign up in seconds. You only need your basic contact info to start sharing your hospitality.</p>
         </div>
         <div className="bh-step-card">
           <div className="step-num">02</div>
-          <h3>List Property</h3>
-          <p>Add photos, descriptions, and amenities to your professional listing.</p>
+          <h3>List Your Accommodation</h3>
+          <p>Upload photos, set your price, pick your amenities (mountain views, breakfast, Wi-Fi), and showcase your story.</p>
         </div>
         <div className="bh-step-card">
           <div className="step-num">03</div>
-          <h3>Start Hosting</h3>
-          <p>Receive bookings and promote your place directly to our community feed.</p>
+          <h3>Start Welcoming Guests</h3>
+          <p>Receive direct inquiries, share daily updates in the community feed, and build trusted local hospitality.</p>
         </div>
       </section>
 
       <section className="bh-quote container glass-panel">
         <div className="quote-content">
           <blockquote>
-            "Hosting on PakJai changed how I see my own home. I've met amazing hikers and nature lovers through the community feed."
+            "Hosting on PakJai changed how I share my homestay. I connect directly with mindful travelers who love Chiang Dao nature."
           </blockquote>
-          <cite>— Mae Rim, Host since 2025</cite>
+          <cite>— Chiang Dao Homestay Host</cite>
         </div>
       </section>
     </div>

@@ -53,16 +53,25 @@ export const HotelDetail: React.FC = () => {
         return;
       }
       
-      const formatted = {
+      const formatted: Hotel = {
         ...data,
-        pricePerNight: data.price_per_night,
-        imageUrl: data.image_url,
-        isVerified: data.is_verified,
-        checkIn: data.check_in,
-        checkOut: data.check_out,
+        pricePerNight: Number(data.price_per_night || data.price || 0),
+        imageUrl: data.image_url || data.images?.[0] || '',
+        images: data.images?.length ? data.images : (data.image_url ? [data.image_url] : []),
+        isVerified: data.is_verified ?? true,
+        checkIn: data.check_in || '14:00',
+        checkOut: data.check_out || '11:00',
+        features: data.features || [],
+        amenities: data.amenities || [],
+        location: data.location || (data.district ? `${data.district}, ${data.province || 'Chiang Mai'}` : 'Chiang Mai, Thailand'),
         host: {
-          name: data.profiles?.name || data.host_info?.name || 'Unknown',
-          since: new Date(data.profiles?.created_at || new Date()).getFullYear().toString()
+          name: data.host_info?.name || data.profiles?.name || 'Local Host',
+          since: data.host_info?.since || (data.profiles?.created_at ? new Date(data.profiles.created_at).getFullYear().toString() : '2024')
+        },
+        contact: data.contact || {
+          phone: data.phone || '',
+          email: data.email || '',
+          line: data.line || ''
         }
       };
       
@@ -326,16 +335,31 @@ export const HotelDetail: React.FC = () => {
               disabled={!!(user && !user.isVerified)}
               onClick={() => hotel.contact?.phone ? window.open(`tel:${hotel.contact.phone}`) : null}
             >
-              Contact Host
+              📞 Call Host {hotel.contact?.phone ? `(${hotel.contact.phone})` : ''}
             </Button>
+            {hotel.contact?.line && (
+              <Button
+                variant="outline"
+                size="md"
+                className="sidebar-line-btn"
+                style={{ borderColor: '#06C755', color: '#06C755', fontWeight: 600, marginTop: '8px' }}
+                disabled={!!(user && !user.isVerified)}
+                onClick={() => {
+                  const cleanLine = (hotel.contact?.line || '').replace('@', '');
+                  window.open(`https://line.me/R/ti/p/~${cleanLine}`, '_blank');
+                }}
+              >
+                💬 Chat on LINE ({hotel.contact.line})
+              </Button>
+            )}
             <Button
               variant="outline"
               size="md"
               className="sidebar-msg-btn"
               disabled={!!(user && !user.isVerified)}
-              onClick={() => hotel.contact?.email ? window.open(`mailto:${hotel.contact.email}`) : null}
+              onClick={() => hotel.contact?.email ? window.open(`mailto:${hotel.contact.email}?subject=Booking Inquiry for ${hotel.name}`) : null}
             >
-              Send Message
+              ✉️ Send Email
             </Button>
           </div>
         </aside>

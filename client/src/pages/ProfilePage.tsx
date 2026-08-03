@@ -205,10 +205,30 @@ const ProfilePage: React.FC = () => {
               </div>
             </div>
 
-            {/* ── Log Out Button — always visible ── */}
-            <button className="logout-btn" onClick={handleLogout}>
-              Log Out
-            </button>
+            <div className="profile-actions-row" style={{ display: 'flex', gap: '10px', marginTop: '16px', flexWrap: 'wrap' }}>
+              {user.role === 'host' ? (
+                <button 
+                  className="btn btn-primary"
+                  style={{ borderRadius: '30px', padding: '8px 20px', fontSize: '0.85rem' }}
+                  onClick={() => navigate('/dashboard')}
+                >
+                  🏡 Host Dashboard
+                </button>
+              ) : (
+                <button 
+                  className="btn btn-primary"
+                  style={{ borderRadius: '30px', padding: '8px 20px', fontSize: '0.85rem', background: 'var(--accent-color)' }}
+                  onClick={() => navigate('/become-host')}
+                >
+                  ✨ Become a Host
+                </button>
+              )}
+
+              {/* ── Log Out Button — always visible ── */}
+              <button className="logout-btn" onClick={handleLogout}>
+                Log Out
+              </button>
+            </div>
           </div>
         </div>
 

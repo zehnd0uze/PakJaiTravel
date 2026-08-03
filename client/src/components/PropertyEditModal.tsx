@@ -2,178 +2,696 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { type Property } from '../types';
 import { supabase } from '../utils/supabase';
+import { uploadToCloudinary } from '../utils/cloudinary';
+import { compressImage } from '../utils/imageCompression';
 import './PropertyEditModal.css';
 
 interface PropertyEditModalProps {
-  property?: Property; // Existing property if editing
+  property?: Property;
   onClose: () => void;
   onSave: () => void;
 }
 
+const PROPERTY_TYPES = [
+  'Homestay',
+  'Resort',
+  'Hotel',
+  'Villa',
+  'Guesthouse',
+  'Glamping',
+  'Eco Lodge',
+  'Cabin'
+];
+
+const POPULAR_DISTRICTS = [
+  'Chiang Dao',
+  'Mae Rim',
+  'Samoeng',
+  'Fang',
+  'Hang Dong',
+  'Mueang Chiang Mai',
+  'Chom Thong',
+  'Mae Taeng',
+  'Pai (Mae Hong Son)'
+];
+
+const PRESET_FEATURES = [
+  'Doi Luang View',
+  'Mountain View',
+  'Sunrise View',
+  'Riverfront',
+  'Breakfast Included',
+  'Private Balcony',
+  'Firepit / Campfire',
+  'Coffee Plantation',
+  'Organic Farm',
+  'Stargazing',
+  'Nature Trail',
+  'Local Cooking'
+];
+
+const PRESET_AMENITIES = [
+  'Free Wi-Fi',
+  'Air Conditioning',
+  'Hot Shower',
+  'Free Parking',
+  'Swimming Pool',
+  'Private Bathroom',
+  'Kitchen',
+  'Fan',
+  'Workspace',
+  'Pet Friendly',
+  'Bicycles',
+  'BBQ Grill'
+];
+
 const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose, onSave }) => {
-
-  const [formData, setFormData] = useState({
-    name: property?.name || '',
-    type: property?.type || 'Guesthouse',
-    price: property?.price || '',
-    description: (property as any)?.description || '',
-    images: property?.images?.join(', ') || '',
-    amenities: property?.amenities?.join(', ') || '',
-    status: property?.status || 'active'
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-
+  const { user } = useAuth();
   const isEditing = !!property;
 
-  const { user } = useAuth();
+  const currentYear = new Date().getFullYear().toString();
+
+  const [name, setName] = useState(property?.name || '');
+  const [type, setType] = useState(property?.type || 'Homestay');
+  const [price, setPrice] = useState(
+    property?.pricePerNight?.toString() || 
+    property?.price_per_night?.toString() || 
+    property?.price?.toString() || 
+    '1500'
+  );
+  const [status, setStatus] = useState<'published' | 'draft'>(
+    property?.status === 'draft' ? 'draft' : 'published'
+  );
+  
+  const [province, setProvince] = useState(property?.province || 'Chiang Mai');
+  const [district, setDistrict] = useState(property?.district || 'Chiang Dao');
+  const [location, setLocation] = useState(
+    property?.location || (property?.district ? `${property.district}, Chiang Mai` : 'Chiang Dao, Chiang Mai')
+  );
+  const [description, setDescription] = useState(property?.description || '');
+
+  const [images, setImages] = useState<string[]>(
+    property?.images && property.images.length > 0 
+      ? property.images 
+      : property?.imageUrl || property?.image_url 
+        ? [property.imageUrl || property.image_url || ''] 
+        : []
+  );
+  const [customImageUrl, setCustomImageUrl] = useState('');
+
+  const [selectedFeatures, setSelectedFeatures] = useState<string[]>(property?.features || []);
+  const [customFeature, setCustomFeature] = useState('');
+
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>(property?.amenities || []);
+  const [customAmenity, setCustomAmenity] = useState('');
+
+  const [checkIn, setCheckIn] = useState(property?.checkIn || property?.check_in || '14:00');
+  const [checkOut, setCheckOut] = useState(property?.checkOut || property?.check_out || '11:00');
+
+  const [hostName, setHostName] = useState(
+    property?.host?.name || property?.host_info?.name || user?.name || ''
+  );
+  const [hostSince, setHostSince] = useState(
+    property?.host?.since || property?.host_info?.since || currentYear
+  );
+  const [phone, setPhone] = useState(property?.contact?.phone || '');
+  const [email, setEmail] = useState(property?.contact?.email || user?.email || '');
+  const [line, setLine] = useState(property?.contact?.line || '');
+
+  const [uploading, setUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState<'details' | 'photos' | 'amenities' | 'contact'>('details');
+
+  // Toggle helper
+  const toggleItem = (list: string[], setList: React.Dispatch<React.SetStateAction<string[]>>, item: string) => {
+    if (list.includes(item)) {
+      setList(list.filter(i => i !== item));
+    } else {
+      setList([...list, item]);
+    }
+  };
+
+  const handleAddCustomFeature = (e: React.KeyboardEvent | React.MouseEvent) => {
+    if ('key' in e && e.key !== 'Enter') return;
+    e.preventDefault();
+    if (customFeature.trim() && !selectedFeatures.includes(customFeature.trim())) {
+      setSelectedFeatures([...selectedFeatures, customFeature.trim()]);
+      setCustomFeature('');
+    }
+  };
+
+  const handleAddCustomAmenity = (e: React.KeyboardEvent | React.MouseEvent) => {
+    if ('key' in e && e.key !== 'Enter') return;
+    e.preventDefault();
+    if (customAmenity.trim() && !selectedAmenities.includes(customAmenity.trim())) {
+      setSelectedAmenities([...selectedAmenities, customAmenity.trim()]);
+      setCustomAmenity('');
+    }
+  };
+
+  // Image Upload Handling
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) return;
+    
+    setUploading(true);
+    setError('');
+    
+    try {
+      const originalFiles = Array.from(e.target.files);
+      const newUrls: string[] = [];
+
+      for (const file of originalFiles) {
+        let fileToUpload = file;
+        if (file.type.startsWith('image/')) {
+          try {
+            fileToUpload = await compressImage(file);
+          } catch (compErr) {
+            console.warn('Image compression fallback:', compErr);
+          }
+        }
+
+        const url = await uploadToCloudinary(fileToUpload);
+        if (url) {
+          newUrls.push(url);
+        }
+      }
+
+      setImages(prev => [...prev, ...newUrls]);
+    } catch (err: any) {
+      setError(err.message || 'Failed to upload image. You can also paste image URLs directly.');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleAddCustomImageUrl = () => {
+    if (customImageUrl.trim()) {
+      setImages(prev => [...prev, customImageUrl.trim()]);
+      setCustomImageUrl('');
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleMoveImageToCover = (index: number) => {
+    if (index === 0) return;
+    setImages(prev => {
+      const updated = [...prev];
+      const [chosen] = updated.splice(index, 1);
+      updated.unshift(chosen);
+      return updated;
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setError('');
 
-    const payload = {
-      ...formData,
-      images: formData.images.split(',').map(s => s.trim()).filter(Boolean),
-      amenities: formData.amenities.split(',').map(s => s.trim()).filter(Boolean),
-    };
+    if (!name.trim()) {
+      setError('Please provide a name for your accommodation.');
+      setActiveTab('details');
+      return;
+    }
+
+    const numericPrice = Number(price.toString().replace(/,/g, ''));
+    if (isNaN(numericPrice) || numericPrice <= 0) {
+      setError('Please provide a valid price per night.');
+      setActiveTab('details');
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
+      if (!user) throw new Error('Not authenticated');
+
+      const primaryImage = images[0] || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1200';
+
       const dbData: any = {
-        name: formData.name,
-        type: formData.type,
-        price_per_night: Number(formData.price.toString().replace(/,/g, '')),
-        description: formData.description,
-        images: payload.images,
-        image_url: payload.images[0] || '',
-        amenities: payload.amenities,
-        status: formData.status === 'active' ? 'published' : 'draft',
+        name: name.trim(),
+        type,
+        price_per_night: numericPrice,
+        currency: 'THB',
+        image_url: primaryImage,
+        images: images.length > 0 ? images : [primaryImage],
+        features: selectedFeatures,
+        amenities: selectedAmenities,
+        location: location.trim() || `${district}, ${province}`,
+        province,
+        district,
+        description: description.trim(),
+        check_in: checkIn,
+        check_out: checkOut,
+        host_info: {
+          name: hostName.trim() || user.name || 'Host',
+          since: hostSince.trim() || currentYear
+        },
+        contact: {
+          phone: phone.trim(),
+          email: email.trim() || user.email || '',
+          line: line.trim()
+        },
+        status,
+        owner_id: user.id
       };
 
-      if (isEditing) {
-        const { error } = await supabase
+      if (isEditing && property?.id) {
+        const { error: updateError } = await supabase
           .from('properties')
           .update(dbData)
           .eq('id', property.id);
-        if (error) throw error;
+
+        if (updateError) throw updateError;
       } else {
-        if (!user) throw new Error("Not authenticated");
-        dbData.owner_id = user.id;
-        const { error } = await supabase
+        dbData.rating = 5.0;
+        dbData.reviews = 0;
+        dbData.is_verified = true;
+
+        const { error: insertError } = await supabase
           .from('properties')
           .insert(dbData);
-        if (error) throw error;
+
+        if (insertError) throw insertError;
       }
 
       onSave();
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Failed to save property');
+      setError(err.message || 'Failed to save accommodation.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="modal-backdrop">
+    <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="property-edit-modal animate-slide-up">
         <div className="modal-header">
-          <h2>{isEditing ? 'Edit Listing' : 'List New Property'}</h2>
-          <button className="close-btn" onClick={onClose}>&times;</button>
+          <div>
+            <h2>{isEditing ? `Edit "${property.name}"` : 'List Your Accommodation'}</h2>
+            <p className="modal-subtitle">Provide details, photos, and amenities for travelers</p>
+          </div>
+          <button className="close-btn" onClick={onClose} aria-label="Close modal">&times;</button>
         </div>
 
+        {/* Modal Navigation Tabs */}
+        <div className="modal-tabs">
+          <button 
+            type="button"
+            className={`modal-tab-btn ${activeTab === 'details' ? 'active' : ''}`}
+            onClick={() => setActiveTab('details')}
+          >
+            1. Basic Info
+          </button>
+          <button 
+            type="button"
+            className={`modal-tab-btn ${activeTab === 'photos' ? 'active' : ''}`}
+            onClick={() => setActiveTab('photos')}
+          >
+            2. Photos ({images.length})
+          </button>
+          <button 
+            type="button"
+            className={`modal-tab-btn ${activeTab === 'amenities' ? 'active' : ''}`}
+            onClick={() => setActiveTab('amenities')}
+          >
+            3. Amenities & Highlights ({selectedAmenities.length + selectedFeatures.length})
+          </button>
+          <button 
+            type="button"
+            className={`modal-tab-btn ${activeTab === 'contact' ? 'active' : ''}`}
+            onClick={() => setActiveTab('contact')}
+          >
+            4. Host & Rules
+          </button>
+        </div>
+
+        {error && <div className="form-error">{error}</div>}
+
         <form onSubmit={handleSubmit} className="property-form">
-          <div className="form-grid">
-            <div className="form-group full-width">
-              <label>Property Name</label>
-              <input 
-                type="text" 
-                placeholder="e.g. Moonlight Mountain Retreat" 
-                value={formData.name}
-                onChange={e => setFormData({...formData, name: e.target.value})}
-                required
-              />
-            </div>
+          {/* TAB 1: BASIC INFO */}
+          {activeTab === 'details' && (
+            <div className="tab-pane animate-fade-in">
+              <div className="form-grid">
+                <div className="form-group full-width">
+                  <label htmlFor="prop-name">Accommodation Name *</label>
+                  <input 
+                    id="prop-name"
+                    type="text" 
+                    placeholder="e.g. Chiang Dao Mountain Sanctuary & Homestay" 
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    required
+                  />
+                </div>
 
-            <div className="form-group">
-              <label>Category</label>
-              <select 
-                value={formData.type}
-                onChange={e => setFormData({...formData, type: e.target.value})}
-              >
-                <option value="Guesthouse">Guesthouse</option>
-                <option value="Resort">Resort</option>
-                <option value="Hotel">Hotel</option>
-                <option value="Villa">Villa</option>
-                <option value="Homestay">Homestay</option>
-              </select>
-            </div>
+                <div className="form-group">
+                  <label htmlFor="prop-type">Property Type</label>
+                  <select 
+                    id="prop-type"
+                    value={type}
+                    onChange={e => setType(e.target.value)}
+                  >
+                    {PROPERTY_TYPES.map(t => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
 
-            <div className="form-group">
-              <label>Base Price (per night)</label>
-              <div className="price-input-wrapper">
-                <span className="currency-label">฿</span>
-                <input 
-                  type="text" 
-                  placeholder="3,500" 
-                  value={formData.price}
-                  onChange={e => setFormData({...formData, price: e.target.value})}
-                  required
-                />
+                <div className="form-group">
+                  <label htmlFor="prop-price">Price per Night (THB) *</label>
+                  <div className="price-input-wrapper">
+                    <span className="currency-label">฿</span>
+                    <input 
+                      id="prop-price"
+                      type="number" 
+                      min="0"
+                      step="50"
+                      placeholder="1500" 
+                      value={price}
+                      onChange={e => setPrice(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="prop-district">District / Area</label>
+                  <select 
+                    id="prop-district"
+                    value={district}
+                    onChange={e => {
+                      setDistrict(e.target.value);
+                      if (!location || location === `${district}, ${province}`) {
+                        setLocation(`${e.target.value}, ${province}`);
+                      }
+                    }}
+                  >
+                    {POPULAR_DISTRICTS.map(d => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="prop-province">Province</label>
+                  <input 
+                    id="prop-province"
+                    type="text"
+                    value={province}
+                    onChange={e => setProvince(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group full-width">
+                  <label htmlFor="prop-loc">Detailed Location / Landmark</label>
+                  <input 
+                    id="prop-loc"
+                    type="text" 
+                    placeholder="e.g. Ban Tham, Near Wat Tham Chiang Dao, Chiang Dao" 
+                    value={location}
+                    onChange={e => setLocation(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group full-width">
+                  <label htmlFor="prop-desc">Description</label>
+                  <textarea 
+                    id="prop-desc"
+                    placeholder="Describe your property, surroundings, unique views, morning mist, meals provided, and why travelers will love staying here..."
+                    value={description}
+                    onChange={e => setDescription(e.target.value)}
+                    rows={5}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="prop-status">Listing Status</label>
+                  <select 
+                    id="prop-status"
+                    value={status}
+                    onChange={e => setStatus(e.target.value as 'published' | 'draft')}
+                  >
+                    <option value="published">Published (Visible in Accommodations Directory)</option>
+                    <option value="draft">Draft (Private, not listed yet)</option>
+                  </select>
+                </div>
               </div>
             </div>
+          )}
 
-            <div className="form-group full-width">
-              <label>Description</label>
-              <textarea 
-                placeholder="Describe the charm of your place..."
-                value={formData.description}
-                onChange={e => setFormData({...formData, description: e.target.value})}
-                rows={4}
-              />
-            </div>
+          {/* TAB 2: PHOTOS & GALLERY */}
+          {activeTab === 'photos' && (
+            <div className="tab-pane animate-fade-in">
+              <div className="photo-upload-section">
+                <div className="photo-dropzone">
+                  <input 
+                    type="file" 
+                    id="property-file-input"
+                    multiple 
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    disabled={uploading}
+                    style={{ display: 'none' }}
+                  />
+                  <label htmlFor="property-file-input" className={`dropzone-label ${uploading ? 'disabled' : ''}`}>
+                    <span className="dropzone-icon">📷</span>
+                    <strong>{uploading ? 'Compressing & Uploading...' : 'Click to Upload Accommodation Photos'}</strong>
+                    <span>Supports JPG, PNG, WEBP (Auto-compressed for ultra-fast loading)</span>
+                  </label>
+                </div>
 
-            <div className="form-group full-width">
-              <label>Image URLs (comma separated)</label>
-              <input 
-                type="text" 
-                placeholder="https://example.com/photo1.jpg, https://example.com/photo2.jpg" 
-                value={formData.images}
-                onChange={e => setFormData({...formData, images: e.target.value})}
-              />
-              <p className="helper-text">Add multiple URLs separated by commas.</p>
-            </div>
+                <div className="url-input-row">
+                  <input 
+                    type="text"
+                    placeholder="Or paste an image URL directly..."
+                    value={customImageUrl}
+                    onChange={e => setCustomImageUrl(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomImageUrl(); } }}
+                  />
+                  <button type="button" className="btn-add-url" onClick={handleAddCustomImageUrl}>
+                    + Add URL
+                  </button>
+                </div>
 
-            <div className="form-group full-width">
-              <label>Amenities (comma separated)</label>
-              <input 
-                type="text" 
-                placeholder="Free WiFi, Mountain View, Pool, Breakfast" 
-                value={formData.amenities}
-                onChange={e => setFormData({...formData, amenities: e.target.value})}
-              />
+                {images.length > 0 ? (
+                  <div className="photo-gallery-preview">
+                    <p className="gallery-hint">
+                      ⭐ The first photo is your <strong>Cover Photo</strong>. Click "Set as Cover" on any photo to make it primary.
+                    </p>
+                    <div className="preview-grid">
+                      {images.map((img, idx) => (
+                        <div key={idx} className={`preview-item ${idx === 0 ? 'is-cover' : ''}`}>
+                          <img src={img} alt={`Property upload ${idx + 1}`} />
+                          {idx === 0 && <span className="cover-badge">Cover Photo</span>}
+                          <div className="preview-actions">
+                            {idx !== 0 && (
+                              <button 
+                                type="button" 
+                                className="preview-cover-btn"
+                                onClick={() => handleMoveImageToCover(idx)}
+                                title="Make Cover Photo"
+                              >
+                                Set Cover
+                              </button>
+                            )}
+                            <button 
+                              type="button" 
+                              className="preview-remove-btn"
+                              onClick={() => handleRemoveImage(idx)}
+                              title="Delete Photo"
+                            >
+                              &times;
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="empty-photos-notice">
+                    No photos added yet. Upload at least 1 photo for your listing to stand out!
+                  </div>
+                )}
+              </div>
             </div>
-            
-            <div className="form-group">
-               <label>Listing Status</label>
-               <select 
-                value={formData.status}
-                onChange={e => setFormData({...formData, status: e.target.value as 'active' | 'draft'})}
-              >
-                <option value="active">Active (Visible to all)</option>
-                <option value="draft">Draft (Hidden)</option>
-              </select>
-            </div>
-          </div>
+          )}
 
-          {error && <div className="form-error">{error}</div>}
+          {/* TAB 3: AMENITIES & FEATURES */}
+          {activeTab === 'amenities' && (
+            <div className="tab-pane animate-fade-in">
+              <div className="chips-section">
+                <h3>Highlights & Scenic Features</h3>
+                <p className="chips-hint">Select the top features that describe your accommodation:</p>
+                <div className="chips-grid">
+                  {PRESET_FEATURES.map(feat => (
+                    <button
+                      key={feat}
+                      type="button"
+                      className={`chip-btn ${selectedFeatures.includes(feat) ? 'selected' : ''}`}
+                      onClick={() => toggleItem(selectedFeatures, setSelectedFeatures, feat)}
+                    >
+                      {selectedFeatures.includes(feat) ? '✓ ' : '+ '} {feat}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="custom-chip-adder">
+                  <input 
+                    type="text"
+                    placeholder="Add custom feature (e.g. Bamboo Balcony)..."
+                    value={customFeature}
+                    onChange={e => setCustomFeature(e.target.value)}
+                    onKeyDown={handleAddCustomFeature}
+                  />
+                  <button type="button" onClick={handleAddCustomFeature}>+ Add</button>
+                </div>
+              </div>
+
+              <div className="chips-section" style={{ marginTop: '32px' }}>
+                <h3>Amenities & Comforts</h3>
+                <p className="chips-hint">Select all available amenities for guests:</p>
+                <div className="chips-grid">
+                  {PRESET_AMENITIES.map(amenity => (
+                    <button
+                      key={amenity}
+                      type="button"
+                      className={`chip-btn ${selectedAmenities.includes(amenity) ? 'selected' : ''}`}
+                      onClick={() => toggleItem(selectedAmenities, setSelectedAmenities, amenity)}
+                    >
+                      {selectedAmenities.includes(amenity) ? '✓ ' : '+ '} {amenity}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="custom-chip-adder">
+                  <input 
+                    type="text"
+                    placeholder="Add custom amenity (e.g. Campfire Wood, Coffee Grinder)..."
+                    value={customAmenity}
+                    onChange={e => setCustomAmenity(e.target.value)}
+                    onKeyDown={handleAddCustomAmenity}
+                  />
+                  <button type="button" onClick={handleAddCustomAmenity}>+ Add</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: HOST CONTACT & HOUSE RULES */}
+          {activeTab === 'contact' && (
+            <div className="tab-pane animate-fade-in">
+              <div className="form-grid">
+                <div className="form-group">
+                  <label htmlFor="host-name">Host / Contact Person Name</label>
+                  <input 
+                    id="host-name"
+                    type="text" 
+                    placeholder="e.g. P'Somchai" 
+                    value={hostName}
+                    onChange={e => setHostName(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="host-since">Hosting Since (Year)</label>
+                  <input 
+                    id="host-since"
+                    type="text" 
+                    placeholder="2024" 
+                    value={hostSince}
+                    onChange={e => setHostSince(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="contact-phone">Phone Number (For Traveler Bookings)</label>
+                  <input 
+                    id="contact-phone"
+                    type="tel" 
+                    placeholder="081-234-5678" 
+                    value={phone}
+                    onChange={e => setPhone(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="contact-line">LINE ID (Popular for Thailand Bookings)</label>
+                  <input 
+                    id="contact-line"
+                    type="text" 
+                    placeholder="@homestay or line_id" 
+                    value={line}
+                    onChange={e => setLine(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group full-width">
+                  <label htmlFor="contact-email">Host Email</label>
+                  <input 
+                    id="contact-email"
+                    type="email" 
+                    placeholder="host@example.com" 
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="check-in-time">Check-In Time</label>
+                  <input 
+                    id="check-in-time"
+                    type="text" 
+                    placeholder="14:00" 
+                    value={checkIn}
+                    onChange={e => setCheckIn(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="check-out-time">Check-Out Time</label>
+                  <input 
+                    id="check-out-time"
+                    type="text" 
+                    placeholder="11:00" 
+                    value={checkOut}
+                    onChange={e => setCheckOut(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="form-actions">
-            <button type="button" className="cancel-btn" onClick={onClose}>Cancel</button>
-            <button type="submit" className="save-btn" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : (isEditing ? 'Save Changes' : 'Create Listing')}
+            <button type="button" className="cancel-btn" onClick={onClose}>
+              Cancel
             </button>
+            <div className="action-buttons-right">
+              {activeTab !== 'contact' ? (
+                <button 
+                  type="button" 
+                  className="next-tab-btn"
+                  onClick={() => {
+                    if (activeTab === 'details') setActiveTab('photos');
+                    else if (activeTab === 'photos') setActiveTab('amenities');
+                    else if (activeTab === 'amenities') setActiveTab('contact');
+                  }}
+                >
+                  Next Step →
+                </button>
+              ) : null}
+              <button 
+                type="submit" 
+                className="save-btn" 
+                disabled={isSubmitting || uploading}
+              >
+                {isSubmitting ? 'Saving Accommodation...' : (isEditing ? 'Save Changes' : 'Publish Accommodation')}
+              </button>
+            </div>
           </div>
         </form>
       </div>
