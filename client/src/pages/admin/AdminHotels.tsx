@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../utils/supabase';
-import { verifiedChiangDaoList } from '../../data/chiangDaoData';
+import { AdminPropertyImportModal } from './AdminPropertyImportModal';
 
 interface Property {
   id: string;
@@ -14,16 +14,18 @@ interface Property {
   isVerified: boolean;
   imageUrl: string;
   location: string;
+  province?: string;
+  district?: string;
   status?: string;
   host_info?: { name?: string };
-  contact?: { phone?: string; bank?: string; accountNumber?: string };
+  contact?: { phone?: string; bank?: string; accountNumber?: string; accountName?: string };
 }
 
 export const AdminHotels: React.FC = () => {
   const navigate = useNavigate();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
-  const [importing, setImporting] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [alert, setAlert] = useState<{ type: string; message: string } | null>(null);
 
   const fetchProperties = async () => {
@@ -53,72 +55,6 @@ export const AdminHotels: React.FC = () => {
       setAlert({ type: 'error', message: err.message || 'Failed to load properties.' });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleImportVerified = async () => {
-    if (!window.confirm(`Do you want to import ${verifiedChiangDaoList.length} verified Chiang Dao homestays from the directory?`)) return;
-
-    setImporting(true);
-    setAlert({ type: 'info', message: 'Importing verified Chiang Dao homestays into database...' });
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      let ownerId = user?.id;
-
-      if (!ownerId) {
-        const { data: profile } = await supabase.from('profiles').select('id').limit(1).single();
-        ownerId = profile?.id;
-      }
-
-      if (!ownerId) {
-        throw new Error('Please make sure you are logged in as Admin.');
-      }
-
-      const rows = verifiedChiangDaoList.map(item => ({
-        name: item.name,
-        type: item.type,
-        price_per_night: item.pricePerNight,
-        currency: item.currency,
-        rating: item.rating,
-        reviews: item.reviews,
-        image_url: item.imageUrl,
-        is_verified: item.isVerified,
-        features: item.features,
-        amenities: item.amenities,
-        location: item.location,
-        province: item.province,
-        district: item.district,
-        description: item.description,
-        check_in: item.checkIn,
-        check_out: item.checkOut,
-        host_info: {
-          name: item.hostName,
-          since: item.hostSince
-        },
-        contact: {
-          phone: item.phone,
-          phones: item.phones,
-          facebook: item.facebookPage,
-          bank: item.bankAccount?.bank,
-          accountNumber: item.bankAccount?.accountNumber,
-          accountName: item.bankAccount?.accountName
-        },
-        owner_id: ownerId,
-        status: item.status
-      }));
-
-      const { error } = await supabase.from('properties').insert(rows);
-      if (error) throw error;
-
-      setAlert({ type: 'success', message: `Successfully imported ${rows.length} verified homestays!` });
-      await fetchProperties();
-    } catch (err: any) {
-      console.error('Import error:', err);
-      setAlert({ type: 'error', message: err.message || 'Failed to import homestays.' });
-    } finally {
-      setImporting(false);
-      setTimeout(() => setAlert(null), 5000);
     }
   };
 
@@ -152,11 +88,10 @@ export const AdminHotels: React.FC = () => {
         <div className="admin-topbar-actions" style={{ display: 'flex', gap: '10px' }}>
           <button 
             className="admin-btn admin-btn-secondary" 
-            onClick={handleImportVerified}
-            disabled={importing}
+            onClick={() => setIsImportModalOpen(true)}
             style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
           >
-            {importing ? '⏳ Importing...' : '📥 Import Chiang Dao List (34)'}
+            📥 Import / Export Data
           </button>
           <button className="admin-btn admin-btn-primary" onClick={() => navigate('/admin/hotels/new')}>
             + Add Property
@@ -187,10 +122,9 @@ export const AdminHotels: React.FC = () => {
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
                 <button 
                   className="admin-btn admin-btn-secondary" 
-                  onClick={handleImportVerified}
-                  disabled={importing}
+                  onClick={() => setIsImportModalOpen(true)}
                 >
-                  {importing ? '⏳ Importing...' : '📥 Import Verified Chiang Dao List (34 Homestays)'}
+                  📥 Import from CSV / JSON
                 </button>
                 <button className="admin-btn admin-btn-primary" onClick={() => navigate('/admin/hotels/new')}>
                   + Add Your First Property
@@ -258,6 +192,18 @@ export const AdminHotels: React.FC = () => {
           )}
         </div>
       </div>
+
+      <AdminPropertyImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onSuccess={() => {
+          fetchProperties();
+          setAlert({ type: 'success', message: 'Accommodations list successfully updated!' });
+          setTimeout(() => setAlert(null), 4000);
+        }}
+        currentProperties={properties}
+      />
     </>
   );
 };
+
