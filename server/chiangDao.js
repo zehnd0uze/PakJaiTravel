@@ -97,7 +97,7 @@ export const chiangDaoProperties = [
   },
   {
     id: 'cd-4',
-    name: 'บ้านไอจ๋อด (Baan Ai Jod)',
+    name: 'https://www.facebook.com/hashtag/บ้านไอ่จ๊อด (Baan Ai Jod)',
     nameTh: 'บ้านไอจ๋อด',
     type: 'Homestay',
     rating: 4.8,
@@ -115,7 +115,7 @@ export const chiangDaoProperties = [
       since: '2021'
     },
     contact: {
-      phones: ['080-677-5116', '089-855-2244'],
+      phones: ['081-934-9751', '089-855-2244'],
       phone: '080-677-5116',
       facebookPage: 'บ้านไอจ๋อด',
       bankAccount: {
@@ -128,7 +128,7 @@ export const chiangDaoProperties = [
   },
   {
     id: 'cd-5',
-    name: 'ปาย ปาย ดอยหลวงเชียงดาว (Pai Pai Doi Luang)',
+    name: 'https://www.facebook.com/people/ปาย-ปาย-ดอยหลวงเชียงดาว/100063627993077/ (Pai Pai Doi Luang)',
     nameTh: 'ปาย ปาย ดอยหลวงเชียงดาว',
     type: 'Homestay',
     rating: 4.8,
@@ -146,7 +146,7 @@ export const chiangDaoProperties = [
       since: '2020'
     },
     contact: {
-      phones: ['093-138-7650'],
+      phones: ['081-934-9751'],
       phone: '093-138-7650',
       facebookPage: 'ปาย ปาย ดอยหลวงเชียงดาว',
       bankAccount: {
@@ -159,7 +159,7 @@ export const chiangDaoProperties = [
   },
   {
     id: 'cd-6',
-    name: 'บ้านหมอกแสงดาว (Baan Mok Saeng Dao)',
+    name: 'https://www.facebook.com/profile.php?id=100083084054899 (Baan Mok Saeng Dao)',
     nameTh: 'บ้านหมอกแสงดาว',
     type: 'Homestay',
     rating: 4.6,
@@ -177,7 +177,7 @@ export const chiangDaoProperties = [
       since: '2021'
     },
     contact: {
-      phones: ['086-189-9275'],
+      phones: ['065-270-2055'],
       phone: '086-189-9275',
       facebookPage: 'บ้านหมอกแสงดาว',
       bankAccount: {
@@ -190,14 +190,14 @@ export const chiangDaoProperties = [
   },
   {
     id: 'cd-7',
-    name: 'บ้านหมอกเชียงดาวโฮมสเตย์ (Baan Mok Chiang Dao)',
+    name: 'https://www.facebook.com/ChaingmaiChaingdao (Baan Mok Chiang Dao)',
     nameTh: 'บ้านหมอกเชียงดาวโฮมสเตย์',
     type: 'Homestay',
     rating: 4.8,
     reviews: 138,
     pricePerNight: 800,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://th.readme.me/f/2832/5701fd4aef3a07566b187008.jpg',
     isVerified: true,
     features: ['Panoramic Mist', 'Balcony Dining', 'Hot Shower'],
     location: 'Chiang Dao, Chiang Mai',
@@ -208,7 +208,7 @@ export const chiangDaoProperties = [
       since: '2019'
     },
     contact: {
-      phones: ['089-952-9856'],
+      phones: ['065-270-2055'],
       phone: '089-952-9856',
       facebookPage: 'บ้านหมอกเชียงดาวโฮมสเตย์',
       bankAccount: {
@@ -221,14 +221,14 @@ export const chiangDaoProperties = [
   },
   {
     id: 'cd-8',
-    name: 'ดอยเคียงดาวโฮมสเตย์ (Doi Khiang Dao)',
+    name: 'https://www.facebook.com/people/ดอยเคียงดาวโฮมสเตย์/100063645391629/ (Doi Khiang Dao)',
     nameTh: 'ดอยเคียงดาวโฮมสเตย์',
     type: 'Homestay',
     rating: 4.9,
     reviews: 215,
     pricePerNight: 850,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://th.readme.me/f/4108/576b7e013856fe4c2b43c190.jpg',
     isVerified: true,
     features: ['Milky Way Views', 'Doi Luang Front View', 'Free Breakfast'],
     location: 'Chiang Dao, Chiang Mai',
@@ -239,7 +239,7 @@ export const chiangDaoProperties = [
       since: '2019'
     },
     contact: {
-      phones: ['093-138-7650'],
+      phones: ['081-387-9311'],
       phone: '093-138-7650',
       facebookPage: 'ดอยเคียงดาวโฮมสเตย์',
       bankAccount: {
@@ -252,14 +252,14 @@ export const chiangDaoProperties = [
   },
   {
     id: 'cd-9',
-    name: 'บ้านดอยนับดาว (Baan Doi Nab Dao)',
+    name: 'https://www.facebook.com/2121575761491008 (Baan Doi Nab Dao)',
     nameTh: 'บ้านดอยนับดาว',
     type: 'Homestay',
     rating: 4.7,
     reviews: 94,
     pricePerNight: 750,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://asset.readme.me/f/13593/5a539c0fa46440263f3edb4a.jpg',
     isVerified: true,
     features: ['Stargazing Terrace', 'Mountain Breeze', 'Breakfast Included'],
     location: 'Chiang Dao, Chiang Mai',
@@ -270,7 +270,7 @@ export const chiangDaoProperties = [
       since: '2021'
     },
     contact: {
-      phones: ['086-189-9275'],
+      phones: ['088-410-7231'],
       phone: '086-189-9275',
       facebookPage: 'บ้านดอยนับดาว',
       bankAccount: {
@@ -283,14 +283,14 @@ export const chiangDaoProperties = [
   },
   {
     id: 'cd-10',
-    name: 'บ้านภูตะวันโฮมสเตย์ (Baan Phu Tawan)',
+    name: 'https://www.facebook.com/search/top/?q=บ้านภูตะวัน%20เมืองคอง (Baan Phu Tawan)',
     nameTh: 'บ้านภูตะวันโฮมสเตย์',
     type: 'Homestay',
     rating: 4.8,
     reviews: 112,
     pricePerNight: 800,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://asset.readme.me/f/13593/5a539c0fa46440263f3edb4a.jpg',
     isVerified: true,
     features: ['Sunrise Panorama', 'Scenic Balcony', 'Real Owner Verified'],
     location: 'Chiang Dao, Chiang Mai',
@@ -301,7 +301,7 @@ export const chiangDaoProperties = [
       since: '2020'
     },
     contact: {
-      phones: ['093-138-7650'],
+      phones: ['089-560-1567'],
       phone: '093-138-7650',
       facebookPage: 'บ้านภูตะวันโฮมสเตย์',
       bankAccount: {
@@ -314,14 +314,14 @@ export const chiangDaoProperties = [
   },
   {
     id: 'cd-11',
-    name: 'บ้านดอยหมอก (Baan Doi Mok)',
+    name: 'https://www.facebook.com/pichitvietto (Baan Doi Mok)',
     nameTh: 'บ้านดอยหมอก',
     type: 'Homestay',
     rating: 4.7,
     reviews: 88,
     pricePerNight: 750,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://asset.readme.me/f/4108/576b7de43856fe4c2b43c18f.jpg',
     isVerified: true,
     features: ['Valley Fog', 'Rustic Wooden Cabin', 'Local Food'],
     location: 'Chiang Dao, Chiang Mai',
@@ -332,7 +332,7 @@ export const chiangDaoProperties = [
       since: '2021'
     },
     contact: {
-      phones: ['086-189-9275'],
+      phones: ['098-752-9512'],
       phone: '086-189-9275',
       facebookPage: 'บ้านดอยหมอก',
       bankAccount: {
@@ -345,14 +345,14 @@ export const chiangDaoProperties = [
   },
   {
     id: 'cd-12',
-    name: 'บ้านสุมาลีโฮมสเตย์ (Baan Sumalee)',
+    name: 'https://www.facebook.com/Baansumalee (Baan Sumalee)',
     nameTh: 'บ้านสุมาลีโฮมสเตย์',
     type: 'Homestay',
     rating: 4.8,
     reviews: 130,
     pricePerNight: 800,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://asset.readme.me/f/4108/576b7de43856fe4c2b43c18f.jpg',
     isVerified: true,
     features: ['Lush Garden', 'Doi Luang View', 'Traditional Breakfast'],
     location: 'Chiang Dao, Chiang Mai',
@@ -363,7 +363,7 @@ export const chiangDaoProperties = [
       since: '2019'
     },
     contact: {
-      phones: ['086-189-9275'],
+      phones: ['065-468-2281'],
       phone: '086-189-9275',
       facebookPage: 'บ้านสุมาลีโฮมสเตย์',
       bankAccount: {
@@ -376,14 +376,14 @@ export const chiangDaoProperties = [
   },
   {
     id: 'cd-13',
-    name: 'ภูเพียงดาวโฮมสเตย์ (Phu Phiang Dao)',
+    name: 'https://www.facebook.com/phu.pheiyng.daw.dxy.hlwng.cheiyngdaw (Phu Phiang Dao)',
     nameTh: 'ภูเพียงดาวโฮมสเตย์',
     type: 'Homestay',
     rating: 4.9,
     reviews: 175,
     pricePerNight: 850,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://th.readme.me/f/38569/669d2f62b2cbeba9443eec4f.jpg',
     isVerified: true,
     features: ['High Cliff View', '360 Mountain Ridge', 'Free Breakfast'],
     location: 'Chiang Dao, Chiang Mai',
@@ -394,7 +394,7 @@ export const chiangDaoProperties = [
       since: '2018'
     },
     contact: {
-      phones: ['086-189-9275'],
+      phones: ['063-157-6362'],
       phone: '086-189-9275',
       facebookPage: 'ภูเพียงดาวโฮมสเตย์',
       bankAccount: {
@@ -407,14 +407,14 @@ export const chiangDaoProperties = [
   },
   {
     id: 'cd-14',
-    name: 'บ้านสายหมอกโฮมสเตย์ (Baan Sai Mok)',
+    name: 'https://www.facebook.com/profile.php?id=100057488059885 (Baan Sai Mok)',
     nameTh: 'บ้านสายหมอกโฮมสเตย์',
     type: 'Homestay',
     rating: 4.7,
     reviews: 92,
     pricePerNight: 750,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1507608869274-d3177c8bb4c7?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://th.readme.me/f/2832/5701fd31ef3a07566b186fe1.jpg',
     isVerified: true,
     features: ['Morning Mist Streams', 'Cozy Balcony', 'Authentic Dinner'],
     location: 'Chiang Dao, Chiang Mai',
@@ -425,7 +425,7 @@ export const chiangDaoProperties = [
       since: '2020'
     },
     contact: {
-      phones: ['086-189-9275'],
+      phones: ['096-753-2158'],
       phone: '086-189-9275',
       facebookPage: 'บ้านสายหมอกโฮมสเตย์',
       bankAccount: {
@@ -438,14 +438,14 @@ export const chiangDaoProperties = [
   },
   {
     id: 'cd-15',
-    name: 'แม่เฒ่าโฮมสเตย์ (Mae Thao Homestay)',
+    name: 'https://web.facebook.com/profile.php?id=100082974687011 (Mae Thao Homestay)',
     nameTh: 'แม่เฒ่าโฮมสเตย์',
     type: 'Homestay',
     rating: 4.8,
     reviews: 104,
     pricePerNight: 700,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://asset.readme.me/f/33827/64d78096fbb52d3a39e944a6.jpg',
     isVerified: true,
     features: ['Authentic Village Hearth', 'Warm Hospitality', 'Home-cooked Meals'],
     location: 'Chiang Dao, Chiang Mai',
@@ -456,7 +456,7 @@ export const chiangDaoProperties = [
       since: '2017'
     },
     contact: {
-      phones: ['086-189-9275'],
+      phones: ['088-760-5407'],
       phone: '086-189-9275',
       facebookPage: 'แม่เฒ่าโฮมสเตย์',
       bankAccount: {
@@ -469,14 +469,14 @@ export const chiangDaoProperties = [
   },
   {
     id: 'cd-16',
-    name: 'บ้านทะเลหมอก (Baan Thale Mok)',
+    name: 'https://www.facebook.com/BaanTalayMokChiangDao (Baan Thale Mok)',
     nameTh: 'บ้านทะเลหมอก',
     type: 'Homestay',
     rating: 4.8,
     reviews: 156,
     pricePerNight: 800,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://th.readme.me/f/4108/576b7e013856fe4c2b43c190.jpg',
     isVerified: true,
     features: ['Sea of White Clouds', 'Front Cliff Balcony', 'Free Breakfast'],
     location: 'Chiang Dao, Chiang Mai',
@@ -487,7 +487,7 @@ export const chiangDaoProperties = [
       since: '2019'
     },
     contact: {
-      phones: ['086-189-9275'],
+      phones: ['062-247-5328'],
       phone: '086-189-9275',
       facebookPage: 'บ้านทะเลหมอก',
       bankAccount: {
@@ -500,14 +500,14 @@ export const chiangDaoProperties = [
   },
   {
     id: 'cd-17',
-    name: 'บ้านข้างดอยเพียงดาว (Baan Khang Doi)',
+    name: 'https://www.facebook.com/Baankhangdoiphiangdao (Baan Khang Doi)',
     nameTh: 'บ้านข้างดอยเพียงดาว',
     type: 'Homestay',
     rating: 4.7,
     reviews: 78,
     pricePerNight: 750,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1587061949409-02df41d5e562?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://th.readme.me/f/2832/5701fd4aef3a07566b187008.jpg',
     isVerified: true,
     features: ['Peaceful Grassy Slope', 'Private Balcony', 'Doi Luang View'],
     location: 'Chiang Dao, Chiang Mai',
@@ -518,7 +518,7 @@ export const chiangDaoProperties = [
       since: '2021'
     },
     contact: {
-      phones: ['086-189-9275'],
+      phones: ['081-733-8505'],
       phone: '086-189-9275',
       facebookPage: 'บ้านข้างดอยเพียงดาว',
       bankAccount: {
@@ -531,14 +531,14 @@ export const chiangDaoProperties = [
   },
   {
     id: 'cd-18',
-    name: 'บ้านวิวดอยหลวงโฮมสเตย์ (Baan View Doi Luang)',
+    name: 'https://www.facebook.com/p/บ้านวิวดอยหลวงเชียงดาว-100063989341517/ (Baan View Doi Luang)',
     nameTh: 'บ้านวิวดอยหลวงโฮมสเตย์',
     type: 'Homestay',
     rating: 4.9,
     reviews: 240,
     pricePerNight: 850,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://asset.readme.me/f/4108/576b7de43856fe4c2b43c18f.jpg',
     isVerified: true,
     features: ['Frontal Mountain Peak', 'Sunset Viewing Deck', 'Free Breakfast & Dinner'],
     location: 'Chiang Dao, Chiang Mai',
@@ -549,7 +549,7 @@ export const chiangDaoProperties = [
       since: '2018'
     },
     contact: {
-      phones: ['086-189-9275'],
+      phones: ['089-559-8272'],
       phone: '086-189-9275',
       facebookPage: 'บ้านวิวดอยหลวงโฮมสเตย์',
       bankAccount: {
@@ -562,14 +562,14 @@ export const chiangDaoProperties = [
   },
   {
     id: 'cd-19',
-    name: 'บ้านหมอกอรุณเชียงดาว (Baan Mok Arun)',
+    name: 'https://www.facebook.com/BaanMokArun (Baan Mok Arun)',
     nameTh: 'บ้านหมอกอรุณเชียงดาว',
     type: 'Homestay',
     rating: 4.8,
     reviews: 125,
     pricePerNight: 800,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://asset.readme.me/f/13593/5a539c0fa46440263f3edb4a.jpg',
     isVerified: true,
     features: ['Dawn Sunbeam Glow', 'Hot Drip Coffee', 'Breakfast Included'],
     location: 'Chiang Dao, Chiang Mai',
@@ -580,7 +580,7 @@ export const chiangDaoProperties = [
       since: '2020'
     },
     contact: {
-      phones: ['086-189-9275'],
+      phones: ['093-149-5724'],
       phone: '086-189-9275',
       facebookPage: 'บ้านหมอกอรุณเชียงดาว',
       bankAccount: {
@@ -600,7 +600,7 @@ export const chiangDaoProperties = [
     reviews: 96,
     pricePerNight: 750,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://asset.readme.me/f/33827/64d78096fbb52d3a39e944a6.jpg',
     isVerified: true,
     features: ['Clear Blue Skies', 'Valley Fog', 'Real Owner Verified'],
     location: 'Chiang Dao, Chiang Mai',
@@ -631,7 +631,7 @@ export const chiangDaoProperties = [
     reviews: 180,
     pricePerNight: 850,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1510312305653-8ed496efae75?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://th.readme.me/f/2832/5701fd4aef3a07566b187008.jpg',
     isVerified: true,
     features: ['High Ridge Balcony', 'Stargazing Camp', 'Breakfast & Dinner'],
     location: 'Chiang Dao, Chiang Mai',
@@ -662,7 +662,7 @@ export const chiangDaoProperties = [
     reviews: 110,
     pricePerNight: 800,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://asset.readme.me/f/38569/669d2f23b2cbeba9443eec4b.jpg',
     isVerified: true,
     features: ['Morning Sunshine Views', 'Pine Forest Surroundings', 'Local Food'],
     location: 'Chiang Dao, Chiang Mai',
@@ -693,7 +693,7 @@ export const chiangDaoProperties = [
     reviews: 82,
     pricePerNight: 750,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://asset.readme.me/files/2832/cover.jpg',
     isVerified: true,
     features: ['Warm Mountain Lodge', 'Scenic Balcony', 'Breakfast Included'],
     location: 'Chiang Dao, Chiang Mai',
@@ -724,7 +724,7 @@ export const chiangDaoProperties = [
     reviews: 160,
     pricePerNight: 850,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://asset.readme.me/f/33827/64d78096fbb52d3a39e944a6.jpg',
     isVerified: true,
     features: ['Dark Sky Stargazing', 'Cliff Terrace', 'Free Northern Dinner'],
     location: 'Chiang Dao, Chiang Mai',
@@ -755,7 +755,7 @@ export const chiangDaoProperties = [
     reviews: 118,
     pricePerNight: 800,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://asset.readme.me/files/2832/cover.jpg',
     isVerified: true,
     features: ['Refreshing Mountain Breeze', 'Bamboo Terrace', 'Authentic Food'],
     location: 'Chiang Dao, Chiang Mai',
@@ -786,7 +786,7 @@ export const chiangDaoProperties = [
     reviews: 135,
     pricePerNight: 800,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1517824806704-9040b037703b?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://th.readme.me/f/4108/576b7e013856fe4c2b43c190.jpg',
     isVerified: true,
     features: ['High Elevation Vista', 'Cloudline Balcony', 'Free Breakfast'],
     location: 'Chiang Dao, Chiang Mai',
@@ -817,7 +817,7 @@ export const chiangDaoProperties = [
     reviews: 90,
     pricePerNight: 750,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://th.readme.me/f/25615/619e201ff97eb4b23838202b.jpg',
     isVerified: true,
     features: ['Hillside Slopes', 'Rustic Cottages', 'Doi Luang View'],
     location: 'Chiang Dao, Chiang Mai',
@@ -848,7 +848,7 @@ export const chiangDaoProperties = [
     reviews: 102,
     pricePerNight: 800,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://asset.readme.me/f/25615/619e1fdbf97eb4b238382025.jpg',
     isVerified: true,
     features: ['Flower Garden Meadow', 'Panoramic Sunrise', 'Breakfast Included'],
     location: 'Chiang Dao, Chiang Mai',
@@ -879,7 +879,7 @@ export const chiangDaoProperties = [
     reviews: 114,
     pricePerNight: 800,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://asset.readme.me/f/33827/64d78096fbb52d3a39e944a6.jpg',
     isVerified: true,
     features: ['Authentic Wooden Huts', 'Doi Luang Vista', 'Free Breakfast'],
     location: 'Chiang Dao, Chiang Mai',
@@ -910,7 +910,7 @@ export const chiangDaoProperties = [
     reviews: 198,
     pricePerNight: 850,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://th.readme.me/f/38569/669d2f62b2cbeba9443eec4f.jpg',
     isVerified: true,
     features: ['Marigold Blossom Views', 'Direct Doi Luang Panorama', 'Free Dinner & Breakfast'],
     location: 'Chiang Dao, Chiang Mai',
@@ -941,7 +941,7 @@ export const chiangDaoProperties = [
     reviews: 86,
     pricePerNight: 750,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://th.readme.me/f/2832/5701fd31ef3a07566b186fe1.jpg',
     isVerified: true,
     features: ['Serene Forest Setting', 'Private Balcony', 'Authentic Food'],
     location: 'Chiang Dao, Chiang Mai',
@@ -972,7 +972,7 @@ export const chiangDaoProperties = [
     reviews: 74,
     pricePerNight: 700,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://asset.readme.me/f/33827/64d78096fbb52d3a39e944a6.jpg',
     isVerified: true,
     features: ['Hilltop Wooden Deck', 'Limestone Cliff Views', 'Breakfast Included'],
     location: 'Chiang Dao, Chiang Mai',
@@ -1003,7 +1003,7 @@ export const chiangDaoProperties = [
     reviews: 148,
     pricePerNight: 850,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1510798831971-661eb04b3739?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://asset.readme.me/f/13593/5a539c0fa46440263f3edb4a.jpg',
     isVerified: true,
     features: ['Fog Under Valley', 'Warm Tea Balcony', 'Northern Style Dinner'],
     location: 'Chiang Dao, Chiang Mai',
@@ -1034,7 +1034,7 @@ export const chiangDaoProperties = [
     reviews: 162,
     pricePerNight: 800,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1508873696983-2df5293cb395?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://asset.readme.me/files/2832/cover.jpg',
     isVerified: true,
     features: ['Spectacular Panoramic Ridges', 'Lisu Cultural Dinner', 'Breakfast Included'],
     location: 'Chiang Dao, Chiang Mai',
