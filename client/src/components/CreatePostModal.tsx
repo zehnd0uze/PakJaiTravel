@@ -1,20 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useJsApiLoader, Autocomplete, GoogleMap, Marker } from '@react-google-maps/api';
 import { type Post } from '../types';
 import { uploadToCloudinary } from '../utils/cloudinary';
 import { supabase } from '../utils/supabase';
 import { compressImage } from '../utils/imageCompression';
+import PlaceSearchPicker from './PlaceSearchPicker';
 import './CreatePostModal.css';
-
-const libraries: ("places")[] = ["places"];
-
-const mapContainerStyle = {
-  width: '100%',
-  height: '200px',
-  borderRadius: '8px',
-  marginTop: '12px'
-};
 
 interface CreatePostModalProps {
   onClose: () => void;
@@ -59,45 +50,21 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(
     postToEdit?.lat && postToEdit?.lng ? { lat: postToEdit.lat, lng: postToEdit.lng } : null
   );
+  const [propertyId, setPropertyId] = useState(postToEdit?.propertyId || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   const isEditing = !!postToEdit;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const placeInputRef = useRef<HTMLInputElement>(null);
 
-  const { isLoaded } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
-    libraries: libraries
-  });
-
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-
-  const onLoad = (autocomplete: google.maps.places.Autocomplete) => {
-    autocompleteRef.current = autocomplete;
-  };
-
-  const onPlaceChanged = () => {
-    if (autocompleteRef.current !== null) {
-      const place = autocompleteRef.current.getPlace();
-      if (place && place.geometry && place.geometry.location) {
-        const lat = place.geometry.location.lat();
-        const lng = place.geometry.location.lng();
-        setCoordinates({ lat, lng });
-        
-        if (place.name) {
-          setLocationTag(place.name);
-        } else if (place.formatted_address) {
-          setLocationTag(place.formatted_address);
-        }
-      }
+  const handlePlaceChange = (tag: string, coords: { lat: number; lng: number } | null, propId?: string) => {
+    setLocationTag(tag);
+    setCoordinates(coords);
+    if (propId) {
+      setPropertyId(propId);
     }
-  };
-
-  const clearLocation = () => {
-    setLocationTag('');
-    setCoordinates(null);
   };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -143,6 +110,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
       const postData = {
         content: content.trim(),
         image_url: imageUrl,
+        property_id: propertyId || null,
         location_tag: locationTag.trim() || null,
         lat: coordinates?.lat || null,
         lng: coordinates?.lng || null,
@@ -230,52 +198,13 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
             )}
 
             <div className="fb-location-input-container">
-              {isLoaded ? (
-                <div className="fb-location-group">
-                  <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
-                    <div className="fb-location-input-wrapper">
-                      <svg viewBox="0 0 24 24" width="16" height="16" fill="#ef4444"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                      <input 
-                        type="text" 
-                        placeholder="เพิ่มสถานที่..."
-                        value={locationTag}
-                        onChange={e => setLocationTag(e.target.value)}
-                      />
-                      {locationTag && (
-                        <button type="button" className="clear-location-btn" onClick={clearLocation}>
-                          &times;
-                        </button>
-                      )}
-                    </div>
-                  </Autocomplete>
-                  
-                  {coordinates && isLoaded && (
-                    <div className="fb-map-preview">
-                      <GoogleMap
-                        mapContainerStyle={mapContainerStyle}
-                        center={coordinates}
-                        zoom={15}
-                        options={{
-                          disableDefaultUI: true,
-                          gestureHandling: 'cooperative'
-                        }}
-                      >
-                        <Marker position={coordinates} />
-                      </GoogleMap>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="fb-location-input-wrapper">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="#ef4444"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                  <input 
-                    type="text" 
-                    placeholder="เพิ่มสถานที่..."
-                    value={locationTag}
-                    onChange={e => setLocationTag(e.target.value)}
-                  />
-                </div>
-              )}
+              <PlaceSearchPicker
+                value={locationTag}
+                coordinates={coordinates}
+                onChange={handlePlaceChange}
+                inputRef={placeInputRef}
+                placeholder="เพิ่มสถานที่ / ค้นหาที่พักหรือจุดท่องเที่ยว..."
+              />
             </div>
 
             <div className="fb-ratings-bar">
@@ -349,7 +278,12 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
                 <button type="button" className="option-btn" title="ความรู้สึก">
                   <svg viewBox="0 0 24 24" fill="#F7B928"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9c.83 0 1.5-.67 1.5-1.5S7.83 8 7 8s-1.5.67-1.5 1.5S6.17 11 7 11zm10 0c.83 0 1.5-.67 1.5-1.5S17.83 8 17 8s-1.5.67-1.5 1.5.67 1.5 1.5 1.5zM7 14c1.66 2.01 3.33 3 5 3s3.34-.99 5-3H7z"/></svg>
                 </button>
-                <button type="button" className="option-btn" title="เช็คอิน">
+                <button 
+                  type="button" 
+                  className="option-btn" 
+                  title="เช็คอินสถานที่"
+                  onClick={() => placeInputRef.current?.focus()}
+                >
                   <svg viewBox="0 0 24 24" fill="#F3425F"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
                 </button>
               </div>
