@@ -16,13 +16,17 @@ export const AdminLogin: React.FC = () => {
     setLoading(true);
 
     try {
+      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+        throw new Error('Supabase environment variables (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY) are not configured in client/.env');
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
       if (error) {
-        throw new Error(error.message);
+        throw new Error(error.message || 'Invalid login credentials');
       }
 
       // Fetch profile to verify role
@@ -41,10 +45,14 @@ export const AdminLogin: React.FC = () => {
       localStorage.setItem('admin_token', data.session.access_token);
       navigate('/admin');
     } catch (err: any) {
-      if (err?.message?.includes('Failed to fetch')) {
+      const msg = typeof err?.message === 'string' && err.message !== '{}' && err.message.trim()
+        ? err.message
+        : (typeof err === 'string' ? err : 'Authentication failed. Please check your credentials and database connection.');
+        
+      if (msg.includes('Failed to fetch')) {
         setError('Unable to connect to database server. Please check your Supabase project status or network.');
       } else {
-        setError(err.message || 'Authentication failed');
+        setError(msg);
       }
     } finally {
       setLoading(false);

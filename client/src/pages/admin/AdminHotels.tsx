@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../utils/supabase';
+import { verifiedChiangDaoList } from '../../data/chiangDaoData';
 
 interface Property {
   id: string;
@@ -14,12 +15,15 @@ interface Property {
   imageUrl: string;
   location: string;
   status?: string;
+  host_info?: { name?: string };
+  contact?: { phone?: string; bank?: string; accountNumber?: string };
 }
 
 export const AdminHotels: React.FC = () => {
   const navigate = useNavigate();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+  const [importing, setImporting] = useState(false);
   const [alert, setAlert] = useState<{ type: string; message: string } | null>(null);
 
   const fetchProperties = async () => {
@@ -52,6 +56,72 @@ export const AdminHotels: React.FC = () => {
     }
   };
 
+  const handleImportVerified = async () => {
+    if (!window.confirm(`Do you want to import ${verifiedChiangDaoList.length} verified Chiang Dao homestays from the directory?`)) return;
+
+    setImporting(true);
+    setAlert({ type: 'info', message: 'Importing verified Chiang Dao homestays into database...' });
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      let ownerId = user?.id;
+
+      if (!ownerId) {
+        const { data: profile } = await supabase.from('profiles').select('id').limit(1).single();
+        ownerId = profile?.id;
+      }
+
+      if (!ownerId) {
+        throw new Error('Please make sure you are logged in as Admin.');
+      }
+
+      const rows = verifiedChiangDaoList.map(item => ({
+        name: item.name,
+        type: item.type,
+        price_per_night: item.pricePerNight,
+        currency: item.currency,
+        rating: item.rating,
+        reviews: item.reviews,
+        image_url: item.imageUrl,
+        is_verified: item.isVerified,
+        features: item.features,
+        amenities: item.amenities,
+        location: item.location,
+        province: item.province,
+        district: item.district,
+        description: item.description,
+        check_in: item.checkIn,
+        check_out: item.checkOut,
+        host_info: {
+          name: item.hostName,
+          since: item.hostSince
+        },
+        contact: {
+          phone: item.phone,
+          phones: item.phones,
+          facebook: item.facebookPage,
+          bank: item.bankAccount?.bank,
+          accountNumber: item.bankAccount?.accountNumber,
+          accountName: item.bankAccount?.accountName
+        },
+        owner_id: ownerId,
+        status: item.status
+      }));
+
+      const { error } = await supabase.from('properties').insert(rows);
+      if (error) throw error;
+
+      setAlert({ type: 'success', message: `Successfully imported ${rows.length} verified homestays!` });
+      await fetchProperties();
+    } catch (err: any) {
+      console.error('Import error:', err);
+      setAlert({ type: 'error', message: err.message || 'Failed to import homestays.' });
+    } finally {
+      setImporting(false);
+      setTimeout(() => setAlert(null), 5000);
+    }
+  };
+
   useEffect(() => {
     fetchProperties();
   }, []);
@@ -79,7 +149,15 @@ export const AdminHotels: React.FC = () => {
     <>
       <div className="admin-topbar">
         <h1>Properties</h1>
-        <div className="admin-topbar-actions">
+        <div className="admin-topbar-actions" style={{ display: 'flex', gap: '10px' }}>
+          <button 
+            className="admin-btn admin-btn-secondary" 
+            onClick={handleImportVerified}
+            disabled={importing}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            {importing ? '⏳ Importing...' : '📥 Import Chiang Dao List (34)'}
+          </button>
           <button className="admin-btn admin-btn-primary" onClick={() => navigate('/admin/hotels/new')}>
             + Add Property
           </button>
@@ -88,13 +166,13 @@ export const AdminHotels: React.FC = () => {
 
       <div className="admin-content">
         {alert && (
-          <div className={`admin-alert ${alert.type}`}>
+          <div className={`admin-alert ${alert.type}`} style={alert.type === 'info' ? { background: '#e0f2fe', color: '#0369a1', borderLeft: '4px solid #0284c7' } : {}}>
             {alert.message}
           </div>
         )}
 
         <div className="admin-table-wrapper">
-          <div className="admin-table-header">
+          <div className="admin-table-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h2>All Properties ({properties.length})</h2>
           </div>
 
@@ -106,9 +184,18 @@ export const AdminHotels: React.FC = () => {
           ) : properties.length === 0 ? (
             <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>
               <p style={{ marginBottom: '16px', fontSize: '1rem' }}>No properties found in the database.</p>
-              <button className="admin-btn admin-btn-primary" onClick={() => navigate('/admin/hotels/new')}>
-                + Add Your First Property
-              </button>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                <button 
+                  className="admin-btn admin-btn-secondary" 
+                  onClick={handleImportVerified}
+                  disabled={importing}
+                >
+                  {importing ? '⏳ Importing...' : '📥 Import Verified Chiang Dao List (34 Homestays)'}
+                </button>
+                <button className="admin-btn admin-btn-primary" onClick={() => navigate('/admin/hotels/new')}>
+                  + Add Your First Property
+                </button>
+              </div>
             </div>
           ) : (
             <table className="admin-table">

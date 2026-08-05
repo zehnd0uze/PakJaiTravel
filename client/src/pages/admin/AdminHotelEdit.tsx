@@ -26,6 +26,11 @@ interface PropertyForm {
   hostName: string;
   hostSince: string;
   phone: string;
+  phones: string;
+  facebook: string;
+  bank: string;
+  accountNumber: string;
+  accountName: string;
   email: string;
   line: string;
   status: string;
@@ -35,10 +40,12 @@ const emptyForm: PropertyForm = {
   name: '', type: 'Homestay', pricePerNight: 0, currency: 'THB',
   rating: 0, reviews: 0, imageUrl: '', images: [],
   isVerified: true, features: [], amenities: [],
-  location: '', province: 'Chiang Mai', district: 'Chiang Dao',
+  location: '', province: 'เชียงใหม่', district: 'เชียงดาว',
   description: '', checkIn: '14:00', checkOut: '11:00',
-  hostName: '', hostSince: '', phone: '', email: '', line: '',
-  status: 'draft',
+  hostName: '', hostSince: '', phone: '', phones: '', facebook: '',
+  bank: '', accountNumber: '', accountName: '',
+  email: '', line: '',
+  status: 'published',
 };
 
 export const AdminHotelEdit: React.FC = () => {
@@ -85,6 +92,11 @@ export const AdminHotelEdit: React.FC = () => {
               hostName: data.host_info?.name || '',
               hostSince: data.host_info?.since || '',
               phone: data.contact?.phone || '',
+              phones: Array.isArray(data.contact?.phones) ? data.contact.phones.join(', ') : '',
+              facebook: data.contact?.facebook || '',
+              bank: data.contact?.bank || '',
+              accountNumber: data.contact?.accountNumber || '',
+              accountName: data.contact?.accountName || '',
               email: data.contact?.email || '',
               line: data.contact?.line || '',
               status: data.status || 'published',
@@ -185,6 +197,11 @@ export const AdminHotelEdit: React.FC = () => {
       host_info: { name: form.hostName, since: form.hostSince },
       contact: {
         phone: form.phone,
+        phones: form.phones ? form.phones.split(',').map(s => s.trim()).filter(Boolean) : [form.phone].filter(Boolean),
+        facebook: form.facebook,
+        bank: form.bank,
+        accountNumber: form.accountNumber,
+        accountName: form.accountName,
         email: form.email,
         line: form.line,
       },
@@ -403,14 +420,14 @@ export const AdminHotelEdit: React.FC = () => {
 
           {/* Host & Contact */}
           <div className="admin-form-section">
-            <h3>Host & Contact</h3>
+            <h3>Host, Contact & Verified Bank Information</h3>
             <div className="admin-form-grid">
               <div className="admin-form-group">
-                <label>Host Name</label>
+                <label>Host Name (ชื่อเจ้าของ/ผู้ดูแล)</label>
                 <input
                   value={form.hostName}
                   onChange={e => handleChange('hostName', e.target.value)}
-                  placeholder="Khun Somchai"
+                  placeholder="เช่น น.ส. อรัญญา แซ่ล้อ"
                 />
               </div>
               <div className="admin-form-group">
@@ -422,11 +439,51 @@ export const AdminHotelEdit: React.FC = () => {
                 />
               </div>
               <div className="admin-form-group">
-                <label>Phone</label>
+                <label>Primary Phone (เบอร์โทรหลัก)</label>
                 <input
                   value={form.phone}
                   onChange={e => handleChange('phone', e.target.value)}
-                  placeholder="+66 89 123 4567"
+                  placeholder="086-189-9275"
+                />
+              </div>
+              <div className="admin-form-group">
+                <label>All Phone Numbers (เบอร์โทรทั้งหมด คั่นด้วย comma)</label>
+                <input
+                  value={form.phones}
+                  onChange={e => handleChange('phones', e.target.value)}
+                  placeholder="086-189-9275, 061-056-6617, 093-225-1344"
+                />
+              </div>
+              <div className="admin-form-group">
+                <label>Facebook Page (ชื่อเพจ Facebook)</label>
+                <input
+                  value={form.facebook}
+                  onChange={e => handleChange('facebook', e.target.value)}
+                  placeholder="เช่น บ้านระเบียงดาว"
+                />
+              </div>
+              <div className="admin-form-group">
+                <label>Bank Name (ธนาคารรับโอน)</label>
+                <input
+                  value={form.bank}
+                  onChange={e => handleChange('bank', e.target.value)}
+                  placeholder="เช่น ไทยพาณิชย์ (SCB), กรุงไทย (KTB)"
+                />
+              </div>
+              <div className="admin-form-group">
+                <label>Bank Account Number (เลขที่บัญชี)</label>
+                <input
+                  value={form.accountNumber}
+                  onChange={e => handleChange('accountNumber', e.target.value)}
+                  placeholder="เช่น 093-2-25134-4"
+                />
+              </div>
+              <div className="admin-form-group">
+                <label>Account Owner Name (ชื่อเจ้าของบัญชี)</label>
+                <input
+                  value={form.accountName}
+                  onChange={e => handleChange('accountName', e.target.value)}
+                  placeholder="เช่น นางสาว อรัญญา แซ่ล้อ"
                 />
               </div>
               <div className="admin-form-group">
@@ -451,7 +508,7 @@ export const AdminHotelEdit: React.FC = () => {
                   value={form.isVerified ? 'true' : 'false'}
                   onChange={e => handleChange('isVerified', e.target.value === 'true')}
                 >
-                  <option value="true">Verified</option>
+                  <option value="true">Verified (ยืนยันแล้ว)</option>
                   <option value="false">Not Verified</option>
                 </select>
               </div>

@@ -109,15 +109,18 @@ begin
   insert into public.profiles (id, name, email, avatar, role)
   values (
     new.id, 
-    new.raw_user_meta_data->>'name', 
+    coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1), 'User'), 
     new.email, 
     new.raw_user_meta_data->>'avatar_url',
     coalesce(new.raw_user_meta_data->>'role', 'user')
-  );
+  )
+  on conflict (id) do update set
+    email = excluded.email,
+    name = coalesce(excluded.name, profiles.name);
   return new;
 end;
 $$ language plpgsql security definer;
 
-create trigger on_auth_user_created
+create or replace trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
