@@ -41,10 +41,11 @@ export const verifiedChiangDaoList: VerifiedHomestay[] = [
     reviews: 320,
     pricePerNight: 800,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://asset.readme.me/files/2832/cover.jpg',
     images: [
-      'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200&auto=format&fit=crop'
+      'https://asset.readme.me/files/2832/cover.jpg',
+      'https://th.readme.me/f/2832/5701fd4aef3a07566b187008.jpg',
+      'https://th.readme.me/f/2832/5701fd31ef3a07566b186fe1.jpg'
     ],
     isVerified: true,
     features: ['Doi Luang View', 'Breakfast Included', 'Private Balcony', 'Real Owner Verified'],
@@ -76,10 +77,10 @@ export const verifiedChiangDaoList: VerifiedHomestay[] = [
     reviews: 195,
     pricePerNight: 750,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://asset.readme.me/f/4108/576b7de43856fe4c2b43c18f.jpg',
     images: [
-      'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=1200&auto=format&fit=crop'
+      'https://asset.readme.me/f/4108/576b7de43856fe4c2b43c18f.jpg',
+      'https://th.readme.me/f/2832/5701fd31ef3a07566b186fe1.jpg'
     ],
     isVerified: true,
     features: ['Mountain Mist View', 'Local Food', 'Real Owner Verified'],
@@ -111,8 +112,11 @@ export const verifiedChiangDaoList: VerifiedHomestay[] = [
     reviews: 210,
     pricePerNight: 800,
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=1200&auto=format&fit=crop',
-    images: ['https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=1200&auto=format&fit=crop'],
+    imageUrl: 'https://asset.readme.me/files/4108/cover.jpg',
+    images: [
+      'https://asset.readme.me/files/4108/cover.jpg',
+      'https://asset.readme.me/f/4108/576b7de43856fe4c2b43c18f.jpg'
+    ],
     isVerified: true,
     features: ['Lisu Cultural Experience', 'Doi Luang View', 'Authentic Food'],
     amenities: ['Wi-Fi', 'Breakfast', 'Mountain View', 'Balcony', 'Hot Shower'],
