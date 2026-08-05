@@ -102,12 +102,29 @@ export const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [properties, setProperties] = useState<Property[]>([]);
   const [users, setUsers] = useState<User[]>([]);
-  const [traffic, setTraffic] = useState<TrafficStats>({ active5m: 0, total24h: 0, chartData: [], lastUpdated: '' });
+  const [pendingClaimsCount, setPendingClaimsCount] = useState<number>(0);
+  const [traffic, setTraffic] = useState<TrafficStats>({
+    active5m: 0,
+    total24h: 0,
+    chartData: [],
+    lastUpdated: new Date().toISOString()
+  });
 
   useEffect(() => {
     const fetchData = async () => {
       let currentUsersCount = 0;
       let currentPropsCount = 0;
+
+      // Fetch pending claims
+      try {
+        const { count } = await supabase
+          .from('property_claims')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending');
+        if (count !== null) setPendingClaimsCount(count);
+      } catch {
+        // ignore
+      }
 
       try {
         const { data: propData, error: propError } = await supabase
@@ -230,9 +247,28 @@ export const AdminDashboard: React.FC = () => {
             <div className="stat-value">{traffic.total24h}</div>
             <div className="stat-label">Total Visits (24h)</div>
           </div>
-           <div className="stat-card">
+          <div className="stat-card">
             <div className="stat-value">{publishedCount}</div>
             <div className="stat-label">Published Stays</div>
+          </div>
+          <div 
+            className="stat-card" 
+            onClick={() => navigate('/admin/claims')} 
+            style={{ 
+              cursor: 'pointer',
+              border: pendingClaimsCount > 0 ? '2px solid #f59e0b' : undefined,
+              background: pendingClaimsCount > 0 ? 'rgba(245, 158, 11, 0.06)' : undefined
+            }}
+          >
+            <div className="stat-value" style={{ color: pendingClaimsCount > 0 ? '#d97706' : undefined }}>
+              {pendingClaimsCount}
+            </div>
+            <div className="stat-label">Pending Claims</div>
+            {pendingClaimsCount > 0 && (
+              <div style={{ fontSize: '0.7rem', color: '#d97706', fontWeight: 700, marginTop: '4px' }}>
+                NEEDS REVIEW →
+              </div>
+            )}
           </div>
           <div className="stat-card" onClick={() => navigate('/admin/users')} style={{ cursor: 'pointer' }}>
             <div className="stat-value">{users.length}</div>

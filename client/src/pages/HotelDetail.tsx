@@ -4,6 +4,7 @@ import { supabase } from '../utils/supabase';
 import { VerifiedBadge } from '../components/VerifiedBadge';
 import { Button } from '../components/Button';
 import { useAuth } from '../context/AuthContext';
+import { ClaimPropertyModal } from '../components/ClaimPropertyModal';
 import './HotelDetail.css';
 
 interface Hotel {
@@ -34,6 +35,7 @@ export const HotelDetail: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [hotel, setHotel] = useState<Hotel | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showClaimModal, setShowClaimModal] = useState(false);
 
   // Fetch from API
   useEffect(() => {
@@ -361,9 +363,61 @@ export const HotelDetail: React.FC = () => {
             >
               ✉️ Send Email
             </Button>
+
+            {/* Claim Property Banner for Owners */}
+            <div style={{
+              marginTop: '20px',
+              padding: '14px',
+              background: '#f8fafc',
+              border: '1px dashed #cbd5e1',
+              borderRadius: '12px',
+              textAlign: 'center'
+            }}>
+              <span style={{ fontSize: '0.82rem', color: '#64748b', display: 'block', marginBottom: '8px' }}>
+                Are you the owner of this accommodation?
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowClaimModal(true)}
+                style={{
+                  width: '100%',
+                  background: '#ffffff',
+                  border: '1.5px solid #2e7d32',
+                  color: '#2e7d32',
+                  borderRadius: '8px',
+                  padding: '8px 12px',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = '#2e7d32';
+                  e.currentTarget.style.color = '#ffffff';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = '#ffffff';
+                  e.currentTarget.style.color = '#2e7d32';
+                }}
+              >
+                🏷️ Claim this Listing (ขอสิทธิ์ดูแลที่พักนี้)
+              </button>
+            </div>
           </div>
         </aside>
       </div>
+
+      {/* Claim Property Modal */}
+      <ClaimPropertyModal
+        isOpen={showClaimModal}
+        onClose={() => setShowClaimModal(false)}
+        preselectedPropertyId={hotel.id}
+        preselectedPropertyName={hotel.name}
+      />
     </div>
   );
 };

@@ -7,10 +7,12 @@ export const AdminLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [checking, setChecking] = useState(true);
+  const [pendingClaimsCount, setPendingClaimsCount] = useState(0);
 
   const navItems = [
     { path: '/admin', label: 'Dashboard', exact: true },
     { path: '/admin/hotels', label: 'Properties' },
+    { path: '/admin/claims', label: 'Ownership Claims', badge: pendingClaimsCount },
     { path: '/admin/users', label: 'Users' },
   ];
 
@@ -18,6 +20,24 @@ export const AdminLayout: React.FC = () => {
     if (exact) return location.pathname === path;
     return location.pathname.startsWith(path);
   };
+
+  const fetchPendingClaims = async () => {
+    try {
+      const { count, error } = await supabase
+        .from('property_claims')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+      if (!error && count !== null) {
+        setPendingClaimsCount(count);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    fetchPendingClaims();
+  }, [location.pathname]);
 
   useEffect(() => {
     let isMounted = true;
@@ -109,8 +129,22 @@ export const AdminLayout: React.FC = () => {
                 key={item.path}
                 className={`admin-nav-item ${isActive(item.path, item.exact) ? 'active' : ''}`}
                 onClick={() => navigate(item.path)}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
               >
                 <span>{item.label}</span>
+                {item.badge !== undefined && item.badge > 0 && (
+                  <span style={{
+                    background: '#ef4444',
+                    color: '#ffffff',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    padding: '2px 7px',
+                    borderRadius: '10px',
+                    lineHeight: 1
+                  }}>
+                    {item.badge}
+                  </span>
+                )}
               </button>
             ))}
           </div>

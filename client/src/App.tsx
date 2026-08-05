@@ -19,6 +19,7 @@ import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminHotels } from './pages/admin/AdminHotels';
 import { AdminHotelEdit } from './pages/admin/AdminHotelEdit';
 import { AdminUsers } from './pages/admin/AdminUsers';
+import { AdminClaims } from './pages/admin/AdminClaims';
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { MobileBottomNav } from './components/MobileBottomNav';
 
@@ -42,6 +43,7 @@ function App() {
               <Route path="hotels" element={<AdminHotels />} />
               <Route path="hotels/:id/edit" element={<AdminHotelEdit />} />
               <Route path="hotels/new" element={<AdminHotelEdit />} />
+              <Route path="claims" element={<AdminClaims />} />
               <Route path="users" element={<AdminUsers />} />
             </Route>
 

@@ -5,10 +5,19 @@ import HostPostCreation from '../components/HostPostCreation';
 import PostCard from '../components/PostCard';
 import HostPropertyCard from '../components/HostPropertyCard';
 import PropertyEditModalComp from '../components/PropertyEditModal';
+import { ClaimPropertyModal } from '../components/ClaimPropertyModal';
 import { type Post, type Property } from '../types';
 import { supabase } from '../utils/supabase';
 import { Button } from '../components/Button';
 import './HostDashboard.css';
+
+interface UserClaim {
+  id: string;
+  property_id: string;
+  status: string;
+  created_at: string;
+  property_name?: string;
+}
 
 const HostDashboard: React.FC = () => {
   const { user, updateProfile } = useAuth();
@@ -16,9 +25,11 @@ const HostDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'properties' | 'updates'>('properties');
   const [posts, setPosts] = useState<Post[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
+  const [userClaims, setUserClaims] = useState<UserClaim[]>([]);
   const [loading, setLoading] = useState(true);
   const [activating, setActivating] = useState(false);
   const [showPropertyModal, setShowPropertyModal] = useState(false);
+  const [showClaimModal, setShowClaimModal] = useState(false);
   const [propertyToEdit, setPropertyToEdit] = useState<Property | undefined>(undefined);
 
   // Auto-open new property modal if navigated with ?new=true or ?new=1
@@ -100,6 +111,29 @@ const HostDashboard: React.FC = () => {
         }
       }));
       setProperties(formattedProps);
+
+      // Fetch User's Ownership Claims
+      try {
+        const { data: claimsData } = await supabase
+          .from('property_claims')
+          .select('id, property_id, status, created_at, properties(name)')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (claimsData) {
+          setUserClaims(
+            claimsData.map((c: any) => ({
+              id: c.id,
+              property_id: c.property_id,
+              status: c.status,
+              created_at: c.created_at,
+              property_name: c.properties?.name || 'Pre-listed Accommodation'
+            }))
+          );
+        }
+      } catch (claimErr) {
+        console.warn('Could not fetch claims (table may be pending migration):', claimErr);
+      }
     } catch (err) {
       console.error("Dashboard fetch error", err);
     } finally {
@@ -208,14 +242,66 @@ const HostDashboard: React.FC = () => {
           <div className="dashboard-content">
             {activeTab === 'properties' ? (
               <div className="properties-section">
-                <div className="section-header-row">
-                  <h2 className="section-label">Your Accommodations</h2>
-                  <button 
-                    className="add-property-btn"
-                    onClick={() => { setPropertyToEdit(undefined); setShowPropertyModal(true); }}
-                  >
-                    + Add New Accommodation
-                  </button>
+                {/* Pending Claims Status Notification */}
+                {userClaims.length > 0 && (
+                  <div style={{
+                    marginBottom: '24px',
+                    padding: '16px 20px',
+                    background: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    borderRadius: '16px'
+                  }}>
+                    <div style={{ fontWeight: 700, color: '#166534', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span>🏷️</span>
+                      <span>Your Property Ownership Requests ({userClaims.length})</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {userClaims.map(claim => (
+                        <div key={claim.id} style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          background: '#ffffff',
+                          padding: '10px 14px',
+                          borderRadius: '10px',
+                          border: '1px solid #e2e8f0',
+                          fontSize: '0.9rem'
+                        }}>
+                          <span style={{ fontWeight: 600, color: '#1e293b' }}>{claim.property_name}</span>
+                          <span style={{
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            padding: '4px 10px',
+                            borderRadius: '20px',
+                            background: claim.status === 'approved' ? '#dcfce7' : claim.status === 'rejected' ? '#fee2e2' : '#fef3c7',
+                            color: claim.status === 'approved' ? '#166534' : claim.status === 'rejected' ? '#991b1b' : '#92400e',
+                            textTransform: 'uppercase'
+                          }}>
+                            {claim.status === 'approved' ? '✓ Approved' : claim.status === 'rejected' ? '✕ Rejected' : '⏳ Pending Review'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="section-header-row" style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <h2 className="section-label" style={{ margin: 0 }}>Your Accommodations</h2>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button 
+                      className="add-property-btn"
+                      style={{ background: '#ffffff', color: '#2e7d32', border: '1.5px solid #2e7d32' }}
+                      onClick={() => setShowClaimModal(true)}
+                    >
+                      🏷️ Claim Existing Listing
+                    </button>
+                    <button 
+                      className="add-property-btn"
+                      onClick={() => { setPropertyToEdit(undefined); setShowPropertyModal(true); }}
+                    >
+                      + Add New Accommodation
+                    </button>
+                  </div>
                 </div>
 
                 {loading ? (
@@ -306,6 +392,14 @@ const HostDashboard: React.FC = () => {
           }}
         />
       )}
+
+      <ClaimPropertyModal
+        isOpen={showClaimModal}
+        onClose={() => setShowClaimModal(false)}
+        onClaimSubmitted={() => {
+          fetchData();
+        }}
+      />
     </div>
   );
 };

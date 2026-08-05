@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/Button';
+import { ClaimPropertyModal } from '../components/ClaimPropertyModal';
 import './BecomeHostPage.css';
 
 const BecomeHostPage: React.FC = () => {
@@ -9,6 +10,7 @@ const BecomeHostPage: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showClaimModal, setShowClaimModal] = useState(false);
 
   const handleGetStarted = async () => {
     setError('');
@@ -56,6 +58,28 @@ const BecomeHostPage: React.FC = () => {
                 user.role === 'host' ? 'Go to Host Dashboard (+ Add Listing)' : 
                 'Activate Host Mode & List Accommodation'}
             </Button>
+
+            <button 
+              type="button" 
+              className="bh-secondary-link" 
+              onClick={() => setShowClaimModal(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '10px 18px',
+                background: 'rgba(255, 255, 255, 0.9)',
+                border: '1.5px solid #2e7d32',
+                borderRadius: '12px',
+                color: '#2e7d32',
+                fontWeight: 600,
+                fontSize: '0.95rem',
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+              }}
+            >
+              🏷️ Is your homestay already on PakJai? Claim Ownership
+            </button>
 
             {user && user.role === 'host' && (
               <button className="bh-secondary-link" onClick={() => navigate('/dashboard')}>
@@ -107,6 +131,11 @@ const BecomeHostPage: React.FC = () => {
           <cite>— Chiang Dao Homestay Host</cite>
         </div>
       </section>
+
+      <ClaimPropertyModal
+        isOpen={showClaimModal}
+        onClose={() => setShowClaimModal(false)}
+      />
     </div>
   );
 };
