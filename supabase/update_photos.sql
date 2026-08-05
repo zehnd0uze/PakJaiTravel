@@ -1,0 +1,36 @@
+-- Run this SQL in your Supabase SQL Editor to update all 34 accommodations with real high-resolution photos!
+
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%ระเบียงดาว%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%ไอดิน%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%ลีซู%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1510312305653-8ed496efae75?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%ไอจ๋อด%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%ปาย ปาย%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%หมอกแสงดาว%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%หมอกเชียงดาว%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%เคียงดาว%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%ดอยนับดาว%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%ภูตะวัน%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%ดอยหมอก%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%สุมาลี%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%ภูเพียงดาว%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1507608869274-d3177c8bb4c7?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%สายหมอก%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%แม่เฒ่า%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%ทะเลหมอก%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1587061949409-02df41d5e562?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%ข้างดอยเพียงดาว%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%วิวดอยหลวง%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%หมอกอรุณ%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%หมอกฟ้า%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1510312305653-8ed496efae75?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%ดาวล้อมดอย%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%แสงตะวัน%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%ฮักเฮือนสุข%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%ทะเลดาว%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%สายลม%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1517824806704-9040b037703b?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%ดอยเคียงฟ้า%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%ฮิลล์ไซด์%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%ทุ่งตะวันสายรุ้ง%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%อะตา%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%นาเลาบางบัวตอง%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%อะซามะ%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%ซือกีพี%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1510798831971-661eb04b3739?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%กุเขา%';
+UPDATE public.properties SET image_url = 'https://images.unsplash.com/photo-1508873696983-2df5293cb395?q=80&w=1200&auto=format&fit=crop' WHERE name LIKE '%วิวสวย%';
