@@ -439,12 +439,6 @@ export const PlaceSearchPicker: React.FC<PlaceSearchPickerProps> = ({
   return (
     <div className="place-search-container" ref={containerRef}>
       <div className={`place-search-input-wrapper ${isOpen ? 'focused' : ''} ${value ? 'has-value' : ''}`}>
-        <span className="place-pin-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="#ef4444">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-          </svg>
-        </span>
-
         <input
           ref={inputRef}
           type="text"
@@ -484,7 +478,7 @@ export const PlaceSearchPicker: React.FC<PlaceSearchPickerProps> = ({
       {isOpen && (
         <div className="place-dropdown-menu animate-fade-in">
           <div className="place-dropdown-header">
-            <span>{!query.trim() ? '✨ สถานที่ยอดนิยม' : '🔍 ผลการค้นหาสถานที่'}</span>
+            <span>{!query.trim() ? 'สถานที่ยอดนิยม' : 'ผลการค้นหาสถานที่'}</span>
             <span className="place-dropdown-hint">กด Enter หรือคลิกเพื่อเลือก</span>
           </div>
 
@@ -499,24 +493,9 @@ export const PlaceSearchPicker: React.FC<PlaceSearchPickerProps> = ({
                     onClick={() => handleSelectPlace(item)}
                     onMouseEnter={() => setSelectedIndex(index)}
                   >
-                    <div className="place-item-icon-wrapper">
-                      {item.category === 'property' ? (
-                        <span className="place-badge-emoji">🏡</span>
-                      ) : item.category === 'popular' ? (
-                        <span className="place-badge-emoji">📍</span>
-                      ) : item.category === 'map' ? (
-                        <span className="place-badge-emoji">🗺️</span>
-                      ) : (
-                        <span className="place-badge-emoji">✏️</span>
-                      )}
-                    </div>
-
                     <div className="place-item-info">
                       <div className="place-item-title-row">
                         <span className="place-item-name">{item.name}</span>
-                        <span className={`place-item-badge badge-${item.category}`}>
-                          {item.categoryLabel}
-                        </span>
                       </div>
                       {item.subTitle && (
                         <span className="place-item-subtitle">{item.subTitle}</span>
