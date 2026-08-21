@@ -232,7 +232,7 @@ export const Header: React.FC = () => {
             <button 
               className="nav-link lang-btn" 
               onClick={toggleLanguage} 
-              style={{ marginRight: '1.5rem', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '0.9rem' }}
+              style={{ marginRight: '1.5rem', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '0.9rem', color: 'inherit' }}
               title="Toggle Language"
             >
               {i18n.language.startsWith('th') ? 'EN' : 'TH'}
