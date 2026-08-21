@@ -1,5 +1,5 @@
 .footer {
-  background: linear-gradient(135deg, #022F40 0%, #0077B6 100%);
+  background: linear-gradient(135deg, #1A2F23 0%, #2C4C3B 50%, #1D3528 100%);
   color: #ffffff;
   padding: var(--spacing-3xl) 0 0 0;
   font-family: var(--font-body);
@@ -24,7 +24,7 @@
 }
 
 .footer-desc {
-  color: #a0aec0;
+  color: #a8b5a0;
   line-height: 1.6;
   max-width: 300px;
 }
@@ -42,8 +42,9 @@
 }
 
 .footer-column a {
-  color: #a0aec0;
+  color: #a8b5a0;
   font-size: 0.95rem;
+  transition: color 0.3s ease;
 }
 
 .footer-column a:hover {
@@ -55,7 +56,7 @@
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   text-align: center;
   padding: var(--spacing-lg) 0;
-  color: #718096;
+  color: #6b7a64;
   font-size: 0.875rem;
 }
 
