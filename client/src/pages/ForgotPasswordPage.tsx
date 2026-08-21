@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
-import './LoginPage.css'; // Reusing standard auth styling
+import "./AuthPages.css"; // Reusing standard auth styling
 
 export const ForgotPasswordPage: React.FC = () => {
   const [email, setEmail] = useState('');

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import './LoginPage.css';
+import './AuthPages.css';
 
 export const VerifyEmailPage: React.FC = () => {
   const [searchParams] = useSearchParams();

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
-import './LoginPage.css';
+import './AuthPages.css';
 
 export const ResetPasswordPage: React.FC = () => {
   const [newPassword, setNewPassword] = useState('');
