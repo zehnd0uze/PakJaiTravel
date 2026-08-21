@@ -230,12 +230,13 @@ export const Header: React.FC = () => {
                   id="user-avatar-btn"
                   aria-label="User menu"
                   aria-expanded={menuOpen}
+                  style={{ position: 'relative' }}
                 >
-                  <span className="user-avatar" style={{ position: 'relative' }}>
+                  <span className="user-avatar">
                     {/* Safe access — falls back to email initial or 'U' */}
                     {(user.name?.[0] || user.email?.[0] || 'U').toUpperCase()}
-                    {!user.isVerified && <span className="avatar-status-dot" />}
                   </span>
+                  {!user.isVerified && <span className="avatar-status-dot" />}
                 </button>
 
                 {menuOpen && (

@@ -642,8 +642,8 @@
 /* Unverified Account Indicators */
 .avatar-status-dot {
   position: absolute;
-  top: -6px;
-  right: -6px;
+  top: -2px;
+  right: -2px;
   width: 12px;
   height: 12px;
   background-color: #ff4d4f; /* Red for alert */
