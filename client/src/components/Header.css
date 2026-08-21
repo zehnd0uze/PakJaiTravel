@@ -328,10 +328,10 @@
 }
 
 .user-avatar {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: var(--primary-color);
+  background: linear-gradient(135deg, #2C4C3B, #4A7C5E);
   color: #fff;
   display: flex;
   align-items: center;
@@ -339,13 +339,15 @@
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: 0.95rem;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-  border: 2px solid transparent;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 2.5px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 2px 8px rgba(44, 76, 59, 0.3);
 }
 
 .user-avatar-btn:hover .user-avatar {
-  transform: scale(1.08);
-  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.15);
+  transform: scale(1.1);
+  box-shadow: 0 4px 14px rgba(44, 76, 59, 0.45);
+  border-color: #fff;
 }
 
 .user-dropdown {
