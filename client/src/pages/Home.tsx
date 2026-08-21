@@ -12,7 +12,11 @@ interface Property {
   type: string;
   rating: number;
   reviews: number;
+  price?: number | string;
+  price_per_night?: number;
   pricePerNight: number;
+  price_type?: 'per_night' | 'per_person';
+  priceType?: 'per_night' | 'per_person';
   currency: string;
   imageUrl: string;
   isVerified: boolean;

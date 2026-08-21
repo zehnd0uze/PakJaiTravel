@@ -11,6 +11,8 @@ interface Hotel {
   rating: number;
   reviews: number;
   pricePerNight: number;
+  price_type?: 'per_night' | 'per_person';
+  priceType?: 'per_night' | 'per_person';
   currency: string;
   imageUrl: string;
   isVerified: boolean;
