@@ -113,6 +113,7 @@
     "descriptionPlaceholder": "Describe your property, surroundings, unique views, morning mist, meals provided, and why travelers will love staying here...",
     "statusLabel": "Listing Status",
     "statusPublished": "Published (Visible in Accommodations Directory)",
+    "statusPending": "Submit for Review (Pending Admin Approval)",
     "statusDraft": "Draft (Private, not listed yet)",
     "uploading": "Compressing & Uploading...",
     "uploadText": "Click to Upload Accommodation Photos",

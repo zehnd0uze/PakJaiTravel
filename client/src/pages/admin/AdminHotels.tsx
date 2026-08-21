@@ -83,6 +83,23 @@ export const AdminHotels: React.FC = () => {
     setTimeout(() => setAlert(null), 3000);
   };
 
+  const handleApprove = async (id: string, name: string) => {
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .update({ status: 'published' })
+        .eq('id', id);
+      if (error) throw error;
+
+      setAlert({ type: 'success', message: `"${name}" has been approved and published.` });
+      fetchProperties();
+    } catch {
+      setAlert({ type: 'error', message: 'Failed to approve property.' });
+    }
+
+    setTimeout(() => setAlert(null), 3000);
+  };
+
   return (
     <>
       <div className="admin-topbar">
@@ -161,12 +178,21 @@ export const AdminHotels: React.FC = () => {
                     <td>฿{p.pricePerNight.toLocaleString()} {p.priceType === 'per_person' ? '/ person' : '/ night'}</td>
                     <td>{p.rating} ({p.reviews})</td>
                     <td>
-                      <span className={`status-badge ${p.status || 'published'}`}>
+                      <span className={`status-badge ${p.status || 'published'}`} style={p.status === 'pending' ? { background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d' } : {}}>
                         {p.status || 'published'}
                       </span>
                     </td>
                     <td>
                       <div className="table-actions">
+                        {p.status === 'pending' && (
+                          <button
+                            className="table-action-btn"
+                            style={{ background: '#ecfdf5', color: '#059669', borderColor: '#a7f3d0' }}
+                            onClick={() => handleApprove(p.id, p.name)}
+                          >
+                            Approve
+                          </button>
+                        )}
                         <button
                           className="table-action-btn"
                           onClick={() => navigate(`/admin/hotels/${p.id}/edit`)}

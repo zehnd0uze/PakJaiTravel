@@ -41,6 +41,8 @@
 }
 
 .status-badge.active { color: #2c4c3b; background: #e6f0eb; }
+.status-badge.published { color: #2c4c3b; background: #e6f0eb; }
+.status-badge.pending { color: #92400e; background: #fef3c7; border: 1px solid #fcd34d; }
 .status-badge.draft { color: #666; background: #f0f0f0; }
 
 .property-info {

@@ -85,8 +85,8 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
   const [priceType, setPriceType] = useState<'per_night' | 'per_person'>(
     property?.priceType || property?.price_type || 'per_night'
   );
-  const [status, setStatus] = useState<'published' | 'draft'>(
-    property?.status === 'draft' ? 'draft' : 'published'
+  const [status, setStatus] = useState<'published' | 'draft' | 'pending'>(
+    property?.status === 'published' ? 'published' : (property?.status === 'draft' ? 'draft' : 'pending')
   );
   
   const [province, setProvince] = useState(property?.province || 'Chiang Mai');
@@ -453,9 +453,12 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                   <select 
                     id="prop-status"
                     value={status}
-                    onChange={e => setStatus(e.target.value as 'published' | 'draft')}
+                    onChange={e => setStatus(e.target.value as 'published' | 'draft' | 'pending')}
                   >
-                    <option value="published">{t('propertyEditModal.statusPublished')}</option>
+                    {(user?.role === 'admin' || status === 'published') && (
+                      <option value="published">{t('propertyEditModal.statusPublished')}</option>
+                    )}
+                    <option value="pending">{t('propertyEditModal.statusPending')}</option>
                     <option value="draft">{t('propertyEditModal.statusDraft')}</option>
                   </select>
                 </div>
