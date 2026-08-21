@@ -81,7 +81,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClic
           post_id: post.id,
           user_id: user.id,
           author_name: user.name,
-          author_avatar: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`,
+          author_avatar: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=2C4C3B&color=fff`,
           text: commentText.trim()
         })
         .select()

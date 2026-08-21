@@ -103,7 +103,7 @@ const ProfilePage: React.FC = () => {
 
   const avatarSrc =
     user.avatar ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=0ea5e9&color=fff&size=200`;
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=2C4C3B&color=fff&size=200`;
 
   const coverSrc =
     user.coverPhoto ||
