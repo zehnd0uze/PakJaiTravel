@@ -5,7 +5,7 @@
 }
 
 .community-header {
-  background: linear-gradient(135deg, var(--primary-color, #0ea5e9), var(--secondary-color, #fb923c));
+  background: linear-gradient(135deg, var(--primary-color, #2C4C3B), var(--secondary-color, #C2704E));
   color: white;
   padding: 80px 20px 100px;
   text-align: center;
