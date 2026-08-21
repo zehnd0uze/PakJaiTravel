@@ -15,6 +15,10 @@ interface AuthContextType {
   user: User | null;
   token: string | null; // Keep for backward compatibility if needed, though Supabase handles sessions
   loading: boolean;
+  isAuthModalOpen: boolean;
+  authModalView: 'login' | 'register' | 'forgot_password';
+  openAuthModal: (view?: 'login' | 'register' | 'forgot_password') => void;
+  closeAuthModal: () => void;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   verify: (email: string, otp: string) => Promise<void>;
@@ -29,6 +33,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Auth Modal State
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalView, setAuthModalView] = useState<'login' | 'register' | 'forgot_password'>('login');
+
+  const openAuthModal = useCallback((view: 'login' | 'register' | 'forgot_password' = 'login') => {
+    setAuthModalView(view);
+    setIsAuthModalOpen(true);
+  }, []);
+
+  const closeAuthModal = useCallback(() => {
+    setIsAuthModalOpen(false);
+  }, []);
 
   const fetchProfile = async (userId: string, email: string) => {
     const { data, error } = await supabase
@@ -185,7 +202,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user]);
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, verify, resendOtp, logout, updateProfile }}>
+    <AuthContext.Provider value={{ 
+      user, token, loading, 
+      isAuthModalOpen, authModalView, openAuthModal, closeAuthModal,
+      login, register, verify, resendOtp, logout, updateProfile 
+    }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,0 +1,253 @@
+.auth-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.auth-modal-container {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 850px;
+  min-height: 550px;
+  display: flex;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+/* Left Side Banner - hidden on mobile */
+.auth-modal-banner {
+  flex: 1;
+  background: linear-gradient(135deg, rgba(44, 76, 59, 0.9), rgba(44, 76, 59, 0.7)),
+    url('https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&q=80&w=800') center/cover;
+  padding: 3rem;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+.auth-modal-banner .banner-content {
+  position: relative;
+  z-index: 2;
+}
+
+.auth-modal-banner h2 {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+
+.auth-modal-banner p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  line-height: 1.5;
+}
+
+/* Right Side Form Content */
+.auth-modal-content {
+  flex: 1;
+  padding: 3rem;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  max-width: 450px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.auth-modal-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-modal-close:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.auth-modal-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-modal-header .auth-logo {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  display: inline-block;
+}
+
+.auth-modal-header h1 {
+  font-size: 1.75rem;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+}
+
+.auth-modal-header p {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.auth-modal-error {
+  background: #fef2f2;
+  color: #b91c1c;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #fecaca;
+}
+
+.auth-modal-body form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.auth-modal-body .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.auth-modal-body label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.auth-modal-body .form-input {
+  padding: 0.75rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  background-color: #f8fafc;
+}
+
+.auth-modal-body .form-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(44, 76, 59, 0.1);
+}
+
+.auth-modal-body .form-input.input-error {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+}
+
+.auth-modal-switch {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.auth-modal-switch button {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.25rem;
+}
+
+.auth-modal-switch button:hover {
+  text-decoration: underline;
+}
+
+/* Password Strength (reused styles adapted for modal) */
+.password-strength-container {
+  margin-top: 0.5rem;
+}
+.password-strength {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+.strength-bar {
+  height: 4px;
+  flex: 1;
+  background-color: #e2e8f0;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+.strength-bar.active.weak { background-color: #ef4444; }
+.strength-bar.active.fair { background-color: #f59e0b; }
+.strength-bar.active.good { background-color: #3b82f6; }
+.strength-bar.active.strong { background-color: #10b981; }
+
+.strength-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.strength-text.weak { color: #ef4444; }
+.strength-text.fair { color: #f59e0b; }
+.strength-text.good { color: #3b82f6; }
+.strength-text.strong { color: #10b981; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .auth-modal-container {
+    flex-direction: column;
+    height: auto;
+    max-height: 90vh;
+    border-radius: 16px;
+  }
+
+  .auth-modal-banner {
+    display: none;
+  }
+
+  .auth-modal-content {
+    padding: 2rem 1.5rem;
+    max-width: 100%;
+    overflow-y: auto;
+  }
+}

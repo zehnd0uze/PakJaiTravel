@@ -22,12 +22,14 @@ import { AdminUsers } from './pages/admin/AdminUsers';
 import { AdminClaims } from './pages/admin/AdminClaims';
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { MobileBottomNav } from './components/MobileBottomNav';
+import { AuthModal } from './components/AuthModal';
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <div className="app-container">
+          <AuthModal />
           <Routes>
             {/* Auth pages render without header/footer */}
             <Route path="/login" element={<LoginPage />} />

@@ -9,7 +9,7 @@ export const Header: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);       // desktop avatar dropdown
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // hamburger slide-out
-  const { user, logout } = useAuth();
+  const { user, logout, openAuthModal } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const isHomePage = location.pathname === '/';
@@ -291,8 +291,8 @@ export const Header: React.FC = () => {
               </div>
             ) : (
               <>
-                <Button variant="outline" size="sm" onClick={() => navigate('/login')}>Log in</Button>
-                <Button variant="text" size="sm" onClick={() => navigate('/register')}>Sign up</Button>
+                <Button variant="outline" size="sm" onClick={() => openAuthModal('login')}>Log in</Button>
+                <Button variant="text" size="sm" onClick={() => openAuthModal('register')}>Sign up</Button>
               </>
             )}
           </div>
@@ -362,10 +362,10 @@ export const Header: React.FC = () => {
               </div>
             ) : (
               <div className="mobile-login-buttons">
-                <Button variant="text" size="md" onClick={() => mobileNavTo('/login')} style={{ width: '100%', marginBottom: '0.5rem' }}>
+                <Button variant="text" size="md" onClick={() => { setMobileMenuOpen(false); openAuthModal('login'); }} style={{ width: '100%', marginBottom: '0.5rem' }}>
                   Log in
                 </Button>
-                <Button variant="primary" size="md" onClick={() => mobileNavTo('/register')} style={{ width: '100%' }}>
+                <Button variant="primary" size="md" onClick={() => { setMobileMenuOpen(false); openAuthModal('register'); }} style={{ width: '100%' }}>
                   Sign up
                 </Button>
               </div>
