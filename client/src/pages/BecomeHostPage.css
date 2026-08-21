@@ -170,3 +170,17 @@
   .bh-hero h1 { font-size: 3rem; }
   .bh-steps { grid-template-columns: 1fr; }
 }
+
+@media (max-width: 768px) {
+  .bh-hero { padding: 60px 0 40px; }
+  .bh-hero h1 { font-size: 2.2rem; }
+  .bh-quote { padding: 40px 20px; margin: 0 auto 60px; }
+  .bh-quote blockquote { font-size: 1.5rem; }
+  .bh-steps { padding-bottom: 60px; }
+}
+
+@media (max-width: 480px) {
+  .bh-hero h1 { font-size: 1.8rem; }
+  .bh-lead { font-size: 1rem; margin-bottom: 32px; }
+  .bh-step-card { padding: 24px; }
+}
