@@ -642,13 +642,14 @@
 /* Unverified Account Indicators */
 .avatar-status-dot {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: -2px;
+  right: -2px;
   width: 12px;
   height: 12px;
   background-color: #ff4d4f; /* Red for alert */
   border: 2px solid #fff;
   border-radius: 50%;
+  z-index: 1;
 }
 
 .unverified-badge {
