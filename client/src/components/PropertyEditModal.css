@@ -79,7 +79,7 @@
 }
 
 .modal-tab-btn {
-  flex: 1;
+  flex: 1 0 auto;
   min-width: 130px;
   padding: 10px 14px;
   border: none;
