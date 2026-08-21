@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { type Property } from '../types';
 import { supabase } from '../utils/supabase';
 import { uploadToCloudinary } from '../utils/cloudinary';
@@ -67,6 +69,7 @@ const PRESET_AMENITIES = [
 
 const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose, onSave }) => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const isEditing = !!property;
 
   const currentYear = new Date().getFullYear().toString();
@@ -212,14 +215,14 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
     setError('');
 
     if (!name.trim()) {
-      setError('Please provide a name for your accommodation.');
+      setError(t('propertyEditModal.errorName'));
       setActiveTab('details');
       return;
     }
 
     const numericPrice = Number(price.toString().replace(/,/g, ''));
     if (isNaN(numericPrice) || numericPrice <= 0) {
-      setError('Please provide a valid price per night.');
+      setError(t('propertyEditModal.errorPrice'));
       setActiveTab('details');
       return;
     }
@@ -281,19 +284,19 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
       onSave();
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Failed to save accommodation.');
+      setError(err.message || t('propertyEditModal.errorSave'));
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  return (
+  const modalContent = (
     <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="property-edit-modal animate-slide-up">
         <div className="modal-header">
           <div>
-            <h2>{isEditing ? `Edit "${property.name}"` : 'List Your Accommodation'}</h2>
-            <p className="modal-subtitle">Provide details, photos, and amenities for travelers</p>
+            <h2>{isEditing ? t('propertyEditModal.titleEdit', { name: property.name }) : t('propertyEditModal.titleNew')}</h2>
+            <p className="modal-subtitle">{t('propertyEditModal.subtitle')}</p>
           </div>
           <button className="close-btn" onClick={onClose} aria-label="Close modal">&times;</button>
         </div>
@@ -305,28 +308,28 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
             className={`modal-tab-btn ${activeTab === 'details' ? 'active' : ''}`}
             onClick={() => setActiveTab('details')}
           >
-            1. Basic Info
+            {t('propertyEditModal.tabBasic')}
           </button>
           <button 
             type="button"
             className={`modal-tab-btn ${activeTab === 'photos' ? 'active' : ''}`}
             onClick={() => setActiveTab('photos')}
           >
-            2. Photos ({images.length})
+            {t('propertyEditModal.tabPhotos')} ({images.length})
           </button>
           <button 
             type="button"
             className={`modal-tab-btn ${activeTab === 'amenities' ? 'active' : ''}`}
             onClick={() => setActiveTab('amenities')}
           >
-            3. Amenities & Highlights ({selectedAmenities.length + selectedFeatures.length})
+            {t('propertyEditModal.tabAmenities')} ({selectedAmenities.length + selectedFeatures.length})
           </button>
           <button 
             type="button"
             className={`modal-tab-btn ${activeTab === 'contact' ? 'active' : ''}`}
             onClick={() => setActiveTab('contact')}
           >
-            4. Host & Rules
+            {t('propertyEditModal.tabHost')}
           </button>
         </div>
 
@@ -338,11 +341,11 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
             <div className="tab-pane animate-fade-in">
               <div className="form-grid">
                 <div className="form-group full-width">
-                  <label htmlFor="prop-name">Accommodation Name *</label>
+                  <label htmlFor="prop-name">{t('propertyEditModal.nameLabel')}</label>
                   <input 
                     id="prop-name"
                     type="text" 
-                    placeholder="e.g. Chiang Dao Mountain Sanctuary & Homestay" 
+                    placeholder={t('propertyEditModal.namePlaceholder')}
                     value={name}
                     onChange={e => setName(e.target.value)}
                     required
@@ -350,7 +353,7 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="prop-type">Property Type</label>
+                  <label htmlFor="prop-type">{t('propertyEditModal.typeLabel')}</label>
                   <select 
                     id="prop-type"
                     value={type}
@@ -363,7 +366,7 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="prop-price">Price per Night (THB) *</label>
+                  <label htmlFor="prop-price">{t('propertyEditModal.priceLabel')}</label>
                   <div className="price-input-wrapper">
                     <span className="currency-label">฿</span>
                     <input 
@@ -380,7 +383,7 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="prop-district">District / Area</label>
+                  <label htmlFor="prop-district">{t('propertyEditModal.districtLabel')}</label>
                   <select 
                     id="prop-district"
                     value={district}
@@ -398,7 +401,7 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="prop-province">Province</label>
+                  <label htmlFor="prop-province">{t('propertyEditModal.provinceLabel')}</label>
                   <input 
                     id="prop-province"
                     type="text"
@@ -408,21 +411,21 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                 </div>
 
                 <div className="form-group full-width">
-                  <label htmlFor="prop-loc">Detailed Location / Landmark</label>
+                  <label htmlFor="prop-loc">{t('propertyEditModal.locationLabel')}</label>
                   <input 
                     id="prop-loc"
                     type="text" 
-                    placeholder="e.g. Ban Tham, Near Wat Tham Chiang Dao, Chiang Dao" 
+                    placeholder={t('propertyEditModal.locationPlaceholder')}
                     value={location}
                     onChange={e => setLocation(e.target.value)}
                   />
                 </div>
 
                 <div className="form-group full-width">
-                  <label htmlFor="prop-desc">Description</label>
+                  <label htmlFor="prop-desc">{t('propertyEditModal.descriptionLabel')}</label>
                   <textarea 
                     id="prop-desc"
-                    placeholder="Describe your property, surroundings, unique views, morning mist, meals provided, and why travelers will love staying here..."
+                    placeholder={t('propertyEditModal.descriptionPlaceholder')}
                     value={description}
                     onChange={e => setDescription(e.target.value)}
                     rows={5}
@@ -430,14 +433,14 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="prop-status">Listing Status</label>
+                  <label htmlFor="prop-status">{t('propertyEditModal.statusLabel')}</label>
                   <select 
                     id="prop-status"
                     value={status}
                     onChange={e => setStatus(e.target.value as 'published' | 'draft')}
                   >
-                    <option value="published">Published (Visible in Accommodations Directory)</option>
-                    <option value="draft">Draft (Private, not listed yet)</option>
+                    <option value="published">{t('propertyEditModal.statusPublished')}</option>
+                    <option value="draft">{t('propertyEditModal.statusDraft')}</option>
                   </select>
                 </div>
               </div>
@@ -460,34 +463,34 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                   />
                   <label htmlFor="property-file-input" className={`dropzone-label ${uploading ? 'disabled' : ''}`}>
                     <span className="dropzone-icon">📷</span>
-                    <strong>{uploading ? 'Compressing & Uploading...' : 'Click to Upload Accommodation Photos'}</strong>
-                    <span>Supports JPG, PNG, WEBP (Auto-compressed for ultra-fast loading)</span>
+                    <strong>{uploading ? t('propertyEditModal.uploading') : t('propertyEditModal.uploadText')}</strong>
+                    <span>{t('propertyEditModal.uploadSubtext')}</span>
                   </label>
                 </div>
 
                 <div className="url-input-row">
                   <input 
                     type="text"
-                    placeholder="Or paste an image URL directly..."
+                    placeholder={t('propertyEditModal.urlPlaceholder')}
                     value={customImageUrl}
                     onChange={e => setCustomImageUrl(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomImageUrl(); } }}
                   />
                   <button type="button" className="btn-add-url" onClick={handleAddCustomImageUrl}>
-                    + Add URL
+                    {t('propertyEditModal.addUrlBtn')}
                   </button>
                 </div>
 
                 {images.length > 0 ? (
                   <div className="photo-gallery-preview">
                     <p className="gallery-hint">
-                      ⭐ The first photo is your <strong>Cover Photo</strong>. Click "Set as Cover" on any photo to make it primary.
+                      {t('propertyEditModal.coverHint')}
                     </p>
                     <div className="preview-grid">
                       {images.map((img, idx) => (
                         <div key={idx} className={`preview-item ${idx === 0 ? 'is-cover' : ''}`}>
                           <img src={img} alt={`Property upload ${idx + 1}`} />
-                          {idx === 0 && <span className="cover-badge">Cover Photo</span>}
+                          {idx === 0 && <span className="cover-badge">{t('propertyEditModal.coverBadge')}</span>}
                           <div className="preview-actions">
                             {idx !== 0 && (
                               <button 
@@ -496,7 +499,7 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                                 onClick={() => handleMoveImageToCover(idx)}
                                 title="Make Cover Photo"
                               >
-                                Set Cover
+                                {t('propertyEditModal.setCoverBtn')}
                               </button>
                             )}
                             <button 
@@ -514,7 +517,7 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                   </div>
                 ) : (
                   <div className="empty-photos-notice">
-                    No photos added yet. Upload at least 1 photo for your listing to stand out!
+                    {t('propertyEditModal.noPhotos')}
                   </div>
                 )}
               </div>
@@ -525,8 +528,8 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
           {activeTab === 'amenities' && (
             <div className="tab-pane animate-fade-in">
               <div className="chips-section">
-                <h3>Highlights & Scenic Features</h3>
-                <p className="chips-hint">Select the top features that describe your accommodation:</p>
+                <h3>{t('propertyEditModal.highlightsTitle')}</h3>
+                <p className="chips-hint">{t('propertyEditModal.highlightsHint')}</p>
                 <div className="chips-grid">
                   {PRESET_FEATURES.map(feat => (
                     <button
@@ -543,18 +546,18 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                 <div className="custom-chip-adder">
                   <input 
                     type="text"
-                    placeholder="Add custom feature (e.g. Bamboo Balcony)..."
+                    placeholder={t('propertyEditModal.addFeaturePlaceholder')}
                     value={customFeature}
                     onChange={e => setCustomFeature(e.target.value)}
                     onKeyDown={handleAddCustomFeature}
                   />
-                  <button type="button" onClick={handleAddCustomFeature}>+ Add</button>
+                  <button type="button" onClick={handleAddCustomFeature}>{t('propertyEditModal.addBtn')}</button>
                 </div>
               </div>
 
               <div className="chips-section" style={{ marginTop: '32px' }}>
-                <h3>Amenities & Comforts</h3>
-                <p className="chips-hint">Select all available amenities for guests:</p>
+                <h3>{t('propertyEditModal.amenitiesTitle')}</h3>
+                <p className="chips-hint">{t('propertyEditModal.amenitiesHint')}</p>
                 <div className="chips-grid">
                   {PRESET_AMENITIES.map(amenity => (
                     <button
@@ -571,12 +574,12 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                 <div className="custom-chip-adder">
                   <input 
                     type="text"
-                    placeholder="Add custom amenity (e.g. Campfire Wood, Coffee Grinder)..."
+                    placeholder={t('propertyEditModal.addAmenityPlaceholder')}
                     value={customAmenity}
                     onChange={e => setCustomAmenity(e.target.value)}
                     onKeyDown={handleAddCustomAmenity}
                   />
-                  <button type="button" onClick={handleAddCustomAmenity}>+ Add</button>
+                  <button type="button" onClick={handleAddCustomAmenity}>{t('propertyEditModal.addBtn')}</button>
                 </div>
               </div>
             </div>
@@ -587,7 +590,7 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
             <div className="tab-pane animate-fade-in">
               <div className="form-grid">
                 <div className="form-group">
-                  <label htmlFor="host-name">Host / Contact Person Name</label>
+                  <label htmlFor="host-name">{t('propertyEditModal.hostNameLabel')}</label>
                   <input 
                     id="host-name"
                     type="text" 
@@ -598,7 +601,7 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="host-since">Hosting Since (Year)</label>
+                  <label htmlFor="host-since">{t('propertyEditModal.hostSinceLabel')}</label>
                   <input 
                     id="host-since"
                     type="text" 
@@ -609,7 +612,7 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="contact-phone">Phone Number (For Traveler Bookings)</label>
+                  <label htmlFor="contact-phone">{t('propertyEditModal.phoneLabel')}</label>
                   <input 
                     id="contact-phone"
                     type="tel" 
@@ -620,7 +623,7 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="contact-line">LINE ID (Popular for Thailand Bookings)</label>
+                  <label htmlFor="contact-line">{t('propertyEditModal.lineLabel')}</label>
                   <input 
                     id="contact-line"
                     type="text" 
@@ -631,7 +634,7 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                 </div>
 
                 <div className="form-group full-width">
-                  <label htmlFor="contact-email">Host Email</label>
+                  <label htmlFor="contact-email">{t('propertyEditModal.emailLabel')}</label>
                   <input 
                     id="contact-email"
                     type="email" 
@@ -642,7 +645,7 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="check-in-time">Check-In Time</label>
+                  <label htmlFor="check-in-time">{t('propertyEditModal.checkInLabel')}</label>
                   <input 
                     id="check-in-time"
                     type="text" 
@@ -653,7 +656,7 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="check-out-time">Check-Out Time</label>
+                  <label htmlFor="check-out-time">{t('propertyEditModal.checkOutLabel')}</label>
                   <input 
                     id="check-out-time"
                     type="text" 
@@ -668,7 +671,7 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
 
           <div className="form-actions">
             <button type="button" className="cancel-btn" onClick={onClose}>
-              Cancel
+              {t('propertyEditModal.cancelBtn')}
             </button>
             <div className="action-buttons-right">
               {activeTab !== 'contact' ? (
@@ -681,7 +684,7 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                     else if (activeTab === 'amenities') setActiveTab('contact');
                   }}
                 >
-                  Next Step →
+                  {t('propertyEditModal.nextBtn')}
                 </button>
               ) : null}
               <button 
@@ -689,7 +692,7 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                 className="save-btn" 
                 disabled={isSubmitting || uploading}
               >
-                {isSubmitting ? 'Saving Accommodation...' : (isEditing ? 'Save Changes' : 'Publish Accommodation')}
+                {isSubmitting ? t('propertyEditModal.savingBtn') : (isEditing ? t('propertyEditModal.saveChangesBtn') : t('propertyEditModal.publishBtn'))}
               </button>
             </div>
           </div>
@@ -697,6 +700,8 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default PropertyEditModal;
