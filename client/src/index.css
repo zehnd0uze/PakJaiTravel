@@ -31,6 +31,7 @@
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 32px;
+  --radius-full: 9999px;
   
   /* Diffused Luxury Shadows (Softer and more inviting) */
   --shadow-sm: 0 2px 8px rgba(26, 28, 26, 0.04);
