@@ -2,10 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabase';
+import { useTranslation } from 'react-i18next';
 import './Header.css';
 import { Button } from './Button';
 
 export const Header: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);       // desktop avatar dropdown
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // hamburger slide-out
@@ -114,13 +116,17 @@ export const Header: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const toggleLanguage = () => {
+    i18n.changeLanguage(i18n.language.startsWith('th') ? 'en' : 'th');
+  };
+
   return (
     <header className={`header ${scrolled || !isHomePage ? 'header-scrolled glass-panel' : ''}`}>
 
       {/* ── Mobile-only top search bar (Wongnai-style) ── */}
       <div className="mobile-top-bar">
         <div className="location-selector" onClick={() => navigate('/hotels')}>
-          <span className="location-text">ใกล้ฉัน</span>
+          <span className="location-text">{t('header.mobile.nearMe')}</span>
           <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
             <path d="M7 10l5 5 5-5z"/>
           </svg>
@@ -136,7 +142,7 @@ export const Header: React.FC = () => {
           <svg viewBox="0 0 24 24" width="18" height="18" fill="#757575">
             <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
           </svg>
-          <span className="search-placeholder">ค้นหาโรงแรม, คาเฟ่...</span>
+          <span className="search-placeholder">{t('header.mobile.searchPlaceholder')}</span>
         </div>
 
         <div className="header-icons-mobile">
@@ -167,7 +173,7 @@ export const Header: React.FC = () => {
             <input
               type="text"
               className="minimal-search-input"
-              placeholder="Search Destinations"
+              placeholder={t('header.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -205,7 +211,7 @@ export const Header: React.FC = () => {
                     </button>
                   ))
                 ) : (
-                  <div className="no-results-msg">No destinations found matching your search.</div>
+                  <div className="no-results-msg">{t('header.noResults')}</div>
                 )}
               </div>
             )}
@@ -215,15 +221,23 @@ export const Header: React.FC = () => {
         {/* Desktop right: nav link + auth */}
         <div className="header-right-desktop">
           <div className="auth-actions">
+            <button 
+              className="nav-link lang-btn" 
+              onClick={toggleLanguage} 
+              style={{ marginRight: '1.5rem', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '0.9rem' }}
+              title="Toggle Language"
+            >
+              {i18n.language.startsWith('th') ? 'EN' : 'TH'}
+            </button>
             <Link to="/community" className="nav-link" style={{ marginRight: '1.5rem', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.8rem' }}>
-              Journal
+              {t('header.journal')}
             </Link>
             <Link 
               to={user?.role === 'host' ? "/dashboard?new=1" : "/become-host"} 
               className="nav-link host-link" 
               style={{ marginRight: '1.5rem', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.8rem', color: 'var(--accent-color)', fontWeight: '600' }}
             >
-              {user?.role === 'host' ? "+ Add Listing" : "List your property"}
+              {user?.role === 'host' ? t('header.addListing') : t('header.listProperty')}
             </Link>
 
             {user ? (
@@ -251,53 +265,53 @@ export const Header: React.FC = () => {
                       <span className="user-dropdown-email">{user.email}</span>
                       {user.role === 'host' && (
                         <div className="verified-host-tag" style={{ color: '#2c4c3b', fontSize: '0.75rem', fontWeight: 700, marginTop: '4px' }}>
-                          ✓ Certified Host
+                          {t('header.userMenu.certifiedHost')}
                         </div>
                       )}
                       {!user.isVerified && (
-                        <div className="unverified-badge">Unverified Account</div>
+                        <div className="unverified-badge">{t('header.userMenu.unverified')}</div>
                       )}
                     </div>
 
                     {!user.isVerified && (
                       <div className="verify-prompt-box">
-                        <p>Verify your email to unlock all features.</p>
+                        <p>{t('header.userMenu.verifyPrompt')}</p>
                         <button
                           className="verify-now-btn"
                           onClick={() => { setMenuOpen(false); navigate(`/verify-email?email=${user.email}`); }}
                         >
-                          Verify Now
+                          {t('header.userMenu.verifyNow')}
                         </button>
                       </div>
                     )}
 
                     <div className="user-dropdown-divider" />
                     <button className="user-dropdown-item" role="menuitem" onClick={() => { setMenuOpen(false); navigate('/profile'); }}>
-                      Profile
+                      {t('header.userMenu.profile')}
                     </button>
                     {user.role === 'host' ? (
                       <button className="user-dropdown-item" role="menuitem" onClick={() => { setMenuOpen(false); navigate('/dashboard'); }} style={{ fontWeight: 600, color: '#2c4c3b' }}>
-                        🏡 Host Dashboard
+                        {t('header.userMenu.hostDashboard')}
                       </button>
                     ) : (
                       <button className="user-dropdown-item" role="menuitem" onClick={() => { setMenuOpen(false); navigate('/become-host'); }} style={{ color: 'var(--accent-color)', fontWeight: 600 }}>
-                        ✨ Become a Host
+                        {t('header.userMenu.becomeHost')}
                       </button>
                     )}
                     <button className="user-dropdown-item" role="menuitem" onClick={() => { setMenuOpen(false); navigate('/community'); }}>
-                      Community Feed
+                      {t('header.userMenu.communityFeed')}
                     </button>
                     <div className="user-dropdown-divider" />
                     <button className="user-dropdown-item logout-item" role="menuitem" onClick={handleLogout} id="logout-btn">
-                      Log out
+                      {t('header.userMenu.logout')}
                     </button>
                   </div>
                 )}
               </div>
             ) : (
               <>
-                <Button variant="outline" size="sm" onClick={() => openAuthModal('login')}>Log in</Button>
-                <Button variant="text" size="sm" onClick={() => openAuthModal('register')}>Sign up</Button>
+                <Button variant="outline" size="sm" onClick={() => openAuthModal('login')}>{t('header.login')}</Button>
+                <Button variant="text" size="sm" onClick={() => openAuthModal('register')}>{t('header.signup')}</Button>
               </>
             )}
           </div>
@@ -318,13 +332,15 @@ export const Header: React.FC = () => {
         <div className="mobile-nav-content">
           <nav aria-label="Mobile navigation">
             <ul>
-              {/* Real navigation — all use navigate() not href="#" */}
-              <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo('/')}>Home</button></li>
-              <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo('/hotels')}>Hotels</button></li>
-              <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo('/community')}>Community</button></li>
-              <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo(user?.role === 'host' ? '/dashboard?new=1' : '/become-host')} style={{ color: 'var(--accent-color)', fontWeight: '600' }}>{user?.role === 'host' ? '+ Add Listing' : 'List your property'}</button></li>
-              <li><button className="nav-link mobile-nav-link disabled-link" disabled title="Coming soon">Flights <span className="coming-soon-tag">Soon</span></button></li>
-              <li><button className="nav-link mobile-nav-link disabled-link" disabled title="Coming soon">Activities <span className="coming-soon-tag">Soon</span></button></li>
+              <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo('/')}>{t('header.mobile.home')}</button></li>
+              <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo('/hotels')}>{t('header.mobile.hotels')}</button></li>
+              <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo('/community')}>{t('header.mobile.community')}</button></li>
+              <li><button className="nav-link mobile-nav-link" onClick={() => mobileNavTo(user?.role === 'host' ? '/dashboard?new=1' : '/become-host')} style={{ color: 'var(--accent-color)', fontWeight: '600' }}>{user?.role === 'host' ? t('header.addListing') : t('header.listProperty')}</button></li>
+              <li><button className="nav-link mobile-nav-link disabled-link" disabled title="Coming soon">{t('header.mobile.flights')} <span className="coming-soon-tag">{t('header.mobile.soon')}</span></button></li>
+              <li><button className="nav-link mobile-nav-link disabled-link" disabled title="Coming soon">{t('header.mobile.activities')} <span className="coming-soon-tag">{t('header.mobile.soon')}</span></button></li>
+              <li><button className="nav-link mobile-nav-link" onClick={toggleLanguage} style={{ borderTop: '1px solid #eee', marginTop: '8px' }}>
+                🌎 {i18n.language.startsWith('th') ? 'English' : 'ภาษาไทย'}
+              </button></li>
             </ul>
           </nav>
 
@@ -340,28 +356,28 @@ export const Header: React.FC = () => {
                   </div>
                 </div>
                 <button className="mobile-nav-link mobile-profile-btn" onClick={() => mobileNavTo('/profile')}>
-                  My Profile
+                  {t('header.mobile.myProfile')}
                 </button>
                 {user.role === 'host' ? (
                   <button className="mobile-nav-link" onClick={() => mobileNavTo('/dashboard')} style={{ fontWeight: 600, color: '#2c4c3b' }}>
-                    🏡 Host Dashboard
+                    {t('header.userMenu.hostDashboard')}
                   </button>
                 ) : (
                   <button className="mobile-nav-link" onClick={() => mobileNavTo('/become-host')} style={{ fontWeight: 600, color: 'var(--accent-color)' }}>
-                    ✨ Become a Host
+                    {t('header.userMenu.becomeHost')}
                   </button>
                 )}
                 <button className="mobile-nav-link mobile-logout-btn" onClick={handleLogout}>
-                  Log out
+                  {t('header.userMenu.logout')}
                 </button>
               </div>
             ) : (
               <div className="mobile-login-buttons">
                 <Button variant="text" size="md" onClick={() => { setMobileMenuOpen(false); openAuthModal('login'); }} style={{ width: '100%', marginBottom: '0.5rem' }}>
-                  Log in
+                  {t('header.login')}
                 </Button>
                 <Button variant="primary" size="md" onClick={() => { setMobileMenuOpen(false); openAuthModal('register'); }} style={{ width: '100%' }}>
-                  Sign up
+                  {t('header.signup')}
                 </Button>
               </div>
             )}

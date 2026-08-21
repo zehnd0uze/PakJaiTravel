@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
+import { useTranslation } from 'react-i18next';
 import './Home.css';
 import { AirbnbCard } from '../components/AirbnbCard';
 import { VerifiedBadge } from '../components/VerifiedBadge';
@@ -21,6 +22,7 @@ interface Property {
 }
 
 export const Home: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,11 +54,11 @@ export const Home: React.FC = () => {
 
   // Sleek, text-based mood categories replacing the cluttered emoji blocks
   const moods = [
-    { label: 'All Stays', path: '/hotels' },
-    { label: 'Boutique Hotels', path: '/hotels' },
-    { label: 'Forest Retreats', path: '/hotels?type=Nature' },
-    { label: 'Artisan Cafes', path: '/hotels?type=Cafe' },
-    { label: 'Fine Dining', path: '/hotels?type=Restaurant' },
+    { label: t('home.moods.all'), path: '/hotels' },
+    { label: t('home.moods.boutique'), path: '/hotels' },
+    { label: t('home.moods.forest'), path: '/hotels?type=Nature' },
+    { label: t('home.moods.cafe'), path: '/hotels?type=Cafe' },
+    { label: t('home.moods.dining'), path: '/hotels?type=Restaurant' },
   ];
 
   return (
@@ -66,19 +68,19 @@ export const Home: React.FC = () => {
       <section className="hero luxury-hero">
         <div className="hero-overlay"></div>
         <div className="container hero-content">
-          <p className="hero-kicker animate-fade-in">WELCOME TO PAKJAI</p>
+          <p className="hero-kicker animate-fade-in">{t('home.hero.subtitle')}</p>
           <h1 className="hero-title animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            The Art of<br />True Serenity
+            {t('home.hero.titlePart1')}<br />{t('home.hero.titlePart2')}
           </h1>
           <p className="hero-subtitle animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            Discover bespoke nature retreats and authentic heritage stays in the heart of Chiang Dao.
+            {t('home.hero.description')}
           </p>
           <button 
             className="btn-luxury-primary animate-fade-in" 
             style={{ animationDelay: '0.3s' }}
             onClick={() => navigate('/hotels')}
           >
-            Explore the Collection
+            {t('home.hero.exploreBtn')}
           </button>
         </div>
       </section>
@@ -100,12 +102,12 @@ export const Home: React.FC = () => {
       <section className="editorial-section section-padding">
         <div className="container">
           <div className="editorial-header">
-            <h2 className="editorial-title">The Curator's Edit</h2>
-            <p className="editorial-subtitle">A hand-selected portfolio of our most distinguished properties.</p>
+            <h2 className="editorial-title">{t('home.curatorsEdit.title')}</h2>
+            <p className="editorial-subtitle">{t('home.curatorsEdit.subtitle')}</p>
           </div>
 
           {loading ? (
-            <div className="editorial-loading">Preparing your collection...</div>
+            <div className="editorial-loading">{t('home.curatorsEdit.loading')}</div>
           ) : (
             <div className="editorial-mosaic">
               {properties.slice(0, 3).map((prop, idx) => (
@@ -135,8 +137,8 @@ export const Home: React.FC = () => {
       <section className="heritage-collection section-padding">
         <div className="container">
           <div className="editorial-header centered">
-            <h2 className="editorial-title">The Heritage Collection</h2>
-            <p className="editorial-subtitle">Exclusively verified. Locally owned. Extraordinary experiences.</p>
+            <h2 className="editorial-title">{t('home.heritageCollection.title')}</h2>
+            <p className="editorial-subtitle">{t('home.heritageCollection.subtitle')}</p>
           </div>
           
           <div className="destinations-grid">

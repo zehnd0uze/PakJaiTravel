@@ -1,0 +1,92 @@
+{
+  "header": {
+    "searchPlaceholder": "Search Destinations",
+    "noResults": "No destinations found matching your search.",
+    "journal": "Journal",
+    "addListing": "+ Add Listing",
+    "listProperty": "List your property",
+    "userMenu": {
+      "certifiedHost": "✓ Certified Host",
+      "unverified": "Unverified Account",
+      "verifyPrompt": "Verify your email to unlock all features.",
+      "verifyNow": "Verify Now",
+      "profile": "Profile",
+      "hostDashboard": "🏡 Host Dashboard",
+      "becomeHost": "✨ Become a Host",
+      "communityFeed": "Community Feed",
+      "logout": "Log out"
+    },
+    "login": "Log in",
+    "signup": "Sign up",
+    "mobile": {
+      "nearMe": "Near Me",
+      "searchPlaceholder": "Search hotels, cafes...",
+      "home": "Home",
+      "hotels": "Hotels",
+      "community": "Community",
+      "flights": "Flights",
+      "activities": "Activities",
+      "soon": "Soon",
+      "myProfile": "My Profile"
+    }
+  },
+  "home": {
+    "hero": {
+      "subtitle": "WELCOME TO PAKJAI",
+      "titlePart1": "The Art of",
+      "titlePart2": "True Serenity",
+      "description": "Discover bespoke nature retreats and authentic heritage stays in the heart of Chiang Dao.",
+      "exploreBtn": "Explore the Collection"
+    },
+    "featured": {
+      "title": "Featured Destinations",
+      "viewAll": "View all properties"
+    },
+    "curatorsEdit": {
+      "title": "The Curator's Edit",
+      "subtitle": "A hand-selected portfolio of our most distinguished properties.",
+      "loading": "Preparing your collection..."
+    },
+    "heritageCollection": {
+      "title": "The Heritage Collection",
+      "subtitle": "Exclusively verified. Locally owned. Extraordinary experiences."
+    },
+    "moods": {
+      "all": "All Stays",
+      "boutique": "Boutique Hotels",
+      "forest": "Forest Retreats",
+      "cafe": "Artisan Cafes",
+      "dining": "Fine Dining"
+    },
+    "experience": {
+      "title": "The Pakjai Experience",
+      "natureTitle": "Immersive Nature",
+      "natureDesc": "Wake up to misty mountains and fall asleep to the sounds of the forest in our handpicked eco-retreats.",
+      "heritageTitle": "Authentic Heritage",
+      "heritageDesc": "Experience true Northern Thai hospitality in beautifully preserved teakwood homes and boutique resorts.",
+      "wellnessTitle": "Holistic Wellness",
+      "wellnessDesc": "Rejuvenate your mind and body with traditional spa treatments, yoga, and mindful living experiences."
+    },
+    "community": {
+      "title": "Community Journal",
+      "emptyState": "No stories yet. Be the first to share your experience!",
+      "authorSuffix": "'s Journal",
+      "readMore": "Read more"
+    },
+    "footer": {
+      "brand": "PAKJAI",
+      "tagline": "Curated nature retreats & heritage stays in Chiang Dao.",
+      "explore": "Explore",
+      "home": "Home",
+      "stays": "All Stays",
+      "journal": "Journal",
+      "host": "Become a Host",
+      "support": "Support",
+      "contact": "Contact Us",
+      "faq": "FAQ",
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy",
+      "rights": "© 2026 Pakjai Travel. All rights reserved."
+    }
+  }
+}
