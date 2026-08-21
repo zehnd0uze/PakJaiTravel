@@ -117,7 +117,15 @@ export const Header: React.FC = () => {
   }, []);
 
   const toggleLanguage = () => {
-    i18n.changeLanguage(i18n.language.startsWith('th') ? 'en' : 'th');
+    document.body.classList.add('lang-transitioning');
+    
+    setTimeout(() => {
+      i18n.changeLanguage(i18n.language.startsWith('th') ? 'en' : 'th');
+      
+      setTimeout(() => {
+        document.body.classList.remove('lang-transitioning');
+      }, 50);
+    }, 150);
   };
 
   return (
