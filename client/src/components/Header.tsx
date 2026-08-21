@@ -143,8 +143,13 @@ export const Header: React.FC = () => {
           <button className="icon-btn" title="Map" onClick={() => navigate('/hotels')}>
             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
           </button>
-          <button className="icon-btn" title="History">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+          <button
+            className="mobile-menu-btn-inline"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileMenuOpen}
+          >
+            <span className={`hamburger ${mobileMenuOpen ? 'open' : ''}`} />
           </button>
         </div>
       </div>
@@ -298,16 +303,6 @@ export const Header: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* ── Hamburger button — OUTSIDE desktop-only-header so it shows on mobile ── */}
-      <button
-        className="mobile-menu-btn"
-        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-        aria-expanded={mobileMenuOpen}
-      >
-        <span className={`hamburger ${mobileMenuOpen ? 'open' : ''}`} />
-      </button>
 
       {/* ── Mobile slide-out backdrop — tap to dismiss ── */}
       {mobileMenuOpen && (

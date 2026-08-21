@@ -198,21 +198,35 @@
   }
 }
 
-/* Wongnai Mobile Top Bar */
+/* Floating Mobile Search Pill */
 .mobile-top-bar {
   display: none;
   align-items: center;
   gap: 12px;
   padding: 8px 16px;
-  background: var(--bg-color);
-  border-bottom: 1px solid var(--border-color);
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
 }
 
 @media (max-width: 768px) {
+  .header {
+    padding: 0 !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-bottom: none !important;
+  }
+  .header-scrolled {
+    padding: 0 !important;
+  }
+  
   .mobile-top-bar {
     display: flex;
     position: sticky;
-    top: 0;
+    top: max(12px, env(safe-area-inset-top));
+    margin: max(12px, env(safe-area-inset-top)) 16px 16px;
+    border-radius: 40px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     z-index: 1001;
   }
 }
@@ -554,13 +568,28 @@
     display: none;
   }
   .mobile-menu-btn {
-    display: block;
-    /* Position in top-right corner, above the mobile-top-bar */
-    position: fixed;
-    top: 14px;
-    right: 16px;
-    z-index: 2001;
+    display: none; /* Old standalone button */
   }
+}
+
+.mobile-menu-btn-inline {
+  background: transparent;
+  border: none;
+  width: 20px;
+  height: 16px;
+  position: relative;
+  cursor: pointer;
+  margin-left: 8px;
+  padding: 0;
+}
+
+.mobile-menu-btn-inline .hamburger {
+  width: 100%;
+  background-color: var(--text-primary) !important;
+}
+.mobile-menu-btn-inline .hamburger::before,
+.mobile-menu-btn-inline .hamburger::after {
+  background-color: var(--text-primary) !important;
 }
 
 /* ── Mobile nav backdrop — tap to close ── */
