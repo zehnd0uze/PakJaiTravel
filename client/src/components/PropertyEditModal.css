@@ -76,6 +76,12 @@
   border-radius: 16px;
   margin-bottom: 28px;
   overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.modal-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .modal-tab-btn {
