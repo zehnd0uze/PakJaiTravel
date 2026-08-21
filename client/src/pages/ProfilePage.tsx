@@ -205,19 +205,17 @@ const ProfilePage: React.FC = () => {
               </div>
             </div>
 
-            <div className="profile-actions-row" style={{ display: 'flex', gap: '10px', marginTop: '16px', flexWrap: 'wrap' }}>
+            <div className="profile-actions-row">
               {user.role === 'host' ? (
                 <button 
-                  className="btn btn-primary"
-                  style={{ borderRadius: '30px', padding: '8px 20px', fontSize: '0.85rem' }}
+                  className="btn btn-primary profile-action"
                   onClick={() => navigate('/dashboard')}
                 >
                   🏡 Host Dashboard
                 </button>
               ) : (
                 <button 
-                  className="btn btn-primary"
-                  style={{ borderRadius: '30px', padding: '8px 20px', fontSize: '0.85rem', background: 'var(--accent-color)' }}
+                  className="btn btn-primary profile-action"
                   onClick={() => navigate('/become-host')}
                 >
                   ✨ Become a Host
