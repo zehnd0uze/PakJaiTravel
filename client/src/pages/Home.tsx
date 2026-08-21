@@ -26,7 +26,6 @@ export const Home: React.FC = () => {
   const navigate = useNavigate();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showAllHeritage, setShowAllHeritage] = useState(false);
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -143,7 +142,7 @@ export const Home: React.FC = () => {
           </div>
           
           <div className="destinations-grid">
-            {(showAllHeritage ? properties : properties.slice(0, 8)).map(prop => (
+            {properties.slice(0, 8).map(prop => (
               <AirbnbCard
                 key={prop.id}
                 title={prop.name}
@@ -158,11 +157,11 @@ export const Home: React.FC = () => {
             ))}
           </div>
           
-          {!showAllHeritage && properties.length > 8 && (
+          {properties.length > 8 && (
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2.5rem' }}>
               <button 
                 className="btn-luxury-primary" 
-                onClick={() => setShowAllHeritage(true)}
+                onClick={() => navigate('/hotels')}
               >
                 {t('home.heritageCollection.seeMore')}
               </button>
