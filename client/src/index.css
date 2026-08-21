@@ -62,12 +62,17 @@ body {
   -moz-osx-font-smoothing: grayscale;
   /* Mobile resets */
   -webkit-tap-highlight-color: transparent;
-  transition: opacity 0.3s ease, filter 0.3s ease;
 }
 
-body.lang-transitioning {
-  opacity: 0.5;
-  filter: blur(4px);
+body.lang-transitioning,
+body.lang-transitioning * {
+  color: transparent !important;
+  transition: color 0.15s ease-in-out !important;
+}
+
+body.lang-transitioning input::placeholder {
+  color: transparent !important;
+  transition: color 0.15s ease-in-out !important;
 }
 
 h1, h2, h3, h4, h5, h6 {
