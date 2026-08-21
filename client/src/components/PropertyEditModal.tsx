@@ -319,14 +319,14 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
             className={`modal-tab-btn ${activeTab === 'photos' ? 'active' : ''}`}
             onClick={() => setActiveTab('photos')}
           >
-            {t('propertyEditModal.tabPhotos')} ({images.length})
+            {t('propertyEditModal.tabPhotos')}
           </button>
           <button 
             type="button"
             className={`modal-tab-btn ${activeTab === 'amenities' ? 'active' : ''}`}
             onClick={() => setActiveTab('amenities')}
           >
-            {t('propertyEditModal.tabAmenities')} ({selectedAmenities.length + selectedFeatures.length})
+            {t('propertyEditModal.tabAmenities')}
           </button>
           <button 
             type="button"
