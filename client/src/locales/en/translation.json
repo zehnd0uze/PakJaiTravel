@@ -63,7 +63,10 @@
       "nameLabel": "Accommodation Name *",
       "namePlaceholder": "e.g. Chiang Dao Mountain Sanctuary & Homestay",
       "typeLabel": "Property Type",
-      "priceLabel": "Price per Night (THB) *",
+      "priceLabel": "Price (THB) *",
+      "priceTypeLabel": "Pricing Model",
+      "perNight": "Per Night",
+      "perPerson": "Per Person / Night",
       "districtLabel": "District / Area",
       "provinceLabel": "Province",
       "locationLabel": "Detailed Location / Landmark",
@@ -111,6 +114,10 @@
       "forest": "Forest Retreats",
       "cafe": "Artisan Cafes",
       "dining": "Fine Dining"
+    },
+    "common": {
+      "perNight": "/ night",
+      "perPerson": "/ person"
     },
     "experience": {
       "title": "The Pakjai Experience",

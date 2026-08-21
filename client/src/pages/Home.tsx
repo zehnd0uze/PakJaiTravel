@@ -148,7 +148,8 @@ export const Home: React.FC = () => {
                 title={prop.name}
                 subtitle={`${prop.type} • ${(prop.features || []).slice(0, 2).join(' • ') || 'Local Stay'}`}
                 image={prop.imageUrl || '/assets/placeholder-hotel.jpg'}
-                price={`฿${Number(prop.pricePerNight || 0).toLocaleString()}`}
+                price={`฿${Number(prop.pricePerNight || prop.price_per_night || prop.price || 0).toLocaleString()}`}
+                priceType={prop.price_type || prop.priceType as any}
                 rating={Number(prop.rating || 0)}
                 reviews={Number(prop.reviews || 0)}
                 isGuestFavorite={Number(prop.rating || 0) >= 4.8}

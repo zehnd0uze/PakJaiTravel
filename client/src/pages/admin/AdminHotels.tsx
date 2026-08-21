@@ -8,6 +8,7 @@ interface Property {
   name: string;
   type: string;
   pricePerNight: number;
+  priceType?: 'per_night' | 'per_person';
   currency: string;
   rating: number;
   reviews: number;
@@ -41,6 +42,7 @@ export const AdminHotels: React.FC = () => {
         const formatted = (data as any[]).map(p => ({
           ...p,
           pricePerNight: p.price_per_night || 0,
+          priceType: p.price_type || 'per_night',
           currency: p.currency || 'THB',
           rating: p.rating || 4.5,
           reviews: p.reviews || 0,
@@ -156,7 +158,7 @@ export const AdminHotels: React.FC = () => {
                       </div>
                     </td>
                     <td>{p.type}</td>
-                    <td>฿{p.pricePerNight.toLocaleString()}</td>
+                    <td>฿{p.pricePerNight.toLocaleString()} {p.priceType === 'per_person' ? '/ person' : '/ night'}</td>
                     <td>{p.rating} ({p.reviews})</td>
                     <td>
                       <span className={`status-badge ${p.status || 'published'}`}>

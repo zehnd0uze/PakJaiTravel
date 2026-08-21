@@ -4,6 +4,7 @@ import { supabase } from '../utils/supabase';
 import { VerifiedBadge } from '../components/VerifiedBadge';
 import { Button } from '../components/Button';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { ClaimPropertyModal } from '../components/ClaimPropertyModal';
 import './HotelDetail.css';
 
@@ -14,6 +15,7 @@ interface Hotel {
   rating: number;
   reviews: number;
   pricePerNight: number;
+  priceType?: 'per_night' | 'per_person';
   currency: string;
   imageUrl: string;
   images: string[];
@@ -29,6 +31,7 @@ interface Hotel {
 }
 
 export const HotelDetail: React.FC = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -58,6 +61,7 @@ export const HotelDetail: React.FC = () => {
       const formatted: Hotel = {
         ...data,
         pricePerNight: Number(data.price_per_night || data.price || 0),
+        priceType: data.price_type || 'per_night',
         imageUrl: data.image_url || data.images?.[0] || '',
         images: data.images?.length ? data.images : (data.image_url ? [data.image_url] : []),
         isVerified: data.is_verified ?? true,
@@ -294,7 +298,7 @@ export const HotelDetail: React.FC = () => {
             <div className="sidebar-price">
               <span className="price-label">From</span>
               <span className="price-amount">฿{hotel.pricePerNight.toLocaleString()}</span>
-              <span className="price-unit">/ night</span>
+              <span className="price-unit">{hotel.priceType === 'per_person' ? t('common.perPerson') : t('common.perNight')}</span>
             </div>
 
             {hotel.host && (

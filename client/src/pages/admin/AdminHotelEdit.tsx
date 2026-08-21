@@ -9,6 +9,7 @@ interface PropertyForm {
   name: string;
   type: string;
   pricePerNight: number;
+  priceType: 'per_night' | 'per_person';
   currency: string;
   rating: number;
   reviews: number;
@@ -37,7 +38,7 @@ interface PropertyForm {
 }
 
 const emptyForm: PropertyForm = {
-  name: '', type: 'Homestay', pricePerNight: 0, currency: 'THB',
+  name: '', type: 'Homestay', pricePerNight: 0, priceType: 'per_night', currency: 'THB',
   rating: 0, reviews: 0, imageUrl: '', images: [],
   isVerified: true, features: [], amenities: [],
   location: '', province: 'เชียงใหม่', district: 'เชียงดาว',
@@ -75,6 +76,7 @@ export const AdminHotelEdit: React.FC = () => {
               name: data.name || '',
               type: data.type || 'Homestay',
               pricePerNight: data.price_per_night || 0,
+              priceType: data.price_type || 'per_night',
               currency: data.currency || 'THB',
               rating: data.rating || 0,
               reviews: data.reviews || 0,
@@ -180,6 +182,7 @@ export const AdminHotelEdit: React.FC = () => {
       name: form.name,
       type: form.type,
       price_per_night: Number(form.pricePerNight),
+      price_type: form.priceType,
       currency: form.currency,
       rating: Number(form.rating),
       reviews: Number(form.reviews),
@@ -295,6 +298,13 @@ export const AdminHotelEdit: React.FC = () => {
                   onChange={e => handleChange('pricePerNight', Number(e.target.value))}
                   placeholder="800"
                 />
+              </div>
+              <div className="admin-form-group">
+                <label>Price Type</label>
+                <select value={form.priceType} onChange={e => handleChange('priceType', e.target.value)}>
+                  <option value="per_night">Per Night</option>
+                  <option value="per_person">Per Person</option>
+                </select>
               </div>
               <div className="admin-form-group">
                 <label>Status</label>

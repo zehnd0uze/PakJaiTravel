@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import './AirbnbCard.css';
 
 interface HeritageCardProps {
@@ -6,6 +7,7 @@ interface HeritageCardProps {
   title: string;
   subtitle: string;
   price: string;
+  priceType?: 'per_night' | 'per_person';
   rating: number;
   reviews?: number;
   isGuestFavorite?: boolean;
@@ -17,11 +19,14 @@ export const AirbnbCard: React.FC<HeritageCardProps> = ({
   title,
   subtitle,
   price,
+  priceType = 'per_night',
   rating,
   reviews,
   isGuestFavorite,
   onClick
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="heritage-card" onClick={onClick}>
       <div className="heritage-card-image-wrapper">
@@ -62,7 +67,7 @@ export const AirbnbCard: React.FC<HeritageCardProps> = ({
         <p className="heritage-card-distance">Chiang Dao, Thailand</p>
         
         <div className="heritage-card-price">
-          <span>{price}</span> <span className="price-suffix">/ night</span>
+          <span>{price}</span> <span className="price-suffix">{priceType === 'per_person' ? t('common.perPerson') : t('common.perNight')}</span>
         </div>
       </div>
     </div>

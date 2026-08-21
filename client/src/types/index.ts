@@ -33,6 +33,8 @@ export interface Property {
   price?: string | number;
   pricePerNight?: number;
   price_per_night?: number;
+  priceType?: 'per_night' | 'per_person';
+  price_type?: 'per_night' | 'per_person';
   currency?: string;
   rating?: number;
   reviews?: number;

@@ -63,7 +63,10 @@
       "nameLabel": "ชื่อที่พัก *",
       "namePlaceholder": "เช่น บ้านไร่เชียงดาวโฮมสเตย์",
       "typeLabel": "ประเภทที่พัก",
-      "priceLabel": "ราคาต่อคืน (บาท) *",
+      "priceLabel": "ราคา (บาท) *",
+      "priceTypeLabel": "รูปแบบการคิดราคา",
+      "perNight": "ต่อคืน",
+      "perPerson": "ต่อคน / คืน",
       "districtLabel": "อำเภอ / ย่าน",
       "provinceLabel": "จังหวัด",
       "locationLabel": "ตำแหน่งที่ตั้งโดยละเอียด / จุดสังเกต",
@@ -108,9 +111,13 @@
     "moods": {
       "all": "ที่พักทั้งหมด",
       "boutique": "บูติคโฮเทล",
-      "forest": "ที่พักกลางป่า",
-      "cafe": "คาเฟ่อาร์ติซาน",
-      "dining": "ไฟน์ไดน์นิ่ง"
+      "forest": "บ้านพักในป่า",
+      "cafe": "คาเฟ่สุดชิค",
+      "dining": "ร้านอาหารหรู"
+    },
+    "common": {
+      "perNight": "/ คืน",
+      "perPerson": "/ คน"
     },
     "experience": {
       "title": "ประสบการณ์พักใจ",

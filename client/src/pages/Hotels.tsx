@@ -189,6 +189,7 @@ export const Hotels: React.FC = () => {
                   subtitle={hotel.type}
                   image={hotel.imageUrl}
                   price={`${hotel.pricePerNight} ${hotel.currency}`}
+                  priceType={hotel.price_type || hotel.priceType as any}
                   rating={hotel.rating}
                   isVerified={hotel.isVerified}
                   onClick={() => navigate(`/hotels/${hotel.id}`)}

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import './Card.css';
 import { VerifiedBadge } from './VerifiedBadge';
 
@@ -7,6 +8,7 @@ interface CardProps {
   title: string;
   subtitle?: string;
   price?: string;
+  priceType?: 'per_night' | 'per_person';
   rating?: number;
   badge?: string;
   isVerified?: boolean;
@@ -19,12 +21,15 @@ export const Card: React.FC<CardProps> = ({
   title,
   subtitle,
   price,
+  priceType = 'per_night',
   rating,
   badge,
   isVerified,
   onClick,
   className = ''
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className={`destination-card hover-lift ${className}`} onClick={onClick}>
       {image && (
@@ -48,7 +53,7 @@ export const Card: React.FC<CardProps> = ({
         {subtitle && <p className="card-subtitle">{subtitle}</p>}
         {price && (
           <div className="card-price">
-            From <span>{price}</span>
+            From <span>{price}</span> <span style={{fontSize: '0.8em', color: '#666', fontWeight: 400}}>{priceType === 'per_person' ? t('common.perPerson') : t('common.perNight')}</span>
           </div>
         )}
       </div>

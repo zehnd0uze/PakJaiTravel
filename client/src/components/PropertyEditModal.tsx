@@ -82,6 +82,9 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
     property?.price?.toString() || 
     '1500'
   );
+  const [priceType, setPriceType] = useState<'per_night' | 'per_person'>(
+    property?.priceType || property?.price_type || 'per_night'
+  );
   const [status, setStatus] = useState<'published' | 'draft'>(
     property?.status === 'draft' ? 'draft' : 'published'
   );
@@ -238,6 +241,7 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
         name: name.trim(),
         type,
         price_per_night: numericPrice,
+        price_type: priceType,
         currency: 'THB',
         image_url: primaryImage,
         images: images.length > 0 ? images : [primaryImage],
@@ -380,6 +384,18 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                       required
                     />
                   </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="prop-price-type">{t('propertyEditModal.priceTypeLabel')}</label>
+                  <select 
+                    id="prop-price-type"
+                    value={priceType}
+                    onChange={e => setPriceType(e.target.value as 'per_night' | 'per_person')}
+                  >
+                    <option value="per_night">{t('propertyEditModal.perNight')}</option>
+                    <option value="per_person">{t('propertyEditModal.perPerson')}</option>
+                  </select>
                 </div>
 
                 <div className="form-group">
