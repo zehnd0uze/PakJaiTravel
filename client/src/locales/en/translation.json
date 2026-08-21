@@ -52,8 +52,14 @@
       "subtitle": "Exclusively verified. Locally owned. Extraordinary experiences.",
       "seeMore": "See More"
     },
-    "propertyEditModal": {
-      "titleNew": "List Your Accommodation",
+    "moods": {
+      "all": "All Stays",
+      "boutique": "Boutique Hotels",
+      "forest": "Forest Retreats",
+      "cafe": "Artisan Cafes",
+      "dining": "Fine Dining"
+    },
+    "experience": {
       "titleEdit": "Edit \"{{name}}\"",
       "subtitle": "Provide details, photos, and amenities for travelers",
       "tabBasic": "1. Basic Info",
@@ -108,46 +114,67 @@
       "errorPrice": "Please provide a valid price per night.",
       "errorSave": "Failed to save accommodation."
     },
-    "moods": {
-      "all": "All Stays",
-      "boutique": "Boutique Hotels",
-      "forest": "Forest Retreats",
-      "cafe": "Artisan Cafes",
-      "dining": "Fine Dining"
-    },
-    "common": {
-      "perNight": "/ night",
-      "perPerson": "/ person"
-    },
-    "experience": {
-      "title": "The Pakjai Experience",
-      "natureTitle": "Immersive Nature",
-      "natureDesc": "Wake up to misty mountains and fall asleep to the sounds of the forest in our handpicked eco-retreats.",
-      "heritageTitle": "Authentic Heritage",
-      "heritageDesc": "Experience true Northern Thai hospitality in beautifully preserved teakwood homes and boutique resorts.",
-      "wellnessTitle": "Holistic Wellness",
-      "wellnessDesc": "Rejuvenate your mind and body with traditional spa treatments, yoga, and mindful living experiences."
-    },
-    "community": {
-      "title": "Community Journal",
-      "emptyState": "No stories yet. Be the first to share your experience!",
-      "authorSuffix": "'s Journal",
-      "readMore": "Read more"
-    },
-    "footer": {
-      "brand": "PAKJAI",
-      "tagline": "Curated nature retreats & heritage stays in Chiang Dao.",
-      "explore": "Explore",
-      "home": "Home",
-      "stays": "All Stays",
-      "journal": "Journal",
-      "host": "Become a Host",
-      "support": "Support",
-      "contact": "Contact Us",
-      "faq": "FAQ",
-      "terms": "Terms of Service",
-      "privacy": "Privacy Policy",
       "rights": "© 2026 Pakjai Travel. All rights reserved."
     }
+  },
+  "propertyEditModal": {
+    "titleNew": "List Your Accommodation",
+    "titleEdit": "Edit \"{{name}}\"",
+    "subtitle": "Provide details, photos, and amenities for travelers",
+    "tabBasic": "1. Basic Info",
+    "tabPhotos": "2. Photos",
+    "tabAmenities": "3. Amenities & Highlights",
+    "tabHost": "4. Host & Rules",
+    "nameLabel": "Accommodation Name *",
+    "namePlaceholder": "e.g. Chiang Dao Mountain Sanctuary & Homestay",
+    "typeLabel": "Property Type",
+    "priceLabel": "Price (THB) *",
+    "priceTypeLabel": "Pricing Model",
+    "perNight": "Per Night",
+    "perPerson": "Per Person / Night",
+    "districtLabel": "District / Area",
+    "provinceLabel": "Province",
+    "locationLabel": "Detailed Location / Landmark",
+    "locationPlaceholder": "e.g. Ban Tham, Near Wat Tham Chiang Dao, Chiang Dao",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Describe your property, surroundings, unique views, morning mist, meals provided, and why travelers will love staying here...",
+    "statusLabel": "Listing Status",
+    "statusPublished": "Published (Visible in Accommodations Directory)",
+    "statusDraft": "Draft (Private, not listed yet)",
+    "uploading": "Compressing & Uploading...",
+    "uploadText": "Click to Upload Accommodation Photos",
+    "uploadSubtext": "Supports JPG, PNG, WEBP (Auto-compressed for ultra-fast loading)",
+    "urlPlaceholder": "Or paste an image URL directly...",
+    "addUrlBtn": "+ Add URL",
+    "coverHint": "⭐ The first photo is your Cover Photo. Click \"Set as Cover\" on any photo to make it primary.",
+    "coverBadge": "Cover Photo",
+    "setCoverBtn": "Set Cover",
+    "noPhotos": "No photos added yet. Upload at least 1 photo for your listing to stand out!",
+    "highlightsTitle": "Highlights & Scenic Features",
+    "highlightsHint": "Select the top features that describe your accommodation:",
+    "addFeaturePlaceholder": "Add custom feature (e.g. Bamboo Balcony)...",
+    "addBtn": "+ Add",
+    "amenitiesTitle": "Amenities & Comforts",
+    "amenitiesHint": "Select all available amenities for guests:",
+    "addAmenityPlaceholder": "Add custom amenity (e.g. Campfire Wood, Coffee Grinder)...",
+    "hostNameLabel": "Host / Contact Person Name",
+    "hostSinceLabel": "Hosting Since (Year)",
+    "phoneLabel": "Phone Number (For Traveler Bookings)",
+    "lineLabel": "LINE ID (Popular for Thailand Bookings)",
+    "emailLabel": "Host Email",
+    "checkInLabel": "Check-In Time",
+    "checkOutLabel": "Check-Out Time",
+    "cancelBtn": "Cancel",
+    "nextBtn": "Next Step →",
+    "savingBtn": "Saving Accommodation...",
+    "saveChangesBtn": "Save Changes",
+    "publishBtn": "Publish Accommodation",
+    "errorName": "Please provide a name for your accommodation.",
+    "errorPrice": "Please provide a valid price per night.",
+    "errorSave": "Failed to save accommodation."
+  },
+  "common": {
+    "perNight": "/ night",
+    "perPerson": "/ person"
   }
 }
