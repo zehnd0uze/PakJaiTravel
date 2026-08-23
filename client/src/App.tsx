@@ -20,6 +20,7 @@ import { AdminClaims } from './pages/admin/AdminClaims';
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { AuthModal } from './components/AuthModal';
+import { CookieConsent } from './components/CookieConsent';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
       <AuthProvider>
         <div className="app-container">
           <AuthModal />
+          <CookieConsent />
           <Routes>
             {/* Auth pages render without header/footer */}
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
