@@ -196,11 +196,13 @@ export const AdminHotels: React.FC = () => {
                     <td>{p.rating} ({p.reviews})</td>
                     <td>
                       {p.status === 'pending' ? (
-                        <span className="status-badge" style={{ background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d' }}>Pending</span>
+                        <div style={{ display: 'inline-block', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d' }}>Pending</div>
                       ) : p.status === 'draft' ? (
-                        <span className="status-badge" style={{ background: '#FFF3E0', color: '#E65100' }}>Draft</span>
+                        <div style={{ display: 'inline-block', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, background: '#FFF3E0', color: '#E65100' }}>Draft</div>
                       ) : (
-                        <span className="status-badge" style={{ background: '#E8FAF0', color: '#1B8A5A' }}>Approved</span>
+                        <div style={{ display: 'inline-block', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, background: '#E8FAF0', color: '#1B8A5A' }}>
+                          {p.status === 'published' ? 'Approved' : (p.status || 'Approved')}
+                        </div>
                       )}
                     </td>
                     <td>
