@@ -47,7 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsAuthModalOpen(false);
   }, []);
 
-  const fetchProfile = async (userId: string, email: string) => {
+  const fetchProfile = async (userId: string, email: string, emailConfirmedAt?: string) => {
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -59,12 +59,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     
     if (data) {
+      let isVerified = data.is_verified;
+      
+      // Auto-sync for older accounts that verified before the sync fix
+      if (emailConfirmedAt && !isVerified) {
+        isVerified = true;
+        supabase.from('profiles').update({ is_verified: true }).eq('id', userId).then(({error}) => {
+          if (error) console.warn('Retroactive verify sync failed:', error);
+        });
+      }
+
       setUser({
         id: data.id,
         name: data.name,
         email: data.email,
         role: data.role,
-        isVerified: data.is_verified,
+        isVerified: isVerified,
         avatar: data.avatar,
         coverPhoto: data.cover_photo
       });
@@ -92,7 +102,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (session?.user) {
           setToken(session.access_token);
-          await fetchProfile(session.user.id, session.user.email!);
+          await fetchProfile(session.user.id, session.user.email!, session.user.email_confirmed_at);
         } else {
           setUser(null);
           setToken(null);
@@ -113,7 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         if (session?.user) {
           setToken(session.access_token);
-          await fetchProfile(session.user.id, session.user.email!);
+          await fetchProfile(session.user.id, session.user.email!, session.user.email_confirmed_at);
         } else {
           setUser(null);
           setToken(null);
