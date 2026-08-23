@@ -326,7 +326,7 @@ export const Header: React.FC = () => {
             <Link 
               to={user?.role === 'host' ? "/dashboard?new=1" : "/become-host"} 
               className="nav-link host-link" 
-              style={{ marginRight: '1.5rem', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.8rem', color: 'var(--accent-color)', fontWeight: '600' }}
+              style={{ marginRight: '1.5rem', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.8rem', fontWeight: '600' }}
             >
               {user?.role === 'host' ? t('header.addListing') : t('header.listProperty')}
             </Link>
@@ -448,7 +448,7 @@ export const Header: React.FC = () => {
                         {t('header.userMenu.hostDashboard')}
                       </button>
                     ) : (
-                      <button className="user-dropdown-item" role="menuitem" onClick={() => { setMenuOpen(false); navigate('/become-host'); }} style={{ color: 'var(--accent-color)', fontWeight: 600 }}>
+                      <button className="user-dropdown-item" role="menuitem" onClick={() => { setMenuOpen(false); navigate('/become-host'); }} style={{ fontWeight: 600 }}>
                         {t('header.userMenu.becomeHost')}
                       </button>
                     )}
