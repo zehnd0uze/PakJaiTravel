@@ -26,9 +26,45 @@ export const Header: React.FC = () => {
   // Inline Verify State
   const [showInlineVerify, setShowInlineVerify] = useState(false);
   const [verifyOtp, setVerifyOtp] = useState('');
+  const [otpValues, setOtpValues] = useState<string[]>(Array(6).fill(''));
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [verifyError, setVerifyError] = useState('');
   const [verifyMessage, setVerifyMessage] = useState('');
+
+  const handleOtpChange = (index: number, value: string) => {
+    if (value.length > 1) {
+      // Handle paste
+      const pasted = value.slice(0, 6).split('');
+      const newOtp = [...otpValues];
+      for (let i = 0; i < pasted.length; i++) {
+        if (index + i < 6) newOtp[index + i] = pasted[i];
+      }
+      setOtpValues(newOtp);
+      setVerifyOtp(newOtp.join(''));
+      
+      const nextFocus = Math.min(index + pasted.length, 5);
+      otpInputRefs.current[nextFocus]?.focus();
+      return;
+    }
+
+    const newOtp = [...otpValues];
+    newOtp[index] = value;
+    setOtpValues(newOtp);
+    setVerifyOtp(newOtp.join(''));
+
+    // Move to next input if typing a digit
+    if (value !== '' && index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !otpValues[index] && index > 0) {
+      // Move to previous input on backspace if current is empty
+      otpInputRefs.current[index - 1]?.focus();
+    }
+  };
 
   const handleInlineVerify = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -345,14 +381,31 @@ export const Header: React.FC = () => {
                             <p style={{ fontSize: '0.85rem', margin: 0 }}>Enter 6-digit code:</p>
                             {verifyError && <div style={{ color: '#dc2626', fontSize: '0.75rem' }}>{verifyError}</div>}
                             {verifyMessage && <div style={{ color: '#16a34a', fontSize: '0.75rem' }}>{verifyMessage}</div>}
-                            <input 
-                              type="text" 
-                              maxLength={6} 
-                              placeholder="123456" 
-                              value={verifyOtp}
-                              onChange={(e) => setVerifyOtp(e.target.value)}
-                              style={{ padding: '6px', borderRadius: '4px', border: '1px solid #ccc', fontSize: '0.9rem' }}
-                            />
+                            <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', marginBottom: '8px' }}>
+                              {otpValues.map((digit, index) => (
+                                <input
+                                  key={index}
+                                  type="text"
+                                  maxLength={1}
+                                  value={digit}
+                                  ref={(el) => (otpInputRefs.current[index] = el)}
+                                  onChange={(e) => handleOtpChange(index, e.target.value)}
+                                  onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                                  style={{
+                                    width: '36px',
+                                    height: '40px',
+                                    textAlign: 'center',
+                                    fontSize: '1.2rem',
+                                    fontWeight: 'bold',
+                                    borderRadius: '6px',
+                                    border: '1px solid #ccc',
+                                    outline: 'none',
+                                    transition: 'border-color 0.2s',
+                                  }}
+                                  onFocus={(e) => e.target.select()}
+                                />
+                              ))}
+                            </div>
                             <button 
                               className="verify-now-btn" 
                               onClick={handleInlineVerify}

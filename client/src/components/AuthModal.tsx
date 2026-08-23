@@ -106,9 +106,42 @@ export const AuthModal: React.FC = () => {
   };
 
   const [verifyOtp, setVerifyOtp] = useState('');
+  const [otpValues, setOtpValues] = useState<string[]>(Array(6).fill(''));
+  const otpInputRefs = React.useRef<(HTMLInputElement | null)[]>([]);
   const [resending, setResending] = useState(false);
   const [message, setMessage] = useState('');
   const { verify, resendOtp, user } = useAuth();
+
+  const handleOtpChange = (index: number, value: string) => {
+    if (value.length > 1) {
+      const pasted = value.slice(0, 6).split('');
+      const newOtp = [...otpValues];
+      for (let i = 0; i < pasted.length; i++) {
+        if (index + i < 6) newOtp[index + i] = pasted[i];
+      }
+      setOtpValues(newOtp);
+      setVerifyOtp(newOtp.join(''));
+      
+      const nextFocus = Math.min(index + pasted.length, 5);
+      otpInputRefs.current[nextFocus]?.focus();
+      return;
+    }
+
+    const newOtp = [...otpValues];
+    newOtp[index] = value;
+    setOtpValues(newOtp);
+    setVerifyOtp(newOtp.join(''));
+
+    if (value !== '' && index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !otpValues[index] && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    }
+  };
 
   const handleVerifySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -300,16 +333,31 @@ export const AuthModal: React.FC = () => {
                 }}>{message}</div>}
                 <div className="form-group">
                   <label htmlFor="modal-verify-otp">6-Digit Code</label>
-                  <input
-                    id="modal-verify-otp"
-                    type="text"
-                    className="form-input"
-                    placeholder="123456"
-                    maxLength={6}
-                    value={verifyOtp}
-                    onChange={(e) => setVerifyOtp(e.target.value)}
-                    autoComplete="one-time-code"
-                  />
+                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '8px' }}>
+                    {otpValues.map((digit, index) => (
+                      <input
+                        key={index}
+                        type="text"
+                        maxLength={1}
+                        value={digit}
+                        ref={(el) => (otpInputRefs.current[index] = el)}
+                        onChange={(e) => handleOtpChange(index, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                        style={{
+                          width: '45px',
+                          height: '50px',
+                          textAlign: 'center',
+                          fontSize: '1.5rem',
+                          fontWeight: 'bold',
+                          borderRadius: '8px',
+                          border: '1px solid #ccc',
+                          outline: 'none',
+                          transition: 'border-color 0.2s',
+                        }}
+                        onFocus={(e) => e.target.select()}
+                      />
+                    ))}
+                  </div>
                 </div>
                 <button type="submit" className="auth-submit-btn" disabled={loading}>
                   {loading ? 'Verifying...' : 'Verify Email'}
