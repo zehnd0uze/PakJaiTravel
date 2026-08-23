@@ -20,8 +20,9 @@ interface AuthContextType {
   openAuthModal: (view?: 'login' | 'register' | 'forgot_password' | 'verify_email') => void;
   closeAuthModal: () => void;
   login: (email: string, password: string) => Promise<void>;
+  signInWithOtp: (email: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
-  verify: (email: string, otp: string) => Promise<void>;
+  verify: (email: string, otp: string, type?: 'signup' | 'magiclink' | 'email') => Promise<void>;
   resendOtp: (email: string) => Promise<void>;
   signInWithOAuth: (provider: 'google' | 'facebook') => Promise<void>;
   logout: () => void;
@@ -162,11 +163,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (error) throw new Error(error.message);
   }, []);
 
-  const verify = useCallback(async (email: string, otp: string) => {
+  const signInWithOtp = useCallback(async (email: string) => {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: true,
+      }
+    });
+    if (error) throw new Error(error.message);
+  }, []);
+
+  const verify = useCallback(async (email: string, otp: string, type: 'signup' | 'magiclink' | 'email' = 'email') => {
     const { data, error } = await supabase.auth.verifyOtp({
       email,
       token: otp,
-      type: 'signup'
+      type
     });
     if (error) throw new Error(error.message);
 
@@ -246,7 +257,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <AuthContext.Provider value={{ 
       user, token, loading, 
       isAuthModalOpen, authModalView, openAuthModal, closeAuthModal,
-      login, register,      verify,
+      login, signInWithOtp, register, verify,
       resendOtp,
       signInWithOAuth,
       logout,
