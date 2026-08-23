@@ -23,6 +23,7 @@ interface AuthContextType {
   register: (name: string, email: string, password: string) => Promise<void>;
   verify: (email: string, otp: string) => Promise<void>;
   resendOtp: (email: string) => Promise<void>;
+  signInWithOAuth: (provider: 'google' | 'facebook') => Promise<void>;
   logout: () => void;
   updateProfile: (fields: { avatar?: string; coverPhoto?: string; name?: string; role?: string }) => Promise<void>;
 }
@@ -198,6 +199,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (error) throw new Error(error.message);
   }, []);
 
+  const signInWithOAuth = useCallback(async (provider: 'google' | 'facebook') => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/`,
+      },
+    });
+    if (error) throw new Error(error.message);
+  }, []);
+
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
   }, []);
@@ -235,7 +246,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <AuthContext.Provider value={{ 
       user, token, loading, 
       isAuthModalOpen, authModalView, openAuthModal, closeAuthModal,
-      login, register, verify, resendOtp, logout, updateProfile 
+      login, register,      verify,
+      resendOtp,
+      signInWithOAuth,
+      logout,
+      updateProfile 
     }}>
       {children}
     </AuthContext.Provider>
