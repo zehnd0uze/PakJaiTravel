@@ -152,12 +152,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const verify = useCallback(async (email: string, otp: string) => {
-    const { error } = await supabase.auth.verifyOtp({
+    const { data, error } = await supabase.auth.verifyOtp({
       email,
       token: otp,
       type: 'signup'
     });
     if (error) throw new Error(error.message);
+
+    if (data.user) {
+      // Update profile in DB
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ is_verified: true })
+        .eq('id', data.user.id);
+        
+      if (updateError) {
+        console.warn('Failed to sync verified status to profile:', updateError);
+      } else {
+        // Update local state if this is the current user
+        setUser(prev => {
+          if (prev && prev.id === data.user?.id) {
+            return { ...prev, isVerified: true };
+          }
+          return prev;
+        });
+      }
+    }
   }, []);
 
   const resendOtp = useCallback(async (email: string) => {
