@@ -18,7 +18,7 @@ function getPasswordStrength(pw: string): { level: number; label: string; cls: s
 }
 
 export const AuthModal: React.FC = () => {
-  const { isAuthModalOpen, authModalView, openAuthModal, closeAuthModal, login, register } = useAuth();
+  const { isAuthModalOpen, authModalView, openAuthModal, closeAuthModal, login, register, verify, resendOtp, user } = useAuth();
   
   // Login State
   const [loginEmail, setLoginEmail] = useState('');
@@ -34,6 +34,13 @@ export const AuthModal: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const strength = useMemo(() => getPasswordStrength(regPassword), [regPassword]);
+
+  // Verify State
+  const [verifyOtp, setVerifyOtp] = useState('');
+  const [otpValues, setOtpValues] = useState<string[]>(Array(6).fill(''));
+  const otpInputRefs = React.useRef<(HTMLInputElement | null)[]>([]);
+  const [resending, setResending] = useState(false);
+  const [message, setMessage] = useState('');
 
   if (!isAuthModalOpen) return null;
 
@@ -104,13 +111,7 @@ export const AuthModal: React.FC = () => {
       setLoading(false);
     }
   };
-
-  const [verifyOtp, setVerifyOtp] = useState('');
-  const [otpValues, setOtpValues] = useState<string[]>(Array(6).fill(''));
-  const otpInputRefs = React.useRef<(HTMLInputElement | null)[]>([]);
-  const [resending, setResending] = useState(false);
-  const [message, setMessage] = useState('');
-  const { verify, resendOtp, user } = useAuth();
+  };
 
   const handleOtpChange = (index: number, value: string) => {
     if (value.length > 1) {
