@@ -56,7 +56,7 @@ export const AirbnbCard: React.FC<HeritageCardProps> = ({
       <div className="heritage-card-content">
         <div className="heritage-card-header">
           <h3 className="heritage-card-title">{title}</h3>
-          {reviews > 0 ? (
+          {(reviews || 0) > 0 ? (
             <div className="heritage-card-rating">
               <span className="star">★</span>
               <span>{Number(rating || 0).toFixed(2)}</span>

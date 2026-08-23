@@ -6,9 +6,9 @@ import { ClaimPropertyModal } from '../components/ClaimPropertyModal';
 import './BecomeHostPage.css';
 
 const BecomeHostPage: React.FC = () => {
-  const { user, updateProfile } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+
   const [error, setError] = useState('');
   const [showClaimModal, setShowClaimModal] = useState(false);
 
@@ -44,11 +44,9 @@ const BecomeHostPage: React.FC = () => {
               variant="primary" 
               size="lg" 
               onClick={handleGetStarted}
-              disabled={loading}
               className="bh-main-cta"
             >
-              {loading ? 'Setting up your space...' : 
-                !user ? 'Get Started & List Your Space' : 
+              {!user ? 'Get Started & List Your Space' : 
                 user.role === 'host' ? 'Go to Host Dashboard (+ Add Listing)' : 
                 'Activate Host Mode & List Accommodation'}
             </Button>
