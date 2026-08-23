@@ -56,11 +56,17 @@ export const AirbnbCard: React.FC<HeritageCardProps> = ({
       <div className="heritage-card-content">
         <div className="heritage-card-header">
           <h3 className="heritage-card-title">{title}</h3>
-          <div className="heritage-card-rating">
-            <span className="star">★</span>
-            <span>{Number(rating || 0).toFixed(2)}</span>
-            {reviews && <span className="reviews-count">({reviews})</span>}
-          </div>
+          {reviews > 0 ? (
+            <div className="heritage-card-rating">
+              <span className="star">★</span>
+              <span>{Number(rating || 0).toFixed(2)}</span>
+              <span className="reviews-count">({reviews})</span>
+            </div>
+          ) : (
+            <div className="heritage-card-rating new-badge">
+              <span style={{ fontSize: '0.8rem', padding: '2px 6px', background: 'var(--primary-color)', color: 'white', borderRadius: '4px', fontWeight: 'bold' }}>New</span>
+            </div>
+          )}
         </div>
         
         <p className="heritage-card-subtitle">{subtitle}</p>

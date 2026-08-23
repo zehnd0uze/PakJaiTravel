@@ -171,15 +171,24 @@ export const HotelDetail: React.FC = () => {
                 <h1 className="detail-title">{hotel.name}</h1>
                 <p className="detail-location">{hotel.location}</p>
               </div>
-              <div className="detail-rating-block">
-                <span className="detail-rating-score">{hotel.rating}</span>
-                <div className="detail-rating-meta">
-                  <span className="detail-rating-label">
-                    {hotel.rating >= 4.8 ? 'Exceptional' : hotel.rating >= 4.5 ? 'Excellent' : 'Very Good'}
-                  </span>
-                  <span className="detail-reviews">{hotel.reviews} reviews</span>
+              {hotel.reviews > 0 ? (
+                <div className="detail-rating-block">
+                  <span className="detail-rating-score">{hotel.rating}</span>
+                  <div className="detail-rating-meta">
+                    <span className="detail-rating-label">
+                      {hotel.rating >= 4.8 ? 'Exceptional' : hotel.rating >= 4.5 ? 'Excellent' : 'Very Good'}
+                    </span>
+                    <span className="detail-reviews">{hotel.reviews} reviews</span>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="detail-rating-block new-property" style={{ display: 'flex', alignItems: 'center' }}>
+                  <span className="detail-rating-score" style={{ fontSize: '1rem', padding: '6px 12px', background: 'var(--primary-color)', color: 'white', borderRadius: '8px', fontWeight: 600 }}>New</span>
+                  <div className="detail-rating-meta" style={{ marginLeft: '12px' }}>
+                    <span className="detail-rating-label" style={{ fontSize: '0.9rem', color: '#1a1a1a', fontWeight: 600 }}>No reviews yet</span>
+                  </div>
+                </div>
+              )}
             </div>
             {hotel.isVerified && (
               <div className="detail-verified-banner">
