@@ -1,6 +1,8 @@
 import React from 'react';
 import './Footer.css';
 
+import { Link } from 'react-router-dom';
+
 export const Footer: React.FC = () => {
   return (
     <footer className="footer">
@@ -35,8 +37,8 @@ export const Footer: React.FC = () => {
           <ul>
             <li><a href="#">Help Center</a></li>
             <li><a href="#">Contact Us</a></li>
-            <li><a href="#">Privacy Policy</a></li>
-            <li><a href="#">Terms of Service</a></li>
+            <li><Link to="/privacy">Privacy Policy</Link></li>
+            <li><Link to="/terms">Terms of Service</Link></li>
           </ul>
         </div>
       </div>

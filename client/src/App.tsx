@@ -22,6 +22,8 @@ import { MobileBottomNav } from './components/MobileBottomNav';
 import { AuthModal } from './components/AuthModal';
 import { CookieConsent } from './components/CookieConsent';
 import { SessionTimeout } from './components/SessionTimeout';
+import { TermsPage } from './pages/TermsPage';
+import { PrivacyPage } from './pages/PrivacyPage';
 
 function App() {
   return (
@@ -60,6 +62,9 @@ function App() {
                       <Route path="/profile" element={<ProfilePage />} />
                       <Route path="/dashboard" element={<HostDashboard />} />
                       <Route path="/become-host" element={<BecomeHostPage />} />
+
+                      <Route path="/terms" element={<TermsPage />} />
+                      <Route path="/privacy" element={<PrivacyPage />} />
                       <Route path="/hotels" element={<Hotels />} />
                       <Route path="/hotels/:id" element={<HotelDetail />} />
                     </Routes>
