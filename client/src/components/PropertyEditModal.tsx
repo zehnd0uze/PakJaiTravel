@@ -6,6 +6,7 @@ import { type Property } from '../types';
 import { supabase } from '../utils/supabase';
 import { uploadToCloudinary } from '../utils/cloudinary';
 import { compressImage } from '../utils/imageCompression';
+import { TermsModal } from './TermsModal';
 import './PropertyEditModal.css';
 
 interface PropertyEditModalProps {
@@ -124,6 +125,7 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
   const [email, setEmail] = useState(property?.contact?.email || user?.email || '');
   const [line, setLine] = useState(property?.contact?.line || '');
   const [termsAccepted, setTermsAccepted] = useState(isEditing);
+  const [termsModalType, setTermsModalType] = useState<'terms' | 'privacy' | null>(null);
 
   const [uploading, setUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -703,7 +705,7 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                     style={{ marginTop: '4px', cursor: 'pointer', width: '18px', height: '18px' }}
                   />
                   <label htmlFor="property-terms" style={{ fontSize: '0.9rem', color: '#475569', lineHeight: 1.5, cursor: 'pointer', margin: 0 }}>
-                    I confirm that I am the legal owner or authorized manager of this property, and I agree to PakJai Travel's <a href="/terms" target="_blank" style={{ color: 'var(--primary-color)', fontWeight: 600 }}>Terms of Service</a> and <a href="/privacy" target="_blank" style={{ color: 'var(--primary-color)', fontWeight: 600 }}>Privacy Policy</a>. I guarantee that all provided information is accurate and true.
+                    I confirm that I am the legal owner or authorized manager of this property, and I agree to PakJai Travel's <button type="button" onClick={(e) => { e.preventDefault(); setTermsModalType('terms'); }} style={{ color: 'var(--primary-color)', background: 'none', border: 'none', padding: 0, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>Terms of Service</button> and <button type="button" onClick={(e) => { e.preventDefault(); setTermsModalType('privacy'); }} style={{ color: 'var(--primary-color)', background: 'none', border: 'none', padding: 0, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>Privacy Policy</button>. I guarantee that all provided information is accurate and true.
                   </label>
                 </div>
               </div>
@@ -739,6 +741,12 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
           </div>
         </form>
       </div>
+
+      <TermsModal 
+        isOpen={termsModalType !== null} 
+        type={termsModalType} 
+        onClose={() => setTermsModalType(null)} 
+      />
     </div>
   );
 

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { TermsModal } from './TermsModal';
 import './AuthModal.css';
 
 function getPasswordStrength(pw: string): { level: number; label: string; cls: string } {
@@ -30,6 +31,7 @@ export const AuthModal: React.FC = () => {
   const [regPassword, setRegPassword] = useState('');
   const [regConfirmPassword, setRegConfirmPassword] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsModalType, setTermsModalType] = useState<'terms' | 'privacy' | null>(null);
   
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -324,7 +326,7 @@ export const AuthModal: React.FC = () => {
                     style={{ marginTop: '4px', cursor: 'pointer' }}
                   />
                   <label htmlFor="modal-register-terms" style={{ fontSize: '0.85rem', color: '#666', lineHeight: 1.4, cursor: 'pointer' }}>
-                    I agree to the <a href="/terms" style={{ color: 'var(--primary-color)' }}>Terms of Service</a> and <a href="/privacy" style={{ color: 'var(--primary-color)' }}>Privacy Policy</a>.
+                    I agree to the <button type="button" onClick={(e) => { e.preventDefault(); setTermsModalType('terms'); }} style={{ color: 'var(--primary-color)', background: 'none', border: 'none', padding: 0, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>Terms of Service</button> and <button type="button" onClick={(e) => { e.preventDefault(); setTermsModalType('privacy'); }} style={{ color: 'var(--primary-color)', background: 'none', border: 'none', padding: 0, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>Privacy Policy</button>.
                   </label>
                 </div>
 
@@ -404,6 +406,12 @@ export const AuthModal: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <TermsModal 
+        isOpen={termsModalType !== null} 
+        type={termsModalType} 
+        onClose={() => setTermsModalType(null)} 
+      />
     </div>
   );
 };
