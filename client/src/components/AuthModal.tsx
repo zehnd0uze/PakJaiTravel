@@ -254,7 +254,7 @@ export const AuthModal: React.FC = () => {
                 <button type="submit" className="auth-submit-btn" disabled={loading}>
                   {loading ? 'Signing in...' : 'Sign in'}
                 </button>
-                </div>
+
 
                 <div className="auth-modal-divider">
                   <span>or</span>
