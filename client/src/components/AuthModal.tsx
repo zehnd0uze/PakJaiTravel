@@ -317,15 +317,15 @@ export const AuthModal: React.FC = () => {
                   />
                 </div>
                 
-                <div className="form-group" style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginTop: '4px' }}>
+                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: '10px', marginTop: '12px', marginBottom: '8px' }}>
                   <input 
                     type="checkbox" 
                     id="modal-register-terms" 
                     checked={termsAccepted}
                     onChange={(e) => setTermsAccepted(e.target.checked)}
-                    style={{ marginTop: '4px', cursor: 'pointer' }}
+                    style={{ marginTop: '2px', cursor: 'pointer', width: '16px', height: '16px', flexShrink: 0 }}
                   />
-                  <label htmlFor="modal-register-terms" style={{ fontSize: '0.85rem', color: '#666', lineHeight: 1.4, cursor: 'pointer' }}>
+                  <label htmlFor="modal-register-terms" style={{ fontSize: '0.85rem', color: '#666', lineHeight: 1.4, cursor: 'pointer', margin: 0 }}>
                     I agree to the <button type="button" onClick={(e) => { e.preventDefault(); setTermsModalType('terms'); }} style={{ color: 'var(--primary-color)', background: 'none', border: 'none', padding: 0, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>Terms of Service</button> and <button type="button" onClick={(e) => { e.preventDefault(); setTermsModalType('privacy'); }} style={{ color: 'var(--primary-color)', background: 'none', border: 'none', padding: 0, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>Privacy Policy</button>.
                   </label>
                 </div>
