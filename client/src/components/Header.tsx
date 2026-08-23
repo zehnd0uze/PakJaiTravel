@@ -11,7 +11,7 @@ export const Header: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);       // desktop avatar dropdown
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // hamburger slide-out
-  const { user, logout, openAuthModal } = useAuth();
+  const { user, logout, openAuthModal, verify, resendOtp } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const isHomePage = location.pathname === '/';
@@ -22,6 +22,52 @@ export const Header: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
+
+  // Inline Verify State
+  const [showInlineVerify, setShowInlineVerify] = useState(false);
+  const [verifyOtp, setVerifyOtp] = useState('');
+  const [verifyLoading, setVerifyLoading] = useState(false);
+  const [verifyError, setVerifyError] = useState('');
+  const [verifyMessage, setVerifyMessage] = useState('');
+
+  const handleInlineVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user?.email || !verifyOtp) {
+      setVerifyError('Please enter the 6-digit code.');
+      return;
+    }
+    setVerifyError('');
+    setVerifyMessage('');
+    setVerifyLoading(true);
+    try {
+      await verify(user.email, verifyOtp);
+      setVerifyMessage('Verified successfully!');
+      setTimeout(() => {
+        setMenuOpen(false);
+        window.location.reload();
+      }, 1500);
+    } catch (err: any) {
+      setVerifyError(err.message || 'Verification failed.');
+    } finally {
+      setVerifyLoading(false);
+    }
+  };
+
+  const handleInlineResend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user?.email) return;
+    setVerifyError('');
+    setVerifyMessage('');
+    setVerifyLoading(true);
+    try {
+      await resendOtp(user.email);
+      setVerifyMessage('Code resent to your email.');
+    } catch (err: any) {
+      setVerifyError(err.message || 'Failed to resend code.');
+    } finally {
+      setVerifyLoading(false);
+    }
+  };
 
   // Autocomplete fetcher
   useEffect(() => {
@@ -58,6 +104,7 @@ export const Header: React.FC = () => {
       // For user menu
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setMenuOpen(false);
+        setShowInlineVerify(false);
       }
       // For search dropdown
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
@@ -253,7 +300,7 @@ export const Header: React.FC = () => {
               <div className="user-menu-container" ref={menuRef}>
                 <button
                   className="user-avatar-btn"
-                  onClick={() => setMenuOpen(!menuOpen)}
+                  onClick={() => { setMenuOpen(!menuOpen); setShowInlineVerify(false); }}
                   id="user-avatar-btn"
                   aria-label="User menu"
                   aria-expanded={menuOpen}
@@ -283,13 +330,46 @@ export const Header: React.FC = () => {
 
                     {!user.isVerified && (
                       <div className="verify-prompt-box">
-                        <p>{t('header.userMenu.verifyPrompt')}</p>
-                        <button
-                          className="verify-now-btn"
-                          onClick={() => { setMenuOpen(false); openAuthModal('verify_email'); }}
-                        >
-                          {t('header.userMenu.verifyNow')}
-                        </button>
+                        {!showInlineVerify ? (
+                          <>
+                            <p>{t('header.userMenu.verifyPrompt', 'Verify your email to unlock all features.')}</p>
+                            <button
+                              className="verify-now-btn"
+                              onClick={() => setShowInlineVerify(true)}
+                            >
+                              {t('header.userMenu.verifyNow', 'Verify Now')}
+                            </button>
+                          </>
+                        ) : (
+                          <div className="inline-verify-form" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <p style={{ fontSize: '0.85rem', margin: 0 }}>Enter 6-digit code:</p>
+                            {verifyError && <div style={{ color: '#dc2626', fontSize: '0.75rem' }}>{verifyError}</div>}
+                            {verifyMessage && <div style={{ color: '#16a34a', fontSize: '0.75rem' }}>{verifyMessage}</div>}
+                            <input 
+                              type="text" 
+                              maxLength={6} 
+                              placeholder="123456" 
+                              value={verifyOtp}
+                              onChange={(e) => setVerifyOtp(e.target.value)}
+                              style={{ padding: '6px', borderRadius: '4px', border: '1px solid #ccc', fontSize: '0.9rem' }}
+                            />
+                            <button 
+                              className="verify-now-btn" 
+                              onClick={handleInlineVerify}
+                              disabled={verifyLoading}
+                              style={{ padding: '6px', fontSize: '0.9rem' }}
+                            >
+                              {verifyLoading ? 'Verifying...' : 'Submit'}
+                            </button>
+                            <button 
+                              onClick={handleInlineResend}
+                              disabled={verifyLoading}
+                              style={{ background: 'none', border: 'none', color: '#3b82f6', fontSize: '0.75rem', cursor: 'pointer', textDecoration: 'underline', alignSelf: 'center' }}
+                            >
+                              Resend code
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
 
