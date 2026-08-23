@@ -16,8 +16,8 @@ interface AuthContextType {
   token: string | null; // Keep for backward compatibility if needed, though Supabase handles sessions
   loading: boolean;
   isAuthModalOpen: boolean;
-  authModalView: 'login' | 'register' | 'forgot_password';
-  openAuthModal: (view?: 'login' | 'register' | 'forgot_password') => void;
+  authModalView: 'login' | 'register' | 'forgot_password' | 'verify_email';
+  openAuthModal: (view?: 'login' | 'register' | 'forgot_password' | 'verify_email') => void;
   closeAuthModal: () => void;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
@@ -36,9 +36,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
   // Auth Modal State
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalView, setAuthModalView] = useState<'login' | 'register' | 'forgot_password'>('login');
+  const [authModalView, setAuthModalView] = useState<'login' | 'register' | 'forgot_password' | 'verify_email'>('login');
 
-  const openAuthModal = useCallback((view: 'login' | 'register' | 'forgot_password' = 'login') => {
+  const openAuthModal = useCallback((view: 'login' | 'register' | 'forgot_password' | 'verify_email' = 'login') => {
     setAuthModalView(view);
     setIsAuthModalOpen(true);
   }, []);

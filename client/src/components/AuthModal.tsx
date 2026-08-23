@@ -93,7 +93,7 @@ export const AuthModal: React.FC = () => {
     setLoading(true);
     try {
       await register(regName, regEmail, regPassword);
-      closeAuthModal();
+      openAuthModal('verify_email');
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -102,6 +102,59 @@ export const AuthModal: React.FC = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const [verifyOtp, setVerifyOtp] = useState('');
+  const [resending, setResending] = useState(false);
+  const [message, setMessage] = useState('');
+  const { verify, resendOtp, user } = useAuth();
+
+  const handleVerifySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setMessage('');
+    
+    const emailToVerify = regEmail || user?.email;
+    if (!emailToVerify || !verifyOtp) {
+      setError('Please provide the 6-digit code.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await verify(emailToVerify, verifyOtp);
+      closeAuthModal();
+      window.location.reload(); // Reload to refresh user state if needed
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Verification failed. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    const emailToVerify = regEmail || user?.email;
+    if (!emailToVerify) {
+      setError('Email address not found.');
+      return;
+    }
+    
+    setError('');
+    setMessage('');
+    setResending(true);
+    try {
+      await resendOtp(emailToVerify);
+      setMessage('A new code has been sent to your email.');
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      else setError('Failed to resend code.');
+    } finally {
+      setResending(false);
     }
   };
 
@@ -227,6 +280,56 @@ export const AuthModal: React.FC = () => {
                 </button>
                 <div className="auth-modal-switch">
                   Already have an account? <button type="button" onClick={() => { setError(''); openAuthModal('login'); }}>Sign in</button>
+                </div>
+              </form>
+            )}
+
+            {authModalView === 'verify_email' && (
+              <form onSubmit={handleVerifySubmit} id="modal-verify-form">
+                <div style={{ marginBottom: '16px', fontSize: '0.9rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
+                  Please enter the 6-digit code sent to your email.
+                </div>
+                {message && <div style={{ 
+                  backgroundColor: '#f0fdf4', 
+                  color: '#16a34a', 
+                  padding: '12px', 
+                  borderRadius: '8px', 
+                  marginBottom: '16px',
+                  fontSize: '0.9rem',
+                  border: '1px solid #bcf0da'
+                }}>{message}</div>}
+                <div className="form-group">
+                  <label htmlFor="modal-verify-otp">6-Digit Code</label>
+                  <input
+                    id="modal-verify-otp"
+                    type="text"
+                    className="form-input"
+                    placeholder="123456"
+                    maxLength={6}
+                    value={verifyOtp}
+                    onChange={(e) => setVerifyOtp(e.target.value)}
+                    autoComplete="one-time-code"
+                  />
+                </div>
+                <button type="submit" className="auth-submit-btn" disabled={loading}>
+                  {loading ? 'Verifying...' : 'Verify Email'}
+                </button>
+                <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={resending || loading}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#3b82f6',
+                      cursor: (resending || loading) ? 'not-allowed' : 'pointer',
+                      fontSize: '0.9rem',
+                      textDecoration: 'underline'
+                    }}
+                  >
+                    {resending ? 'Resending...' : "Didn't receive a code? Resend"}
+                  </button>
                 </div>
               </form>
             )}

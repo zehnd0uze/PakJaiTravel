@@ -286,7 +286,7 @@ export const Header: React.FC = () => {
                         <p>{t('header.userMenu.verifyPrompt')}</p>
                         <button
                           className="verify-now-btn"
-                          onClick={() => { setMenuOpen(false); navigate(`/verify-email?email=${user.email}`); }}
+                          onClick={() => { setMenuOpen(false); openAuthModal('verify_email'); }}
                         >
                           {t('header.userMenu.verifyNow')}
                         </button>
