@@ -388,7 +388,7 @@ export const Header: React.FC = () => {
                                   type="text"
                                   maxLength={1}
                                   value={digit}
-                                  ref={(el) => (otpInputRefs.current[index] = el)}
+                                  ref={(el) => { otpInputRefs.current[index] = el; }}
                                   onChange={(e) => handleOtpChange(index, e.target.value)}
                                   onKeyDown={(e) => handleOtpKeyDown(index, e)}
                                   style={{
