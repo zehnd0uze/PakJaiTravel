@@ -359,8 +359,10 @@ export const Header: React.FC = () => {
                           {t('header.userMenu.certifiedHost')}
                         </div>
                       )}
-                      {!user.isVerified && (
-                        <div className="unverified-badge">{t('header.userMenu.unverified')}</div>
+                      {!user.isVerified ? (
+                        <div className="unverified-badge">{t('header.userMenu.unverified', 'UNVERIFIED ACCOUNT')}</div>
+                      ) : (
+                        <div className="verified-badge" style={{ backgroundColor: '#10b981', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '0.65rem', fontWeight: 800, marginTop: '4px', alignSelf: 'flex-start', letterSpacing: '0.05em' }}>VERIFIED ACCOUNT</div>
                       )}
                     </div>
 
@@ -371,7 +373,18 @@ export const Header: React.FC = () => {
                             <p>{t('header.userMenu.verifyPrompt', 'Verify your email to unlock all features.')}</p>
                             <button
                               className="verify-now-btn"
-                              onClick={() => setShowInlineVerify(true)}
+                              onClick={async () => {
+                                setShowInlineVerify(true);
+                                setVerifyError('');
+                                setVerifyMessage('Sending new code...');
+                                try {
+                                  if (user.email) await resendOtp(user.email);
+                                  setVerifyMessage('Code sent to your email!');
+                                } catch (err: any) {
+                                  setVerifyError(err.message || 'Failed to send code.');
+                                  setVerifyMessage('');
+                                }
+                              }}
                             >
                               {t('header.userMenu.verifyNow', 'Verify Now')}
                             </button>
