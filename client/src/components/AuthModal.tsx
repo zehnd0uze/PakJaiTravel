@@ -111,7 +111,6 @@ export const AuthModal: React.FC = () => {
       setLoading(false);
     }
   };
-  };
 
   const handleOtpChange = (index: number, value: string) => {
     if (value.length > 1) {
