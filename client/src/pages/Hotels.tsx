@@ -35,7 +35,7 @@ export const Hotels: React.FC = () => {
   // Fetch from API instead of static data
   useEffect(() => {
     const fetchHotels = async () => {
-      let query = supabase.from('properties').select('*').neq('status', 'draft');
+      let query = supabase.from('properties').select('*').eq('status', 'published');
       
       if (q) {
         query = query.or(`name.ilike.%${q}%,location.ilike.%${q}%,province.ilike.%${q}%,district.ilike.%${q}%`);

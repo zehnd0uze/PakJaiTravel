@@ -36,7 +36,7 @@ export const Home: React.FC = () => {
       const { data, error } = await supabase
         .from('properties')
         .select('*')
-        .neq('status', 'draft');
+        .eq('status', 'published');
         
       if (error) {
         console.error("Failed to fetch properties:", error);
