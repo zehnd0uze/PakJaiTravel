@@ -21,15 +21,9 @@ const BecomeHostPage: React.FC = () => {
     }
 
     try {
-      setLoading(true);
-      if (user.role !== 'host') {
-        await updateProfile({ role: 'host' });
-      }
       navigate('/dashboard?new=true');
     } catch (err: any) {
-      setError(err.message || 'Failed to activate host account.');
-    } finally {
-      setLoading(false);
+      setError(err.message || 'Failed to navigate to dashboard.');
     }
   };
 

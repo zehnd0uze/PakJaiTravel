@@ -149,16 +149,8 @@ const HostDashboard: React.FC = () => {
     }
   }, [user]);
 
-  const handleActivateHost = async () => {
-    try {
-      setActivating(true);
-      await updateProfile({ role: 'host' });
-      setShowPropertyModal(true);
-    } catch (err: any) {
-      alert(err.message || 'Failed to activate host account.');
-    } finally {
-      setActivating(false);
-    }
+  const handleActivateHost = () => {
+    setShowPropertyModal(true);
   };
 
   const handleDeleteProperty = async (id: string) => {
@@ -189,22 +181,45 @@ const HostDashboard: React.FC = () => {
 
   if (user?.role !== 'host') {
     return (
-      <div className="container dashboard-gate animate-fade-in" style={{ padding: '100px 20px', textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
-        <span style={{ fontSize: '3rem', display: 'block', marginBottom: '16px' }}>🏡</span>
-        <h2 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '2rem', marginBottom: '16px', color: 'var(--primary-color)' }}>
-          Become a Verified Host
-        </h2>
-        <p style={{ color: '#666', lineHeight: 1.6, marginBottom: '32px' }}>
-          Welcome, {user.name}! Turn your space into a nature retreat and start welcoming guests to Chiang Dao. Activate your host status with one click to list your accommodations.
-        </p>
-        <Button 
-          variant="primary" 
-          size="lg" 
-          onClick={handleActivateHost}
-          disabled={activating}
-        >
-          {activating ? 'Activating Host Mode...' : 'Activate Host Mode & List Accommodation'}
-        </Button>
+      <div className="host-dashboard-wrapper">
+        <div className="container dashboard-gate animate-fade-in" style={{ padding: '100px 20px', textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
+          <span style={{ fontSize: '3rem', display: 'block', marginBottom: '16px' }}>🏡</span>
+          <h2 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '2rem', marginBottom: '16px', color: 'var(--primary-color)' }}>
+            Become a Verified Host
+          </h2>
+          <p style={{ color: '#666', lineHeight: 1.6, marginBottom: '32px' }}>
+            Welcome, {user.name}! To activate your host status and access the dashboard, you must first list an accommodation. Click below to add your property.
+          </p>
+          <Button 
+            variant="primary" 
+            size="lg" 
+            onClick={handleActivateHost}
+            disabled={activating}
+          >
+            {activating ? 'Activating Host Mode...' : 'Add Property & Activate Host Mode'}
+          </Button>
+        </div>
+        
+        {showPropertyModal && (
+          <PropertyEditModalComp 
+            property={undefined}
+            onClose={() => setShowPropertyModal(false)}
+            onSave={async () => {
+              setShowPropertyModal(false);
+              setActivating(true);
+              try {
+                if (user?.role !== 'host') {
+                  await updateProfile({ role: 'host' });
+                }
+                fetchData();
+              } catch (err) {
+                console.error("Failed to update profile", err);
+              } finally {
+                setActivating(false);
+              }
+            }}
+          />
+        )}
       </div>
     );
   }
