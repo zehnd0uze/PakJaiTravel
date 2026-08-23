@@ -525,31 +525,6 @@ export const AdminHotelEdit: React.FC = () => {
             </div>
           </div>
 
-          {/* Rating (for existing) */}
-          <div className="admin-form-section">
-            <h3>Rating & Reviews</h3>
-            <div className="admin-form-grid">
-              <div className="admin-form-group">
-                <label>Rating (0-5)</label>
-                <input
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  max="5"
-                  value={form.rating}
-                  onChange={e => handleChange('rating', Number(e.target.value))}
-                />
-              </div>
-              <div className="admin-form-group">
-                <label>Number of Reviews</label>
-                <input
-                  type="number"
-                  value={form.reviews}
-                  onChange={e => handleChange('reviews', Number(e.target.value))}
-                />
-              </div>
-            </div>
-          </div>
 
           {/* Actions */}
           <div className="admin-form-actions">
