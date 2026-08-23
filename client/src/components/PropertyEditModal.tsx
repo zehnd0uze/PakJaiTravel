@@ -123,6 +123,7 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
   const [phone, setPhone] = useState(property?.contact?.phone || '');
   const [email, setEmail] = useState(property?.contact?.email || user?.email || '');
   const [line, setLine] = useState(property?.contact?.line || '');
+  const [termsAccepted, setTermsAccepted] = useState(isEditing);
 
   const [uploading, setUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -220,6 +221,12 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
     if (!name.trim()) {
       setError(t('propertyEditModal.errorName'));
       setActiveTab('details');
+      return;
+    }
+
+    if (!termsAccepted) {
+      setError('You must agree to the Terms of Service and Privacy Policy to list your property.');
+      setActiveTab('contact');
       return;
     }
 
@@ -683,6 +690,21 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                     value={checkOut}
                     onChange={e => setCheckOut(e.target.value)}
                   />
+                </div>
+              </div>
+
+              <div className="form-group full-width" style={{ marginTop: '24px', padding: '16px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                  <input 
+                    type="checkbox" 
+                    id="property-terms" 
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    style={{ marginTop: '4px', cursor: 'pointer', width: '18px', height: '18px' }}
+                  />
+                  <label htmlFor="property-terms" style={{ fontSize: '0.9rem', color: '#475569', lineHeight: 1.5, cursor: 'pointer', margin: 0 }}>
+                    I confirm that I am the legal owner or authorized manager of this property, and I agree to PakJai Travel's <a href="/terms" target="_blank" style={{ color: 'var(--primary-color)', fontWeight: 600 }}>Terms of Service</a> and <a href="/privacy" target="_blank" style={{ color: 'var(--primary-color)', fontWeight: 600 }}>Privacy Policy</a>. I guarantee that all provided information is accurate and true.
+                  </label>
                 </div>
               </div>
             </div>

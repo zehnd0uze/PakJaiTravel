@@ -29,6 +29,7 @@ export const AuthModal: React.FC = () => {
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regConfirmPassword, setRegConfirmPassword] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
   
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -94,6 +95,11 @@ export const AuthModal: React.FC = () => {
 
     if (regPassword !== regConfirmPassword) {
       setError('Passwords do not match.');
+      return;
+    }
+
+    if (!termsAccepted) {
+      setError('You must agree to the Terms of Service and Privacy Policy.');
       return;
     }
 
@@ -308,6 +314,20 @@ export const AuthModal: React.FC = () => {
                     onChange={(e) => setRegConfirmPassword(e.target.value)}
                   />
                 </div>
+                
+                <div className="form-group" style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginTop: '4px' }}>
+                  <input 
+                    type="checkbox" 
+                    id="modal-register-terms" 
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    style={{ marginTop: '4px', cursor: 'pointer' }}
+                  />
+                  <label htmlFor="modal-register-terms" style={{ fontSize: '0.85rem', color: '#666', lineHeight: 1.4, cursor: 'pointer' }}>
+                    I agree to the <a href="/terms" style={{ color: 'var(--primary-color)' }}>Terms of Service</a> and <a href="/privacy" style={{ color: 'var(--primary-color)' }}>Privacy Policy</a>.
+                  </label>
+                </div>
+
                 <button type="submit" className="auth-submit-btn" disabled={loading}>
                   {loading ? 'Creating account...' : 'Create account'}
                 </button>
