@@ -88,7 +88,13 @@ create policy "Users can update own profile." on profiles for update using (auth
 create policy "Properties are viewable by everyone." on properties for select using (true);
 create policy "Hosts can insert properties." on properties for insert with check (auth.uid() = owner_id);
 create policy "Hosts can update their own properties." on properties for update using (auth.uid() = owner_id);
+create policy "Admins can update properties." on properties for update using (
+  exists (select 1 from profiles where id = auth.uid() and role = 'admin')
+);
 create policy "Hosts can delete their own properties." on properties for delete using (auth.uid() = owner_id);
+create policy "Admins can delete properties." on properties for delete using (
+  exists (select 1 from profiles where id = auth.uid() and role = 'admin')
+);
 
 -- POSTS POLICIES
 create policy "Posts are viewable by everyone." on posts for select using (true);

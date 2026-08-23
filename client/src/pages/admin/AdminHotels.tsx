@@ -100,6 +100,23 @@ export const AdminHotels: React.FC = () => {
     setTimeout(() => setAlert(null), 3000);
   };
 
+  const handleRevoke = async (id: string, name: string) => {
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .update({ status: 'pending' })
+        .eq('id', id);
+      if (error) throw error;
+
+      setAlert({ type: 'info', message: `"${name}" has been moved back to pending.` });
+      fetchProperties();
+    } catch {
+      setAlert({ type: 'error', message: 'Failed to unapprove property.' });
+    }
+
+    setTimeout(() => setAlert(null), 3000);
+  };
+
   return (
     <>
       <div className="admin-topbar">
@@ -178,19 +195,31 @@ export const AdminHotels: React.FC = () => {
                     <td>฿{p.pricePerNight.toLocaleString()} {p.priceType === 'per_person' ? '/ person' : '/ night'}</td>
                     <td>{p.rating} ({p.reviews})</td>
                     <td>
-                      <span className={`status-badge ${p.status || 'published'}`} style={p.status === 'pending' ? { background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d' } : {}}>
-                        {p.status || 'published'}
-                      </span>
+                      {p.status === 'pending' ? (
+                        <span className="status-badge" style={{ background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d' }}>Pending</span>
+                      ) : p.status === 'draft' ? (
+                        <span className="status-badge" style={{ background: '#FFF3E0', color: '#E65100' }}>Draft</span>
+                      ) : (
+                        <span className="status-badge" style={{ background: '#E8FAF0', color: '#1B8A5A' }}>Approved</span>
+                      )}
                     </td>
                     <td>
                       <div className="table-actions">
-                        {p.status === 'pending' && (
+                        {p.status === 'pending' ? (
                           <button
                             className="table-action-btn"
                             style={{ background: '#ecfdf5', color: '#059669', borderColor: '#a7f3d0' }}
                             onClick={() => handleApprove(p.id, p.name)}
                           >
                             Approve
+                          </button>
+                        ) : (
+                          <button
+                            className="table-action-btn"
+                            style={{ background: '#fff7ed', color: '#c2410c', borderColor: '#fed7aa' }}
+                            onClick={() => handleRevoke(p.id, p.name)}
+                          >
+                            Unapprove
                           </button>
                         )}
                         <button
