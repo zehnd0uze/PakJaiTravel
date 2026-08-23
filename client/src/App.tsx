@@ -21,12 +21,14 @@ import { AdminLogin } from './pages/admin/AdminLogin';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { AuthModal } from './components/AuthModal';
 import { CookieConsent } from './components/CookieConsent';
+import { SessionTimeout } from './components/SessionTimeout';
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <div className="app-container">
+          <SessionTimeout />
           <AuthModal />
           <CookieConsent />
           <Routes>
