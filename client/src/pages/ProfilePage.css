@@ -189,6 +189,60 @@
   border-radius: 20px;
 }
 
+/* ── Mobile account menu list ────────────────────────── */
+.profile-mobile-menu {
+  display: none;
+}
+
+.pmm-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 15px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #f0f2f1;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #2f3633;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.pmm-item:last-child {
+  border-bottom: none;
+}
+
+.pmm-item:active {
+  background: #f5f7f6;
+}
+
+.pmm-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color, #2c4c3b);
+  flex-shrink: 0;
+}
+
+.pmm-label {
+  flex: 1;
+}
+
+.pmm-chevron {
+  color: #b6beb9;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.pmm-danger .pmm-icon,
+.pmm-danger .pmm-label {
+  color: #c0392b;
+}
+
 /* ── Identity row: stacked+centered on desktop, side-by-side on mobile ── */
 .profile-identity-row {
   display: flex;
@@ -598,58 +652,28 @@
     display: none;
   }
 
-  /* ── Actions: stacked full-width ── */
-  .profile-actions-row {
-    flex-direction: column;
-    width: 100%;
-    gap: 10px;
-    margin-top: 4px;
+  /* ── Account menu replaces tabs row + action buttons ── */
+  .profile-mobile-menu {
+    display: block;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    overflow: hidden;
+    margin-bottom: 16px;
   }
 
-  .btn-primary.profile-action,
-  .logout-btn {
-    width: 100%;
-    padding: 12px;
-    font-size: 0.9rem;
-  }
-
-  .logout-btn {
-    color: #c0392b;
-    border-color: rgba(192, 57, 43, 0.25);
-    background: rgba(255, 255, 255, 0.6);
-  }
-
-  /* ── Tabs: segmented control, all three visible ── */
   .profile-tabs-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-    margin-bottom: 20px;
+    display: none;
   }
 
-  .profile-tabs {
-    width: 100%;
-    max-width: 100%;
-    gap: 4px;
-    padding: 4px;
-    border-radius: 14px;
-    overflow: visible;
+  .profile-actions-row {
+    display: none;
   }
 
-  .profile-tab {
-    font-size: 0.78rem;
-    padding: 9px 4px;
-    border-radius: 10px;
-    text-align: center;
-    white-space: normal;
-    line-height: 1.2;
-  }
-
-  .create-post-btn {
-    width: 100%;
-    padding: 12px;
-    background: var(--primary-color, #2c4c3b);
-    box-shadow: 0 6px 16px rgba(44, 76, 59, 0.2);
+  /* Feed heading sits tight under the menu */
+  .profile-feed {
+    margin-top: 4px;
   }
 
   /* ── Empty state ── */

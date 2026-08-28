@@ -236,7 +236,55 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
 
-        {/* ── Tabs + Create Post ── */}
+        {/* ── Mobile account menu (replaces tabs + action buttons on phones) ── */}
+        <div className="profile-mobile-menu">
+          <button className="pmm-item" onClick={() => setIsModalOpen(true)}>
+            <span className="pmm-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+            </span>
+            <span className="pmm-label">Create Post</span>
+            <span className="pmm-chevron" aria-hidden="true">›</span>
+          </button>
+          <button className="pmm-item" onClick={() => navigate('/saved')}>
+            <span className="pmm-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>
+            </span>
+            <span className="pmm-label">Saved Places</span>
+            <span className="pmm-chevron" aria-hidden="true">›</span>
+          </button>
+          {user.role === 'host' ? (
+            <button className="pmm-item" onClick={() => navigate('/dashboard')}>
+              <span className="pmm-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 3L4 9v12h5v-7h6v7h5V9l-8-6z"/></svg>
+              </span>
+              <span className="pmm-label">Host Dashboard</span>
+              <span className="pmm-chevron" aria-hidden="true">›</span>
+            </button>
+          ) : (
+            <button className="pmm-item" onClick={() => navigate('/become-host')}>
+              <span className="pmm-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2l2.4 7.2H22l-6 4.4 2.3 7.2-6.3-4.5L5.7 20.8 8 13.6l-6-4.4h7.6z"/></svg>
+              </span>
+              <span className="pmm-label">Become a Host</span>
+              <span className="pmm-chevron" aria-hidden="true">›</span>
+            </button>
+          )}
+          <button className="pmm-item" onClick={() => navigate('/community')}>
+            <span className="pmm-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+            </span>
+            <span className="pmm-label">Community Journal</span>
+            <span className="pmm-chevron" aria-hidden="true">›</span>
+          </button>
+          <button className="pmm-item pmm-danger" onClick={handleLogout}>
+            <span className="pmm-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+            </span>
+            <span className="pmm-label">Log Out</span>
+          </button>
+        </div>
+
+        {/* ── Tabs + Create Post (desktop) ── */}
         <div className="profile-tabs-row">
           <div className="profile-tabs">
             <button className="profile-tab active">My Reviews</button>
