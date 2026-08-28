@@ -149,45 +149,50 @@ const ProfilePage: React.FC = () => {
         {/* ── Profile Header Card ── */}
         <div className="profile-header-card">
 
-          {/* Avatar with upload overlay */}
-          <div className="profile-avatar-wrapper">
-            <img
-              src={avatarSrc}
-              alt={user.name}
-              className={`profile-avatar-large${uploadingAvatar ? ' uploading' : ''}`}
-            />
-            {user.isVerified && (
-              <div className="verified-badge-icon" title="Verified Traveler">✓</div>
-            )}
-            <button
-              className="avatar-upload-btn"
-              onClick={() => avatarInputRef.current?.click()}
-              disabled={uploadingAvatar}
-              title="Change profile photo"
-            >
-              {uploadingAvatar ? '...' : '+'}
-            </button>
-            <input
-              ref={avatarInputRef}
-              type="file"
-              accept="image/*"
-              className="sr-only"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handlePhotoUpload(file, 'avatar', setUploadingAvatar);
-                e.target.value = '';
-              }}
-            />
-          </div>
+          {/* Avatar + identity side-by-side on mobile, stacked on desktop */}
+          <div className="profile-identity-row">
 
-          {uploadError && <p className="upload-error">{uploadError}</p>}
+            {/* Avatar with upload overlay */}
+            <div className="profile-avatar-wrapper">
+              <img
+                src={avatarSrc}
+                alt={user.name}
+                className={`profile-avatar-large${uploadingAvatar ? ' uploading' : ''}`}
+              />
+              {user.isVerified && (
+                <div className="verified-badge-icon" title="Verified Traveler">✓</div>
+              )}
+              <button
+                className="avatar-upload-btn"
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={uploadingAvatar}
+                title="Change profile photo"
+              >
+                {uploadingAvatar ? '...' : '+'}
+              </button>
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handlePhotoUpload(file, 'avatar', setUploadingAvatar);
+                  e.target.value = '';
+                }}
+              />
+            </div>
 
-          <div className="profile-info-content">
             <div className="profile-name-section">
               <h1>{user.name}</h1>
               <p className="profile-email">{user.email}</p>
               <span className="profile-level">Explorer</span>
             </div>
+          </div>
+
+          {uploadError && <p className="upload-error">{uploadError}</p>}
+
+          <div className="profile-info-content">
 
             <div className="profile-stats">
               <div className="stat-box">

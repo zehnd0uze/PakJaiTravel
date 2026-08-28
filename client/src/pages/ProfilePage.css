@@ -189,6 +189,14 @@
   border-radius: 20px;
 }
 
+/* ── Identity row: stacked+centered on desktop, side-by-side on mobile ── */
+.profile-identity-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
 /* ── Profile Info ─────────────────────────────────────── */
 .profile-info-content {
   width: 100%;
@@ -489,46 +497,64 @@
     margin-bottom: 16px;
   }
 
+  /* ── Identity: avatar left, name/email beside it ── */
+  .profile-identity-row {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 14px;
+    text-align: left;
+    margin-top: -36px;
+    padding: 0 4px;
+  }
+
   .profile-avatar-wrapper {
-    margin-top: -52px;
-    margin-bottom: 12px;
+    margin-top: 0;
+    margin-bottom: 0;
+    flex-shrink: 0;
   }
 
   .profile-avatar-large {
-    width: 96px;
-    height: 96px;
+    width: 76px;
+    height: 76px;
     border-width: 4px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
   }
 
   .verified-badge-icon {
-    width: 26px;
-    height: 26px;
-    font-size: 13px;
+    width: 22px;
+    height: 22px;
+    font-size: 11px;
     border-width: 3px;
-    bottom: 4px;
-    right: -2px;
+    bottom: 2px;
+    right: -4px;
   }
 
   .avatar-upload-btn {
-    width: 30px;
-    height: 30px;
-    font-size: 0.95rem;
-    bottom: 0;
-    right: -6px;
+    width: 26px;
+    height: 26px;
+    font-size: 0.85rem;
+    bottom: -2px;
+    right: -8px;
     border-width: 2px;
   }
 
-  /* ── Name / email / level ── */
+  .profile-name-section {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    padding-bottom: 6px;
+  }
+
   .profile-name-section h1 {
-    font-size: 1.45rem;
+    font-size: 1.3rem;
     margin-bottom: 2px;
     word-break: break-word;
+    line-height: 1.2;
   }
 
   .profile-email {
-    font-size: 0.82rem;
-    margin-bottom: 10px;
+    font-size: 0.78rem;
+    margin-bottom: 8px;
     max-width: 100%;
     white-space: nowrap;
     overflow: hidden;
@@ -536,9 +562,9 @@
   }
 
   .profile-level {
-    padding: 4px 14px;
-    font-size: 0.68rem;
-    margin-bottom: 14px;
+    padding: 3px 12px;
+    font-size: 0.62rem;
+    margin-bottom: 0;
     letter-spacing: 0.08em;
   }
 
@@ -663,13 +689,18 @@
     border-radius: 18px;
   }
 
+  .profile-identity-row {
+    gap: 12px;
+    margin-top: -32px;
+  }
+
   .profile-avatar-large {
-    width: 84px;
-    height: 84px;
+    width: 68px;
+    height: 68px;
   }
 
   .profile-name-section h1 {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
   }
 
   .stat-number {
