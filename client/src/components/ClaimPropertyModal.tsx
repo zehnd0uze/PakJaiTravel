@@ -30,7 +30,7 @@ export const ClaimPropertyModal: React.FC<ClaimPropertyModalProps> = ({
   preselectedPropertyName,
   onClaimSubmitted
 }) => {
-  const { user } = useAuth();
+  const { user, openAuthModal } = useAuth();
   const navigate = useNavigate();
 
   const [properties, setProperties] = useState<PropertyOption[]>([]);
@@ -114,7 +114,8 @@ export const ClaimPropertyModal: React.FC<ClaimPropertyModalProps> = ({
     setError('');
 
     if (!user) {
-      navigate('/login');
+      onClose();
+      openAuthModal('login');
       return;
     }
 
@@ -189,13 +190,13 @@ export const ClaimPropertyModal: React.FC<ClaimPropertyModalProps> = ({
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
               <button 
                 className="claim-btn claim-btn-secondary" 
-                onClick={() => { onClose(); navigate('/register'); }}
+                onClick={() => { onClose(); openAuthModal('register'); }}
               >
                 Register as Host
               </button>
               <button 
                 className="claim-btn claim-btn-primary" 
-                onClick={() => { onClose(); navigate('/login'); }}
+                onClick={() => { onClose(); openAuthModal('login'); }}
               >
                 Sign In
               </button>

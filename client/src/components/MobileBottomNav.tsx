@@ -6,7 +6,7 @@ import './MobileBottomNav.css';
 export const MobileBottomNav: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, openAuthModal } = useAuth();
 
   // Hide on admin routes
   if (location.pathname.startsWith('/admin')) return null;
@@ -52,7 +52,7 @@ export const MobileBottomNav: React.FC = () => {
       {/* Saved — requires login */}
       <div
         className={`mobile-nav-item ${isActive('/saved') ? 'active' : ''}`}
-        onClick={() => user ? navigate('/saved') : navigate('/login')}
+        onClick={() => user ? navigate('/saved') : openAuthModal('login')}
         role="button"
         aria-label="Saved places"
       >
@@ -67,7 +67,7 @@ export const MobileBottomNav: React.FC = () => {
       {/* Profile — active ONLY on /profile, not /login (bug fix) */}
       <div
         className={`mobile-nav-item ${isActive('/profile') ? 'active' : ''}`}
-        onClick={() => user ? navigate('/profile') : navigate('/login')}
+        onClick={() => user ? navigate('/profile') : openAuthModal('login')}
         role="button"
         aria-label={user ? 'My profile' : 'Log in'}
       >

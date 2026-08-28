@@ -12,7 +12,7 @@ import './ProfilePage.css';
 
 
 const ProfilePage: React.FC = () => {
-  const { user, logout, updateProfile } = useAuth();
+  const { user, logout, updateProfile, openAuthModal } = useAuth();
   const navigate = useNavigate();
   const [userPosts, setUserPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,9 +27,10 @@ const ProfilePage: React.FC = () => {
   const isLoggedIn = Boolean(user);
   useEffect(() => {
     if (!isLoggedIn) {
-      navigate('/login');
+      navigate('/');
+      openAuthModal('login');
     }
-  }, [isLoggedIn, navigate]);
+  }, [isLoggedIn, navigate, openAuthModal]);
 
   const fetchUserPosts = async () => {
     if (!user) return;
