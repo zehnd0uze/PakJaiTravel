@@ -232,6 +232,35 @@
   flex: 1;
 }
 
+.pmm-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.pmm-text .pmm-label {
+  flex: none;
+}
+
+.pmm-sub {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: #79817d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pmm-static {
+  cursor: default;
+}
+
+.pmm-static:active {
+  background: transparent;
+}
+
 .pmm-chevron {
   color: #b6beb9;
   font-size: 1.1rem;
@@ -619,13 +648,18 @@
     display: none;
   }
 
-  /* ── Stats: inline line beside the name (Instagram-style) ── */
+  /* Email moved into the Profile Details menu row on mobile */
+  .profile-email {
+    display: none;
+  }
+
+  /* ── Stats: single inline line beside the name ── */
   .profile-stats {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: baseline;
     justify-content: flex-start;
-    gap: 2px 12px;
+    gap: 0 10px;
     padding: 0;
     border-top: none;
     margin: 6px 0 0;
@@ -636,11 +670,12 @@
     align-items: baseline;
     gap: 4px;
     min-width: 0;
+    white-space: nowrap;
   }
 
   .stat-number {
     font-family: var(--font-body);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 700;
     color: #1f2724;
     margin-bottom: 0;
@@ -648,7 +683,7 @@
   }
 
   .stat-label {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     text-transform: none;
     letter-spacing: 0;
     font-weight: 500;
