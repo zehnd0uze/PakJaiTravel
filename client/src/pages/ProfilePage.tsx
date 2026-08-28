@@ -236,7 +236,7 @@ const ProfilePage: React.FC = () => {
           <div className="profile-tabs">
             <button className="profile-tab active">My Reviews</button>
             <button className="profile-tab">Photos</button>
-            <button className="profile-tab">Saved Places</button>
+            <button className="profile-tab" onClick={() => navigate('/saved')}>Saved Places</button>
           </div>
           <button
             onClick={() => setIsModalOpen(true)}

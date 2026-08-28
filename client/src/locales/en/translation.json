@@ -88,7 +88,20 @@
       "terms": "Terms of Service",
       "privacy": "Privacy Policy",
       "rights": "© 2026 Pakjai Travel. All rights reserved."
-    }
+    },
+    "mobileSearch": {
+      "anyDate": "Any date",
+      "anyGuest": "2 guests",
+      "nature": "Nature",
+      "cafe": "Cafe",
+      "community": "Journal"
+    },
+    "promo": {
+      "title": "Top deals for you",
+      "badge": "HOT",
+      "perNight": "night"
+    },
+    "seeAll": "See all"
   },
   "propertyEditModal": {
     "titleNew": "List Your Accommodation",

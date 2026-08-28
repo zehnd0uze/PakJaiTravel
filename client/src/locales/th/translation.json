@@ -88,7 +88,20 @@
       "terms": "ข้อตกลงในการใช้งาน",
       "privacy": "นโยบายความเป็นส่วนตัว",
       "rights": "© 2026 Pakjai Travel. สงวนลิขสิทธิ์."
-    }
+    },
+    "mobileSearch": {
+      "anyDate": "ทุกวัน",
+      "anyGuest": "2 ท่าน",
+      "nature": "ธรรมชาติ",
+      "cafe": "คาเฟ่",
+      "community": "บันทึก"
+    },
+    "promo": {
+      "title": "โปรดีลสำหรับคุณ",
+      "badge": "ฮิต",
+      "perNight": "คืน"
+    },
+    "seeAll": "ดูทั้งหมด"
   },
   "propertyEditModal": {
     "titleNew": "เพิ่มที่พักของคุณ",

@@ -193,9 +193,23 @@ export const Header: React.FC = () => {
   };
 
   // Darken header after scrolling 50px
+  // Sticky navbar search appears only once the homepage hero search card has scrolled out from under the navbar
+  const [stickySearch, setStickySearch] = useState(false);
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+
+      const card = document.querySelector('.mobile-search-card') as HTMLElement | null;
+      if (card) {
+        // Card is gone once its bottom edge passes the navbar (56px) — page content length doesn't matter
+        setStickySearch(card.getBoundingClientRect().bottom <= 60);
+      } else {
+        // Non-home pages have no hero card: show the search row once scrolled
+        setStickySearch(window.scrollY > 240);
+      }
+    };
     window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -214,40 +228,64 @@ export const Header: React.FC = () => {
   return (
     <header className={`header ${scrolled || !isHomePage ? 'header-scrolled glass-panel' : ''}`}>
 
-      {/* ── Mobile-only top search bar (Wongnai-style) ── */}
-      <div className="mobile-top-bar">
-        <div className="location-selector" onClick={() => navigate('/hotels')}>
-          <span className="location-text">{t('header.mobile.nearMe')}</span>
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-            <path d="M7 10l5 5 5-5z"/>
-          </svg>
+      {/* ── Mobile-only app bar (Trip.com-style) ── */}
+      <div className={`mobile-top-bar ${stickySearch ? 'compact' : ''}`}>
+        <div className="mobile-brand" onClick={() => navigate('/')} role="button" aria-label="PakJai home">
+          <span className="mobile-logo-text">PAKJAI</span>
         </div>
 
-        {/* Tapping the search bar goes straight to the hotel search page */}
-        <div
-          className="search-bar-mobile"
-          onClick={() => navigate('/hotels')}
-          role="button"
-          aria-label="Search for hotels"
+        {/* In-bar search — appears beside the brand once the hero search card has scrolled out */}
+        <form
+          className="mobile-compact-search"
+          onSubmit={handleSearch}
+          role="search"
         >
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="#757575">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="rgba(255,255,255,0.7)" aria-hidden="true">
             <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
           </svg>
-          <span className="search-placeholder">{t('header.mobile.searchPlaceholder')}</span>
-        </div>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={t('header.searchPlaceholder')}
+            aria-label={t('header.searchPlaceholder')}
+          />
+          <button type="submit" className="mcs-btn" aria-label="Search">
+            <svg viewBox="0 0 32 32" width="13" height="13" aria-hidden="true" style={{ fill: 'none', stroke: 'currentColor', strokeWidth: 3 }}>
+              <path d="M13 24a11 11 0 1 0 0-22 11 11 0 0 0 0 22zm8-3 9 9" />
+            </svg>
+          </button>
+        </form>
 
-        <div className="header-icons-mobile">
-          <button className="icon-btn" title="Map" onClick={() => navigate('/hotels')}>
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-          </button>
+        <div className="mobile-top-actions">
           <button
-            className="mobile-menu-btn-inline"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={mobileMenuOpen}
+            className="mobile-lang-toggle"
+            onClick={toggleLanguage}
+            title="Toggle Language"
           >
-            <span className={`hamburger ${mobileMenuOpen ? 'open' : ''}`} />
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+              <path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0014.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/>
+            </svg>
+            {i18n.language.startsWith('th') ? 'EN' : 'TH'}
           </button>
+
+          {user ? (
+            <button
+              className="mobile-avatar-btn"
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Open account menu"
+            >
+              <span className="user-avatar mobile-avatar">
+                {(user.name?.[0] || user.email?.[0] || 'U').toUpperCase()}
+              </span>
+              {!user.isVerified && <span className="avatar-status-dot" />}
+            </button>
+          ) : (
+            <button className="mobile-signin-btn" onClick={() => openAuthModal('login')}>
+              {t('header.login')}
+            </button>
+          )}
         </div>
       </div>
 

@@ -61,7 +61,18 @@
 }
 
 @media (max-width: 768px) {
+  /* Bottom tab bar replaces the full footer on mobile */
   .footer-content {
-    grid-template-columns: 1fr;
+    display: none;
+  }
+
+  .footer {
+    padding: 0;
+  }
+
+  .footer-bottom {
+    padding: 16px var(--spacing-md) calc(16px + env(safe-area-inset-bottom));
+    font-size: 0.75rem;
+    color: #8a948e;
   }
 }

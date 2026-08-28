@@ -572,3 +572,10 @@
     padding-bottom: 120px;
   }
 }
+
+/* Solid green mobile app bar — tighten the gap under it */
+@media (max-width: 768px) {
+  .hotel-detail-page {
+    padding-top: calc(72px + env(safe-area-inset-top));
+  }
+}

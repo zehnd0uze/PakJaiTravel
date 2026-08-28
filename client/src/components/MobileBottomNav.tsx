@@ -34,37 +34,22 @@ export const MobileBottomNav: React.FC = () => {
         <span className="mobile-nav-label">หน้าแรก</span>
       </div>
 
-      {/* Search / Hotels */}
+      {/* Community — search lives in the navbar/hero card now */}
       <div
-        className={`mobile-nav-item ${isActive('/hotels') ? 'active' : ''}`}
-        onClick={() => navigate('/hotels')}
+        className={`mobile-nav-item ${isActive('/community') ? 'active' : ''}`}
+        onClick={() => navigate('/community')}
         role="button"
-        aria-label="Search hotels"
+        aria-label="Community"
       >
         <span className="mobile-nav-icon">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-            <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
           </svg>
         </span>
-        <span className="mobile-nav-label">ค้นหา</span>
+        <span className="mobile-nav-label">คอมมูนิตี้</span>
       </div>
 
-      {/* Saved — requires login */}
-      <div
-        className={`mobile-nav-item ${isActive('/saved') ? 'active' : ''}`}
-        onClick={() => user ? navigate('/saved') : openAuthModal('login')}
-        role="button"
-        aria-label="Saved places"
-      >
-        <span className="mobile-nav-icon">
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-            <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
-          </svg>
-        </span>
-        <span className="mobile-nav-label">ที่บันทึกไว้</span>
-      </div>
-
-      {/* Profile — active ONLY on /profile, not /login (bug fix) */}
+      {/* Profile — active ONLY on /profile, not /login (bug fix); Saved lives inside Profile now */}
       <div
         className={`mobile-nav-item ${isActive('/profile') ? 'active' : ''}`}
         onClick={() => user ? navigate('/profile') : openAuthModal('login')}

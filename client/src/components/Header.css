@@ -198,85 +198,180 @@
   }
 }
 
-/* Floating Mobile Search Pill */
+/* ── Mobile App Bar (Trip.com-style, ≤768px) ── */
 .mobile-top-bar {
   display: none;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 16px;
-  background: var(--surface-color);
-  border: 1px solid var(--border-color);
 }
 
 @media (max-width: 768px) {
   .header {
     padding: 0 !important;
-    background: transparent !important;
+    background: var(--primary-color) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     border-bottom: none !important;
+    color: #fff;
   }
+
   .header-scrolled {
     padding: 0 !important;
+    background: var(--primary-color) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    color: #fff;
   }
-  
+
+  .header-scrolled .logo-text {
+    color: #fff;
+  }
+
   .mobile-top-bar {
     display: flex;
-    position: sticky;
-    top: max(12px, env(safe-area-inset-top));
-    margin: max(12px, env(safe-area-inset-top)) 16px 16px;
-    border-radius: 40px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    z-index: 1001;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    height: 56px;
+    padding: 0 16px;
+    padding-top: env(safe-area-inset-top);
+    box-sizing: border-box;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    position: static;
+    margin: 0;
   }
 }
 
-.location-selector {
+.mobile-brand {
   display: flex;
   align-items: center;
-  gap: 2px;
   cursor: pointer;
-  white-space: nowrap;
 }
 
-.location-text {
-  font-size: 14px;
-  font-weight: 700;
-  color: #333;
+.mobile-logo-text {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #fff;
 }
 
-.search-bar-mobile {
+.mobile-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* ── In-bar compact search (appears beside PAKJAI once the hero search card has scrolled out) ── */
+.mobile-compact-search {
+  display: none;
+  align-items: center;
+  gap: 6px;
   flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--surface-color);
-  border: 1px solid var(--border-color);
-  padding: 8px 12px;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  box-shadow: var(--shadow-sm);
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  padding: 5px 5px 5px 12px;
 }
 
-.search-placeholder {
-  font-size: 13px;
-  color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.header-icons-mobile {
-  display: flex;
-  gap: 8px;
-}
-
-.icon-btn {
+.mobile-compact-search input {
+  flex: 1;
+  min-width: 0;
   background: transparent;
   border: none;
-  font-size: 20px;
+  outline: none;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  color: #fff;
+}
+
+.mobile-compact-search input::placeholder {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.mcs-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  background: #fff;
+  color: var(--primary-color);
+  border: none;
+  border-radius: 50%;
   cursor: pointer;
-  padding: 4px;
+}
+
+@media (max-width: 768px) {
+  .mobile-top-bar.compact .mobile-compact-search {
+    display: flex;
+  }
+
+  .mobile-top-bar.compact .mobile-top-actions {
+    display: none;
+  }
+
+  .mobile-top-bar.compact .mobile-logo-text {
+    font-size: 1rem;
+  }
+}
+
+.mobile-lang-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.mobile-lang-toggle:active {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.mobile-avatar-btn {
+  position: relative;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.mobile-avatar {
+  width: 32px;
+  height: 32px;
+  font-size: 0.85rem;
+  border-width: 2px;
+  box-shadow: none;
+}
+
+.mobile-signin-btn {
+  background: #fff;
+  color: var(--primary-color);
+  border: none;
+  border-radius: 999px;
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.mobile-signin-btn:active {
+  opacity: 0.85;
 }
 
 .nav-link {
@@ -570,26 +665,6 @@
   .mobile-menu-btn {
     display: none; /* Old standalone button */
   }
-}
-
-.mobile-menu-btn-inline {
-  background: transparent;
-  border: none;
-  width: 20px;
-  height: 16px;
-  position: relative;
-  cursor: pointer;
-  margin-left: 8px;
-  padding: 0;
-}
-
-.mobile-menu-btn-inline .hamburger {
-  width: 100%;
-  background-color: var(--text-primary) !important;
-}
-.mobile-menu-btn-inline .hamburger::before,
-.mobile-menu-btn-inline .hamburger::after {
-  background-color: var(--text-primary) !important;
 }
 
 /* ── Mobile nav backdrop — tap to close ── */

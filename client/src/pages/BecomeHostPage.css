@@ -184,3 +184,10 @@
   .bh-lead { font-size: 1rem; margin-bottom: 32px; }
   .bh-step-card { padding: 24px; }
 }
+
+/* Solid green mobile app bar — tighten the gap under it */
+@media (max-width: 768px) {
+  .become-host-page {
+    padding-top: calc(72px + env(safe-area-inset-top));
+  }
+}
