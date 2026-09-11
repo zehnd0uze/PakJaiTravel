@@ -204,15 +204,15 @@ const ProfilePage: React.FC = () => {
           <div className="ig-stats-container">
             <div className="ig-stat-item">
               <span className="ig-stat-num">{totalReviews}</span>
-              <span className="ig-stat-label">posts</span>
-            </div>
-            <div className="ig-stat-item">
-              <span className="ig-stat-num">{totalLikes}</span>
-              <span className="ig-stat-label">helpful</span>
+              <span className="ig-stat-label">Journals</span>
             </div>
             <div className="ig-stat-item">
               <span className="ig-stat-num">0</span>
-              <span className="ig-stat-label">following</span>
+              <span className="ig-stat-label">Followers</span>
+            </div>
+            <div className="ig-stat-item">
+              <span className="ig-stat-num">0</span>
+              <span className="ig-stat-label">Following</span>
             </div>
           </div>
         </div>
@@ -268,7 +268,7 @@ const ProfilePage: React.FC = () => {
         {/* ── Post Feed / Grid Content ── */}
         <div className="ig-content-area">
           {loading ? (
-            <div className="profile-loading">Loading posts…</div>
+            <div className="profile-loading">Loading journals…</div>
           ) : userPosts.length > 0 ? (
             viewMode === 'grid' ? (
               <div className="ig-photo-grid">
@@ -300,7 +300,7 @@ const ProfilePage: React.FC = () => {
                   <polyline points="21 15 16 10 5 21"></polyline>
                 </svg>
               </div>
-              <h2>No posts yet</h2>
+              <h2>No journals yet</h2>
               <p>Share your travel experiences.</p>
             </div>
           )}

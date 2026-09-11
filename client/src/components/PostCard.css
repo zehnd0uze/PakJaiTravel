@@ -17,10 +17,12 @@
 
 @media (max-width: 768px) {
   .post-card.luxury-post-card {
-    border-radius: 16px;
-    margin-bottom: 12px;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.03);
-    padding-top: 16px;
+    border-radius: 0;
+    margin-bottom: 0;
+    box-shadow: none;
+    border-top: 1px solid #e5e5e5;
+    border-bottom: 1px solid #e5e5e5;
+    padding-top: 12px;
   }
 }
 
@@ -180,9 +182,8 @@
   aspect-ratio: 16/10;
   background: #f8fafc;
   overflow: hidden;
-  margin: 0 16px;
-  width: calc(100% - 32px);
-  border-radius: 12px;
+  margin: 0;
+  border-radius: 0;
 }
 
 .post-image {
@@ -221,26 +222,30 @@
 /* Action Bar */
 .post-actions {
   display: flex;
-  padding: 16px 24px;
-  gap: 24px;
+  padding: 8px 16px;
   border-top: 1px solid #f1f5f9;
+  justify-content: space-between;
 }
 
 .action-btn {
+  flex: 1;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   background: transparent;
   border: none;
   color: #64748b;
   cursor: pointer;
-  padding: 4px 0;
+  padding: 8px 0;
   font-size: 0.9rem;
   font-weight: 600;
-  transition: color 0.2s;
+  transition: color 0.2s, background-color 0.2s;
+  border-radius: 4px;
 }
 
 .action-btn:hover {
+  background-color: #f1f5f9;
   color: var(--primary-color);
 }
 
