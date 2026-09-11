@@ -46,7 +46,13 @@
 .cover-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 60%, var(--bg-color) 100%);
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.05) 0%,
+    rgba(0, 0, 0, 0.15) 40%,
+    rgba(0, 0, 0, 0.45) 75%,
+    var(--bg-color) 100%
+  );
   pointer-events: none;
 }
 
@@ -55,23 +61,26 @@
   position: absolute;
   bottom: 80px;
   right: 24px;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.45);
   color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 30px;
   padding: 10px 22px;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   transition: all 0.3s ease;
   z-index: 5;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+  letter-spacing: 0.02em;
 }
 
 .cover-upload-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.6);
   transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
 }
 
 .cover-upload-btn:disabled {
@@ -199,33 +208,43 @@
   align-items: center;
   gap: 14px;
   width: 100%;
-  padding: 15px 16px;
+  padding: 16px 18px;
   background: transparent;
   border: none;
-  border-bottom: 1px solid #f0f2f1;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   font-family: var(--font-body);
-  font-size: 0.92rem;
+  font-size: 0.93rem;
   font-weight: 600;
   color: #2f3633;
   cursor: pointer;
   text-align: left;
-  transition: background 0.15s ease;
+  transition: background 0.2s ease, transform 0.15s ease;
 }
 
 .pmm-item:last-child {
   border-bottom: none;
 }
 
-.pmm-item:active {
-  background: #f5f7f6;
+.pmm-item:active:not(.pmm-static) {
+  background: rgba(44, 76, 59, 0.04);
+  transform: scale(0.98);
 }
 
 .pmm-icon {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(44, 76, 59, 0.08) 0%, rgba(44, 76, 59, 0.15) 100%);
   color: var(--primary-color, #2c4c3b);
   flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.pmm-item:active:not(.pmm-static) .pmm-icon {
+  transform: scale(0.92);
 }
 
 .pmm-label {
@@ -259,15 +278,25 @@
 
 .pmm-static:active {
   background: transparent;
+  transform: none;
 }
 
 .pmm-chevron {
-  color: #b6beb9;
-  font-size: 1.1rem;
+  color: #c5ccc8;
+  font-size: 1.2rem;
   line-height: 1;
+  transition: transform 0.2s ease;
 }
 
-.pmm-danger .pmm-icon,
+.pmm-item:active:not(.pmm-static) .pmm-chevron {
+  transform: translateX(2px);
+}
+
+.pmm-danger .pmm-icon {
+  background: linear-gradient(135deg, rgba(192, 57, 43, 0.08) 0%, rgba(192, 57, 43, 0.15) 100%);
+  color: #c0392b;
+}
+
 .pmm-danger .pmm-label {
   color: #c0392b;
 }
@@ -700,9 +729,9 @@
   .profile-mobile-menu {
     display: block;
     background: #fff;
-    border-radius: 20px;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 18px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.03);
+    border: none;
     overflow: hidden;
     margin-bottom: 16px;
   }

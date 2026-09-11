@@ -2,24 +2,24 @@
 .post-card.luxury-post-card {
   background: var(--surface-color);
   border-radius: 20px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.03);
   margin-bottom: 32px;
   padding: 24px 0 0 0;
-  border: 1px solid rgba(0, 0, 0, 0.03);
+  border: none;
   overflow: hidden;
   font-family: var(--font-main);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .post-card.luxury-post-card:hover {
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
 }
 
 @media (max-width: 768px) {
   .post-card.luxury-post-card {
-    border-radius: 0;
+    border-radius: 16px;
     margin-bottom: 12px;
-    box-shadow: none;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.03);
     padding-top: 16px;
   }
 }
@@ -27,7 +27,7 @@
 .post-header {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   padding: 0 24px;
   margin-bottom: 16px;
   position: relative;
@@ -35,8 +35,8 @@
 
 .avatar-wrapper {
   position: relative;
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
 }
 
@@ -45,7 +45,7 @@
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(44, 76, 59, 0.1);
   background: #f8f9fa;
 }
 
@@ -53,6 +53,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  min-width: 0;
 }
 
 .name-row {
