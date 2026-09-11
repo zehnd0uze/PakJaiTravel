@@ -15,6 +15,7 @@ export const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+  const isProfilePage = location.pathname.includes('/profile');
   const menuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -229,6 +230,7 @@ export const Header: React.FC = () => {
     <header className={`header ${scrolled || !isHomePage ? 'header-scrolled glass-panel' : ''}`}>
 
       {/* ── Mobile-only app bar (Trip.com-style) ── */}
+      {!isProfilePage && (
       <div className={`mobile-top-bar ${stickySearch ? 'compact' : ''}`}>
         <div className="mobile-brand" onClick={() => navigate('/')} role="button" aria-label="PakJai home">
           <span className="mobile-logo-text">PAKJAI</span>
@@ -288,6 +290,7 @@ export const Header: React.FC = () => {
           )}
         </div>
       </div>
+      )}
 
       {/* ── Desktop header ── */}
       <div className="container header-content desktop-only-header">
