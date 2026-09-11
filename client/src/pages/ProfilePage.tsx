@@ -102,7 +102,6 @@ const ProfilePage: React.FC = () => {
   if (!user) return null;
 
   const totalReviews = userPosts.length;
-  const totalLikes = userPosts.reduce((acc, post) => acc + (post.likes?.length ?? 0), 0);
 
   const avatarSrc =
     user.avatar ||
