@@ -496,6 +496,7 @@
 
   .ig-bio-section {
     margin-bottom: 8px;
+    text-align: left;
   }
 
   .ig-display-name {
@@ -519,6 +520,7 @@
   .ig-action-buttons {
     margin-top: 0;
     margin-bottom: 10px;
+    justify-content: center;
   }
 
   .ig-action-btn {
@@ -540,7 +542,7 @@
   }
 }
 /* ═══════════════════════════════════════════════════════
-   DESKTOP (≥769px) — same cover-overlay style as mobile, scaled up
+   DESKTOP (≥769px) — original card layout over a banner cover
 ═══════════════════════════════════════════════════════ */
 @media (min-width: 769px) {
   .ig-profile-page {
@@ -549,26 +551,40 @@
   }
 
   .ig-top-bar {
-    display: none; /* Hide mobile top bar on desktop, assume main header is used */
+    display: none; /* Desktop relies on the main site header */
   }
 
   .profile-cover {
-    height: 400px;
+    display: block;
+    width: 100%;
+    height: 300px;
+    position: relative;
+    overflow: hidden;
+    background-color: #cbd5e1;
   }
 
+  .profile-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Mobile-style dark gradient over the cover */
   .profile-cover .cover-overlay {
     background: linear-gradient(
       180deg,
-      rgba(15, 24, 19, 0.3) 0%,
-      rgba(15, 24, 19, 0.05) 35%,
-      rgba(15, 24, 19, 0.5) 65%,
+      rgba(15, 24, 19, 0.32) 0%,
+      rgba(15, 24, 19, 0.08) 38%,
+      rgba(15, 24, 19, 0.55) 68%,
       rgba(15, 24, 19, 0.88) 100%
     );
   }
 
+  /* Mobile-style pill, top-right so the white card doesn't cover it */
   .cover-upload-btn {
-    bottom: 24px;
-    right: 32px;
+    position: absolute;
+    top: 20px;
+    right: 24px;
     background: rgba(0, 0, 0, 0.4);
     color: #fff;
     border: 1px solid rgba(255, 255, 255, 0.25);
@@ -578,50 +594,50 @@
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
+    z-index: 4;
   }
 
-  /* Transparent container: header + bio + buttons overlay the cover */
+  /* White card pulled up over the cover */
   .ig-profile-container {
-    padding: 0 40px;
-    margin-top: -305px;
-    background: transparent;
-    border-radius: 0;
-    box-shadow: none;
+    padding: 30px 20px 0;
+    margin-top: -80px;
+    background: #fff;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
   }
 
   .ig-header-row {
     flex-direction: row;
     padding: 0;
-    margin-bottom: 12px;
-    align-items: flex-end;
+    margin-bottom: 24px;
   }
 
   .ig-avatar-container {
-    margin-right: 36px;
+    margin-right: 40px;
   }
 
   .ig-story-ring {
-    width: 152px;
-    height: 152px;
+    width: 150px;
+    height: 150px;
     padding: 4px;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+    box-shadow: none;
   }
 
   .ig-stats-container {
     justify-content: flex-start;
-    gap: 36px;
-    margin-bottom: 14px;
+    gap: 40px;
+    margin-bottom: 20px;
   }
 
   .ig-stat-num {
-    font-size: 1.3rem;
-    color: #fff;
-    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+    font-size: 1.25rem;
+    color: #000;
+    text-shadow: none;
   }
 
   .ig-stat-label {
-    font-size: 0.95rem;
-    color: rgba(255, 255, 255, 0.85);
+    font-size: 1rem;
+    color: #000;
   }
 
   .ig-stat-item {
@@ -629,67 +645,67 @@
     gap: 6px;
   }
 
-  /* Bio flows under the stats — white text on cover */
+  /* Bio aligned with the stats column */
   .ig-bio-section {
     padding: 0;
-    margin-left: 0;
-    margin-top: 0;
+    margin-left: 190px;
+    margin-top: -60px;
     margin-bottom: 16px;
+    text-align: left;
   }
 
   .ig-display-name {
-    color: #fff;
-    font-size: 1.6rem;
-    font-weight: 700;
-    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+    color: #1a1a1a;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-shadow: none;
   }
 
   .ig-category {
-    color: rgba(255, 255, 255, 0.82);
-    font-size: 0.95rem;
+    color: #737373;
+    font-size: 0.9rem;
   }
 
   .ig-bio-text {
-    color: rgba(255, 255, 255, 0.9);
+    color: #000;
   }
 
-  /* Glassy buttons on the cover bottom (same as mobile) */
+  /* Gray pill buttons on the white card */
   .ig-action-buttons {
     padding: 0;
-    margin-left: 0;
-    margin-top: 0;
+    margin-left: 190px;
+    margin-top: 16px;
     justify-content: flex-start;
-    gap: 12px;
+    gap: 8px;
     margin-bottom: 10px;
   }
 
   .ig-action-btn {
     flex: 0 1 auto;
-    padding: 9px 26px;
-    background: rgba(255, 255, 255, 0.16);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.38);
-    color: #fff;
-    border-radius: 999px;
-    font-size: 0.92rem;
+    padding: 7px 24px;
+    background-color: #efefef;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: none;
+    color: #000;
+    border-radius: 8px;
+    font-size: 0.9rem;
     font-weight: 600;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    text-shadow: none;
   }
 
   .ig-action-btn:hover {
-    background: rgba(255, 255, 255, 0.26);
+    background-color: #dbdbdb;
   }
 
-  /* Tabs + content on a white sheet below the cover */
   .ig-tabs-row {
-    margin-top: 18px;
+    margin-top: 40px;
     justify-content: center;
     gap: 60px;
-    background: #fff;
-    border-top: 1px solid #e8ece9;
-    border-bottom: 1px solid #e8ece9;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    background: transparent;
+    border-bottom: 1px solid #dbdbdb;
+    border-top: none;
+    box-shadow: none;
   }
 
   .ig-tab {
@@ -702,9 +718,9 @@
   }
 
   .ig-tab.active {
-    color: #2c4c3b;
-    border-bottom: 2px solid #2c4c3b;
-    border-top: none;
-    margin-top: 0;
+    color: #000;
+    border-top: 1px solid #000;
+    border-bottom: none;
+    margin-top: -1px;
   }
 }
