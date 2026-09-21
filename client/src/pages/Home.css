@@ -6,6 +6,7 @@
 .luxury-hero {
   background: var(--bg-color);
   padding: var(--spacing-xl) 0 var(--spacing-lg);
+  padding-top: calc(80px + var(--spacing-xl)); /* Clear the fixed navbar */
   min-height: auto;
   height: auto;
   display: block;
