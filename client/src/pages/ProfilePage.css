@@ -421,9 +421,9 @@
     filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45));
   }
 
+  /* Username hidden on mobile — display name already sits on the cover */
   .ig-username {
-    color: #fff;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+    display: none;
   }
 
   /* Cover with dark bottom gradient for white text readability */
@@ -458,9 +458,9 @@
     z-index: 4;
   }
 
-  /* Header + bio overlap the cover bottom; buttons/tabs land on white */
+  /* Header + bio + action buttons all overlap the cover bottom */
   .ig-profile-container {
-    margin-top: -138px;
+    margin-top: -238px;
     padding-top: 0;
     position: relative;
     z-index: 2;
@@ -495,7 +495,7 @@
   }
 
   .ig-bio-section {
-    margin-bottom: 14px;
+    margin-bottom: 8px;
   }
 
   .ig-display-name {
@@ -515,27 +515,32 @@
     font-size: 0.82rem;
   }
 
-  /* Buttons + tabs sit on the white background below the cover */
+  /* Glassy translucent buttons sitting on the cover photo */
   .ig-action-buttons {
-    margin-top: 4px;
-    margin-bottom: 14px;
+    margin-top: 0;
+    margin-bottom: 10px;
   }
 
   .ig-action-btn {
-    background-color: #eef1ef;
-    border: 1px solid #dfe4e1;
-    color: #2c4c3b;
-    border-radius: 10px;
-    padding: 9px 12px;
+    background: rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.38);
+    color: #fff;
+    border-radius: 999px;
+    padding: 8px 12px;
     font-size: 0.84rem;
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    transition: background 0.2s ease;
   }
 
   .ig-action-btn:hover {
-    background-color: #e2e7e4;
+    background: rgba(255, 255, 255, 0.26);
   }
 }
 /* ═══════════════════════════════════════════════════════
-   DESKTOP (≥769px) — banner cover + card layout
+   DESKTOP (≥769px) — same cover-overlay style as mobile, scaled up
 ═══════════════════════════════════════════════════════ */
 @media (min-width: 769px) {
   .ig-profile-page {
@@ -547,73 +552,76 @@
     display: none; /* Hide mobile top bar on desktop, assume main header is used */
   }
 
-  .desktop-cover-only,
   .profile-cover {
-    display: block;
-    width: 100%;
-    height: 300px;
-    position: relative;
-    overflow: hidden;
-    background-color: #cbd5e1;
+    height: 400px;
   }
 
-  .desktop-cover-only img,
-  .profile-cover img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  .profile-cover .cover-overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(15, 24, 19, 0.3) 0%,
+      rgba(15, 24, 19, 0.05) 35%,
+      rgba(15, 24, 19, 0.5) 65%,
+      rgba(15, 24, 19, 0.88) 100%
+    );
   }
-  
+
   .cover-upload-btn {
-    position: absolute;
-    bottom: 20px;
-    right: 24px;
-    background: rgba(0, 0, 0, 0.45);
+    bottom: 24px;
+    right: 32px;
+    background: rgba(0, 0, 0, 0.4);
     color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 8px;
-    padding: 8px 16px;
-    font-size: 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 999px;
+    backdrop-filter: blur(6px);
+    padding: 8px 18px;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
   }
 
+  /* Transparent container: header + bio + buttons overlay the cover */
   .ig-profile-container {
-    padding: 30px 20px 0;
-    margin-top: -80px; /* Pull up over cover photo */
-    background: #fff;
-    border-radius: 12px 12px 0 0;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    padding: 0 40px;
+    margin-top: -305px;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .ig-header-row {
     flex-direction: row;
     padding: 0;
-    margin-bottom: 24px;
+    margin-bottom: 12px;
+    align-items: flex-end;
   }
 
   .ig-avatar-container {
-    margin-right: 40px;
+    margin-right: 36px;
   }
 
   .ig-story-ring {
-    width: 150px;
-    height: 150px;
+    width: 152px;
+    height: 152px;
     padding: 4px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
   }
 
   .ig-stats-container {
     justify-content: flex-start;
-    gap: 40px;
-    margin-bottom: 20px;
+    gap: 36px;
+    margin-bottom: 14px;
   }
 
   .ig-stat-num {
-    font-size: 1.25rem;
+    font-size: 1.3rem;
+    color: #fff;
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
   }
 
   .ig-stat-label {
-    font-size: 1rem;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.85);
   }
 
   .ig-stat-item {
@@ -621,28 +629,67 @@
     gap: 6px;
   }
 
+  /* Bio flows under the stats — white text on cover */
   .ig-bio-section {
     padding: 0;
-    margin-left: 190px; /* Aligned with stats */
-    margin-top: -60px; /* Pull up */
+    margin-left: 0;
+    margin-top: 0;
+    margin-bottom: 16px;
   }
 
+  .ig-display-name {
+    color: #fff;
+    font-size: 1.6rem;
+    font-weight: 700;
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+  }
+
+  .ig-category {
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.95rem;
+  }
+
+  .ig-bio-text {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  /* Glassy buttons on the cover bottom (same as mobile) */
   .ig-action-buttons {
     padding: 0;
-    margin-left: 190px;
-    margin-top: 16px;
+    margin-left: 0;
+    margin-top: 0;
     justify-content: flex-start;
+    gap: 12px;
+    margin-bottom: 10px;
   }
 
   .ig-action-btn {
     flex: 0 1 auto;
-    padding: 7px 24px;
+    padding: 9px 26px;
+    background: rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.38);
+    color: #fff;
+    border-radius: 999px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
   }
 
+  .ig-action-btn:hover {
+    background: rgba(255, 255, 255, 0.26);
+  }
+
+  /* Tabs + content on a white sheet below the cover */
   .ig-tabs-row {
-    margin-top: 40px;
+    margin-top: 18px;
     justify-content: center;
     gap: 60px;
+    background: #fff;
+    border-top: 1px solid #e8ece9;
+    border-bottom: 1px solid #e8ece9;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
   }
 
   .ig-tab {
@@ -655,8 +702,9 @@
   }
 
   .ig-tab.active {
-    border-top: 1px solid #000;
-    border-bottom: none;
-    margin-top: -1px;
+    color: #2c4c3b;
+    border-bottom: 2px solid #2c4c3b;
+    border-top: none;
+    margin-top: 0;
   }
 }
