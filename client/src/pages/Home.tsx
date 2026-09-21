@@ -31,6 +31,7 @@ export const Home: React.FC = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [mobileQuery, setMobileQuery] = useState('');
+  const [carouselIndex, setCarouselIndex] = useState(0);
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -56,6 +57,15 @@ export const Home: React.FC = () => {
     
     fetchProperties();
   }, []);
+
+  // Auto-advance hero carousel every 4s
+  useEffect(() => {
+    const slideCount = Math.min(properties.length, 4) || 4;
+    const timer = setInterval(() => {
+      setCarouselIndex(prev => (prev + 1) % slideCount);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [properties.length]);
 
   // Sleek, text-based mood categories replacing the cluttered emoji blocks
   const moods = [
@@ -172,24 +182,69 @@ export const Home: React.FC = () => {
         </section>
       )}
 
-      {/* ── Cinematic Hero Section (desktop) ── */}
+      {/* ── New Two-Column Hero Section (desktop) ── */}
       <section className="hero luxury-hero">
         <div className="hero-overlay"></div>
-        <div className="container hero-content">
-          <p className="hero-kicker animate-fade-in">{t('home.hero.subtitle')}</p>
-          <h1 className="hero-title animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            {t('home.hero.titlePart1')}<br />{t('home.hero.titlePart2')}
-          </h1>
-          <p className="hero-subtitle animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            {t('home.hero.description')}
-          </p>
-          <button 
-            className="btn-luxury-primary animate-fade-in" 
-            style={{ animationDelay: '0.3s' }}
-            onClick={() => navigate('/hotels')}
-          >
-            {t('home.hero.exploreBtn')}
-          </button>
+        <div className="hero-two-col">
+          {/* Left: Image Carousel */}
+          <div className="hero-carousel">
+            <div className="hero-carousel-track">
+              {(properties.length > 0 ? properties.slice(0, 4) : [null, null, null, null]).map((prop, idx) => (
+                <div key={idx} className={`hero-carousel-slide ${idx === carouselIndex ? 'active' : ''}`}>
+                  {prop ? (
+                    <img src={prop.imageUrl} alt={prop.name} loading={idx === 0 ? 'eager' : 'lazy'} />
+                  ) : (
+                    <div style={{ width: '100%', height: '100%', background: '#e0e0e0' }} />
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="hero-carousel-dots">
+              {(properties.length > 0 ? properties.slice(0, 4) : [null, null, null, null]).map((_, idx) => (
+                <button
+                  key={idx}
+                  className={`hero-carousel-dot ${idx === carouselIndex ? 'active' : ''}`}
+                  onClick={() => setCarouselIndex(idx)}
+                  aria-label={`Go to slide ${idx + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Right: Sidebar */}
+          <div className="hero-sidebar">
+            <div className="hero-sidebar-badge">{t('home.hero.picturesOfWeek', 'Pictures of The Week')}</div>
+
+            {properties.length > 0 && properties[carouselIndex] ? (
+              <div className="hero-sidebar-featured">
+                <span className="featured-name">{properties[carouselIndex].name}</span>
+                <span className="featured-location">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="var(--text-secondary)"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                  {properties[carouselIndex].location}
+                </span>
+                <span className="featured-desc">
+                  {t('home.hero.description')}
+                </span>
+                <span className="featured-price">
+                  ฿{Number(properties[carouselIndex].pricePerNight || properties[carouselIndex].price_per_night || properties[carouselIndex].price || 0).toLocaleString()}
+                  <em> /{t('home.promo.perNight')}</em>
+                </span>
+              </div>
+            ) : (
+              <div className="hero-sidebar-lines">
+                <div className="hero-sidebar-line"></div>
+                <div className="hero-sidebar-line"></div>
+                <div className="hero-sidebar-line"></div>
+              </div>
+            )}
+
+            <div className="hero-sidebar-cta">
+              <button className="btn-luxury-primary" onClick={() => navigate('/hotels')}>
+                {t('home.hero.exploreBtn')}
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
