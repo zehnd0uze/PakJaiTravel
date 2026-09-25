@@ -127,6 +127,25 @@
   width: 90%;
 }
 
+/* Section title above the composition */
+.hero-slide-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-heading);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--primary-color);
+}
+
+.hero-slide-kicker .kicker-spark {
+  color: #d4af37;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
 /* ── Minimal dynamic text composition (animates on every slide change) ── */
 .hero-slide-text {
   display: flex;
@@ -189,6 +208,10 @@
   letter-spacing: -0.015em;
   color: var(--text-primary);
   animation: slideTextUp 0.6s 0.06s cubic-bezier(0.16, 1, 0.3, 1) both;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* Location · rating — quiet editorial caption */
@@ -206,6 +229,14 @@
 }
 
 .hero-slide-meta .slide-meta-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  text-transform: none;
+  letter-spacing: 0.04em;
+}
+
+.hero-slide-meta .slide-meta-votes {
   display: inline-flex;
   align-items: center;
   gap: 5px;

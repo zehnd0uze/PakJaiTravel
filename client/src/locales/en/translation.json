@@ -32,6 +32,9 @@
   },
   "home": {
     "hero": {
+      "picturesOfWeek": "Picture of the Week",
+      "votes": "votes",
+      "viewPost": "View in Community",
       "subtitle": "WELCOME TO PAKJAI",
       "titlePart1": "The Art of",
       "titlePart2": "Chiang Dao",

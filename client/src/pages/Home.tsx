@@ -25,10 +25,26 @@ interface Property {
   status?: string;
 }
 
+// One hero slide: either a top-voted community picture or a property fallback
+interface WeekPic {
+  id: string;
+  kind: 'post' | 'property';
+  imageUrl: string;
+  title: string;
+  location: string;
+  author?: string;
+  votes: number;
+  rating?: number;
+  price?: number;
+  href: string;
+  label: string;
+}
+
 export const Home: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [properties, setProperties] = useState<Property[]>([]);
+  const [weekPics, setWeekPics] = useState<WeekPic[]>([]);
   const [loading, setLoading] = useState(true);
   const [mobileQuery, setMobileQuery] = useState('');
   const [carouselIndex, setCarouselIndex] = useState(0);
@@ -39,7 +55,7 @@ export const Home: React.FC = () => {
         .from('properties')
         .select('*')
         .eq('status', 'published');
-        
+
       if (error) {
         console.error("Failed to fetch properties:", error);
       } else {
@@ -54,18 +70,70 @@ export const Home: React.FC = () => {
       }
       setLoading(false);
     };
-    
+
     fetchProperties();
   }, []);
 
+  // Picture of the Week: community pictures ranked by vote (likes) count
+  useEffect(() => {
+    const fetchWeekPics = async () => {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('id, content, image_url, author_name, location_tag, likes, created_at')
+        .not('image_url', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) {
+        console.error("Failed to fetch community pictures:", error);
+        return;
+      }
+
+      const topPosts: WeekPic[] = (data || [])
+        .sort((a, b) => (b.likes?.length || 0) - (a.likes?.length || 0))
+        .slice(0, 4)
+        .map(p => ({
+          id: p.id,
+          kind: 'post' as const,
+          imageUrl: p.image_url,
+          title: p.content,
+          location: p.location_tag || '',
+          author: p.author_name || '',
+          votes: (p.likes || []).length,
+          href: '/community',
+          label: `View community picture by ${p.author_name || 'a traveler'}`,
+        }));
+
+      setWeekPics(topPosts);
+    };
+
+    fetchWeekPics();
+  }, []);
+
+  // Hero slides: top-voted community pictures, falling back to properties
+  const heroPics: WeekPic[] = weekPics.length > 0
+    ? weekPics
+    : properties.slice(0, 4).map(p => ({
+        id: p.id,
+        kind: 'property' as const,
+        imageUrl: p.imageUrl,
+        title: p.name,
+        location: p.location,
+        votes: 0,
+        rating: Number(p.rating || 0),
+        price: Number(p.pricePerNight || p.price_per_night || p.price || 0),
+        href: `/hotels/${p.id}`,
+        label: `View ${p.name}`,
+      }));
+
   // Auto-advance hero carousel every 4s
   useEffect(() => {
-    const slideCount = Math.min(properties.length, 4) || 4;
+    const slideCount = Math.min(heroPics.length, 4) || 4;
     const timer = setInterval(() => {
       setCarouselIndex(prev => (prev + 1) % slideCount);
     }, 4000);
     return () => clearInterval(timer);
-  }, [properties.length]);
+  }, [heroPics.length]);
 
   // Sleek, text-based mood categories replacing the cluttered emoji blocks
   const moods = [
@@ -189,10 +257,10 @@ export const Home: React.FC = () => {
           {/* Left: Image Carousel */}
           <div className="hero-carousel">
             <div className="hero-carousel-track">
-              {(properties.length > 0 ? properties.slice(0, 4) : [null, null, null, null]).map((prop, idx) => (
-                <div key={idx} className={`hero-carousel-slide ${idx === carouselIndex ? 'active' : ''}`}>
-                  {prop ? (
-                    <img src={prop.imageUrl} alt={prop.name} loading={idx === 0 ? 'eager' : 'lazy'} />
+              {(heroPics.length > 0 ? heroPics : [null, null, null, null]).map((pic, idx) => (
+                <div key={pic ? pic.id : idx} className={`hero-carousel-slide ${idx === carouselIndex ? 'active' : ''}`}>
+                  {pic ? (
+                    <img src={pic.imageUrl} alt={pic.title} loading={idx === 0 ? 'eager' : 'lazy'} />
                   ) : (
                     <div style={{ width: '100%', height: '100%', background: '#e0e0e0' }} />
                   )}
@@ -200,7 +268,7 @@ export const Home: React.FC = () => {
               ))}
             </div>
             <div className="hero-carousel-dots">
-              {(properties.length > 0 ? properties.slice(0, 4) : [null, null, null, null]).map((_, idx) => (
+              {(heroPics.length > 0 ? heroPics : [null, null, null, null]).map((_, idx) => (
                 <button
                   key={idx}
                   className={`hero-carousel-dot ${idx === carouselIndex ? 'active' : ''}`}
@@ -213,40 +281,66 @@ export const Home: React.FC = () => {
 
           {/* Right: Minimal dynamic text composition (syncs with carousel) */}
           <div className="hero-sidebar">
-            {properties.length > 0 && properties[carouselIndex] ? (
+            <span className="hero-slide-kicker">
+              <span className="kicker-spark" aria-hidden="true">✦</span>
+              {t('home.hero.picturesOfWeek', 'Picture of the Week')}
+            </span>
+
+            {heroPics.length > 0 && heroPics[carouselIndex] ? (
               <div
                 key={carouselIndex}
                 className="hero-slide-text"
-                onClick={() => navigate(`/hotels/${properties[carouselIndex].id}`)}
+                onClick={() => navigate(heroPics[carouselIndex].href)}
                 role="button"
                 tabIndex={0}
-                aria-label={`View ${properties[carouselIndex].name}`}
+                aria-label={heroPics[carouselIndex].label}
               >
                 <span className="hero-slide-index" aria-hidden="true">
                   <span className="slide-index-current">{String(carouselIndex + 1).padStart(2, '0')}</span>
                   <span className="slide-index-rule"><span className="slide-index-progress" /></span>
-                  <span className="slide-index-total">{String(Math.min(properties.length || 4, 4)).padStart(2, '0')}</span>
+                  <span className="slide-index-total">{String(heroPics.length).padStart(2, '0')}</span>
                 </span>
 
-                <span className="hero-slide-name">{properties[carouselIndex].name}</span>
+                <span className="hero-slide-name">{heroPics[carouselIndex].title}</span>
 
                 <span className="hero-slide-meta">
-                  <span>{properties[carouselIndex].location}</span>
-                  <span className="slide-meta-divider" aria-hidden="true">—</span>
-                  <span className="slide-meta-rating">
-                    <svg viewBox="0 0 24 24" width="13" height="13" fill="#d4af37" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                    {Number(properties[carouselIndex].rating || 0).toFixed(1)}
-                  </span>
+                  {heroPics[carouselIndex].kind === 'post' && heroPics[carouselIndex].author && (
+                    <span>{heroPics[carouselIndex].author}</span>
+                  )}
+                  {heroPics[carouselIndex].kind === 'post' && heroPics[carouselIndex].author && heroPics[carouselIndex].location && (
+                    <span className="slide-meta-divider" aria-hidden="true">—</span>
+                  )}
+                  {heroPics[carouselIndex].location && (
+                    <span>{heroPics[carouselIndex].location}</span>
+                  )}
+                  {heroPics[carouselIndex].kind === 'post' ? (
+                    <span className="slide-meta-votes">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="var(--accent-color)" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                      {heroPics[carouselIndex].votes} {t('home.hero.votes', 'votes')}
+                    </span>
+                  ) : (
+                    <span className="slide-meta-divider" aria-hidden="true">—</span>
+                  )}
+                  {heroPics[carouselIndex].rating != null && heroPics[carouselIndex].rating > 0 && (
+                    <span className="slide-meta-rating">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="#d4af37" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                      {heroPics[carouselIndex].rating!.toFixed(1)}
+                    </span>
+                  )}
                 </span>
 
-                <span className="hero-slide-price">
-                  <em>{t('home.promo.from', 'from')}</em>
-                  ฿{Number(properties[carouselIndex].pricePerNight || properties[carouselIndex].price_per_night || properties[carouselIndex].price || 0).toLocaleString()}
-                  <span className="price-period">/ {t('home.promo.perNight')}</span>
-                </span>
+                {heroPics[carouselIndex].kind === 'property' && (
+                  <span className="hero-slide-price">
+                    <em>{t('home.promo.from', 'from')}</em>
+                    ฿{Number(heroPics[carouselIndex].price || 0).toLocaleString()}
+                    <span className="price-period">/ {t('home.promo.perNight')}</span>
+                  </span>
+                )}
 
                 <span className="hero-slide-view">
-                  {t('home.hero.viewStay', 'View this stay')}
+                  {heroPics[carouselIndex].kind === 'post'
+                    ? t('home.hero.viewPost', 'View in Community')
+                    : t('home.hero.viewStay', 'View this stay')}
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
                 </span>
               </div>

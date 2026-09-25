@@ -32,6 +32,9 @@
   },
   "home": {
     "hero": {
+      "picturesOfWeek": "ภาพแห่งสัปดาห์",
+      "votes": "โหวต",
+      "viewPost": "ดูในชุมชน",
       "subtitle": "ยินดีต้อนรับสู่พักใจ",
       "titlePart1": "ศิลปะแห่ง",
       "titlePart2": "เชียงดาว",
