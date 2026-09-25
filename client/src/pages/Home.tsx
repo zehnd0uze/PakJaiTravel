@@ -211,23 +211,43 @@ export const Home: React.FC = () => {
             </div>
           </div>
 
-          {/* Right: Sidebar */}
+          {/* Right: Minimal dynamic text composition (syncs with carousel) */}
           <div className="hero-sidebar">
-            <div className="hero-sidebar-badge">{t('home.hero.picturesOfWeek', 'Pictures of The Week')}</div>
-
             {properties.length > 0 && properties[carouselIndex] ? (
-              <div className="hero-sidebar-featured">
-                <span className="featured-name">{properties[carouselIndex].name}</span>
-                <span className="featured-location">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="var(--text-secondary)"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                  {properties[carouselIndex].location}
+              <div
+                key={carouselIndex}
+                className="hero-slide-text"
+                onClick={() => navigate(`/hotels/${properties[carouselIndex].id}`)}
+                role="button"
+                tabIndex={0}
+                aria-label={`View ${properties[carouselIndex].name}`}
+              >
+                <span className="hero-slide-index" aria-hidden="true">
+                  <span className="slide-index-current">{String(carouselIndex + 1).padStart(2, '0')}</span>
+                  <span className="slide-index-rule"><span className="slide-index-progress" /></span>
+                  <span className="slide-index-total">{String(Math.min(properties.length || 4, 4)).padStart(2, '0')}</span>
                 </span>
-                <span className="featured-desc">
-                  {t('home.hero.description')}
+
+                <span className="hero-slide-name">{properties[carouselIndex].name}</span>
+
+                <span className="hero-slide-meta">
+                  <span>{properties[carouselIndex].location}</span>
+                  <span className="slide-meta-divider" aria-hidden="true">—</span>
+                  <span className="slide-meta-rating">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="#d4af37" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                    {Number(properties[carouselIndex].rating || 0).toFixed(1)}
+                  </span>
                 </span>
-                <span className="featured-price">
+
+                <span className="hero-slide-price">
+                  <em>{t('home.promo.from', 'from')}</em>
                   ฿{Number(properties[carouselIndex].pricePerNight || properties[carouselIndex].price_per_night || properties[carouselIndex].price || 0).toLocaleString()}
-                  <em> /{t('home.promo.perNight')}</em>
+                  <span className="price-period">/ {t('home.promo.perNight')}</span>
+                </span>
+
+                <span className="hero-slide-view">
+                  {t('home.hero.viewStay', 'View this stay')}
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
                 </span>
               </div>
             ) : (

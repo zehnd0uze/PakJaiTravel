@@ -37,7 +37,7 @@
       "titlePart2": "Chiang Dao",
       "description": "Discover bespoke nature retreats and authentic heritage stays in the heart of Chiang Dao.",
       "exploreBtn": "Explore the Collection",
-      "picturesOfWeek": "Pictures of The Week"
+      "viewStay": "View this stay"
     },
     "featured": {
       "title": "Featured Destinations",
@@ -100,7 +100,8 @@
     "promo": {
       "title": "Top deals for you",
       "badge": "HOT",
-      "perNight": "night"
+      "perNight": "night",
+      "from": "from"
     },
     "seeAll": "See all"
   },

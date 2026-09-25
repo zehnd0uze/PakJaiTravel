@@ -95,27 +95,14 @@
   background: rgba(0, 0, 0, 0.55);
 }
 
-/* ── Right: Sidebar ── */
+/* ── Right: Minimal text composition (no card, floats on page bg) ── */
 .hero-sidebar {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
-  padding-top: var(--spacing-xs);
-}
-
-.hero-sidebar-badge {
-  display: inline-flex;
-  align-items: center;
   justify-content: center;
-  background: #e2e2e2;
-  color: var(--text-primary);
-  font-family: var(--font-heading);
-  font-size: 0.95rem;
-  font-weight: 600;
-  padding: 14px 28px;
-  border-radius: var(--radius-md);
-  letter-spacing: 0.01em;
-  white-space: nowrap;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-sm) 0;
+  position: relative;
 }
 
 .hero-sidebar-lines {
@@ -140,50 +127,182 @@
   width: 90%;
 }
 
-/* Sidebar — featured property info (when data is loaded) */
-.hero-sidebar-featured {
+/* ── Minimal dynamic text composition (animates on every slide change) ── */
+.hero-slide-text {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: 18px;
+  cursor: pointer;
+  outline: none;
 }
 
-.hero-sidebar-featured .featured-name {
+.hero-slide-text:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 8px;
+  border-radius: 4px;
+}
+
+/* Slide index + progress rule — the only "ui" left, fills over the 4s slide */
+.hero-slide-index {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
   font-family: var(--font-heading);
-  font-size: 1.3rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.22em;
+  color: var(--text-secondary);
+  animation: slideTextUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hero-slide-index .slide-index-current {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.hero-slide-index .slide-index-rule {
+  position: relative;
+  width: 72px;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.14);
+  overflow: hidden;
+}
+
+.hero-slide-index .slide-index-progress {
+  position: absolute;
+  inset: 0;
+  background: var(--primary-color);
+  transform-origin: left;
+  animation: heroProgress 4s linear forwards;
+}
+
+@keyframes heroProgress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* Display name — the hero of the composition */
+.hero-slide-name {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 3.2vw, 2.8rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+  animation: slideTextUp 0.6s 0.06s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Location · rating — quiet editorial caption */
+.hero-slide-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-body);
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-secondary);
+  animation: slideTextUp 0.6s 0.12s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hero-slide-meta .slide-meta-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  text-transform: none;
+  letter-spacing: 0.04em;
+}
+
+.hero-slide-meta .slide-meta-divider {
+  opacity: 0.45;
+}
+
+/* Price — small, refined, no shout */
+.hero-slide-price {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
   font-weight: 600;
   color: var(--text-primary);
-  line-height: 1.3;
+  animation: slideTextUp 0.6s 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.hero-sidebar-featured .featured-location {
+.hero-slide-price em {
+  font-style: normal;
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
   color: var(--text-secondary);
-  display: flex;
+}
+
+.hero-slide-price .price-period {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+/* Underlined text link */
+.hero-slide-view {
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-}
-
-.hero-sidebar-featured .featured-desc {
+  align-self: flex-start;
   font-family: var(--font-body);
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-
-.hero-sidebar-featured .featured-price {
-  font-family: var(--font-heading);
-  font-size: 1.15rem;
+  font-size: 0.88rem;
   font-weight: 700;
-  color: var(--accent-color);
-  margin-top: var(--spacing-xs);
+  color: var(--text-primary);
+  padding-bottom: 4px;
+  position: relative;
+  animation: slideTextUp 0.6s 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: color 0.25s;
 }
 
-.hero-sidebar-featured .featured-price em {
-  font-style: normal;
-  font-weight: 400;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
+.hero-slide-view::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--primary-color);
+  transform-origin: left;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-slide-text:hover .hero-slide-view {
+  color: var(--primary-color);
+}
+
+.hero-slide-text:hover .hero-slide-view svg {
+  transform: translateX(4px);
+}
+
+.hero-slide-view svg {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideTextUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-slide-index,
+  .hero-slide-name,
+  .hero-slide-meta,
+  .hero-slide-price,
+  .hero-slide-view {
+    animation: none;
+  }
+  .slide-index-progress {
+    animation: none;
+    transform: scaleX(1);
+  }
 }
 
 .hero-sidebar-cta {
@@ -192,7 +311,8 @@
 }
 
 .hero-sidebar-cta .btn-luxury-primary {
-  width: 100%;
+  width: auto;
+  align-self: flex-start;
   text-align: center;
 }
 
@@ -397,14 +517,6 @@
     grid-template-columns: 1fr;
     gap: var(--spacing-md);
   }
-  .hero-sidebar {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: var(--spacing-sm);
-    align-items: center;
-  }
-  .hero-sidebar-featured { flex: 1; min-width: 200px; }
-  .hero-sidebar-cta { flex: 0 0 auto; }
   .destinations-grid { grid-template-columns: repeat(3, 1fr); }
   .editorial-mosaic { grid-template-columns: repeat(3, 1fr); }
 }
