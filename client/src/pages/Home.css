@@ -155,44 +155,6 @@
   border-radius: 4px;
 }
 
-/* Slide index + progress rule — the only "ui" left, fills over the 4s slide */
-.hero-slide-index {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  font-family: var(--font-heading);
-  font-size: 0.78rem;
-  letter-spacing: 0.22em;
-  color: var(--text-secondary);
-  animation: slideTextUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.hero-slide-index .slide-index-current {
-  color: var(--text-primary);
-  font-weight: 600;
-}
-
-.hero-slide-index .slide-index-rule {
-  position: relative;
-  width: 72px;
-  height: 1px;
-  background: rgba(0, 0, 0, 0.14);
-  overflow: hidden;
-}
-
-.hero-slide-index .slide-index-progress {
-  position: absolute;
-  inset: 0;
-  background: var(--primary-color);
-  transform-origin: left;
-  animation: heroProgress 4s linear forwards;
-}
-
-@keyframes heroProgress {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
-}
-
 /* Display name — the hero of the composition */
 .hero-slide-name {
   font-family: var(--font-heading);
@@ -365,10 +327,6 @@
   }
   .hero-slide-name .mask-word {
     overflow: visible;
-  }
-  .slide-index-progress {
-    animation: none;
-    transform: scaleX(1);
   }
 }
 
