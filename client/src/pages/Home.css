@@ -388,7 +388,7 @@
 .mood-navigation-section {
   padding: var(--spacing-xl) var(--spacing-md) var(--spacing-md);
   border-bottom: 1px solid var(--border-color);
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: var(--spacing-lg);
 }
 
 .mood-scroll-track {
@@ -442,6 +442,11 @@
 /* ── Editorial Section Headers ── */
 .section-padding {
   padding: var(--spacing-2xl) 0;
+}
+
+/* Pull the first editorial section ("Our Top Picks") closer to the mood nav */
+.editorial-section.section-padding {
+  padding-top: var(--spacing-md);
 }
 
 .editorial-header {
