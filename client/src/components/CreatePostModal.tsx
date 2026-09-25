@@ -51,6 +51,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
     postToEdit?.lat && postToEdit?.lng ? { lat: postToEdit.lat, lng: postToEdit.lng } : null
   );
   const [propertyId, setPropertyId] = useState(postToEdit?.propertyId || '');
+  const [joinPotw, setJoinPotw] = useState(postToEdit?.joinPotw || false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -116,6 +117,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
         lng: coordinates?.lng || null,
         rating: rating > 0 ? rating : null,
         price_rating: priceRating || null,
+        join_potw: joinPotw,
         user_id: user.id,
         author_name: user.name,
         author_avatar: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=2C4C3B&color=fff`
@@ -253,6 +255,18 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
                 <span>3,000+</span>
               </div>
             </div>
+
+            <label className="potw-compete-toggle">
+              <input
+                type="checkbox"
+                checked={joinPotw}
+                onChange={e => setJoinPotw(e.target.checked)}
+              />
+              <span className="potw-compete-text">
+                <span className="potw-compete-title">ร่วมแข่งขันภาพแห่งสัปดาห์</span>
+                <span className="potw-compete-hint">ภาพของคุณจะถูกโหวตให้ขึ้นหน้าแรกเป็น "ภาพแห่งสัปดาห์"</span>
+              </span>
+            </label>
 
             <div className="add-to-post-container">
               <span className="add-to-post-label">เพิ่มลงในโพสต์</span>

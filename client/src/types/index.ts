@@ -22,6 +22,7 @@ export interface Post {
   propertyId?: string | null;
   likes: string[];
   comments: Comment[];
+  joinPotw?: boolean;
   createdAt: string;
   updatedAt?: string;
 }

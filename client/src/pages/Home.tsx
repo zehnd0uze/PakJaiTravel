@@ -81,6 +81,7 @@ export const Home: React.FC = () => {
         .from('posts')
         .select('id, content, image_url, author_name, location_tag, likes, created_at')
         .not('image_url', 'is', null)
+        .eq('join_potw', true)
         .order('created_at', { ascending: false })
         .limit(50);
 
@@ -294,12 +295,6 @@ export const Home: React.FC = () => {
                 tabIndex={0}
                 aria-label={heroPics[carouselIndex].label}
               >
-                <span className="hero-slide-index" aria-hidden="true">
-                  <span className="slide-index-current">{String(carouselIndex + 1).padStart(2, '0')}</span>
-                  <span className="slide-index-rule"><span className="slide-index-progress" /></span>
-                  <span className="slide-index-total">{String(heroPics.length).padStart(2, '0')}</span>
-                </span>
-
                 <span className="hero-slide-name">
                   <span className="sr-only">{heroPics[carouselIndex].title}</span>
                   {heroPics[carouselIndex].title.split(/\s+/).filter(Boolean).map((word, i) => (

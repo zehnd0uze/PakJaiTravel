@@ -34,6 +34,7 @@ const CommunityPage: React.FC = () => {
         locationTag: p.location_tag,
         priceRating: p.price_rating,
         propertyId: p.property_id,
+        joinPotw: p.join_potw,
         createdAt: p.created_at,
         updatedAt: p.updated_at
       }));
