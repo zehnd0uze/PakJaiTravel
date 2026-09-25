@@ -282,7 +282,6 @@ export const Home: React.FC = () => {
           {/* Right: Minimal dynamic text composition (syncs with carousel) */}
           <div className="hero-sidebar">
             <span className="hero-slide-kicker">
-              <span className="kicker-spark" aria-hidden="true">✦</span>
               {t('home.hero.picturesOfWeek', 'Picture of the Week')}
             </span>
 
@@ -301,7 +300,17 @@ export const Home: React.FC = () => {
                   <span className="slide-index-total">{String(heroPics.length).padStart(2, '0')}</span>
                 </span>
 
-                <span className="hero-slide-name">{heroPics[carouselIndex].title}</span>
+                <span className="hero-slide-name">
+                  <span className="sr-only">{heroPics[carouselIndex].title}</span>
+                  {heroPics[carouselIndex].title.split(/\s+/).filter(Boolean).map((word, i) => (
+                    <span key={i} aria-hidden="true">
+                      <span className="mask-word">
+                        <span className="mask-word-inner" style={{ animationDelay: `${0.06 + i * 0.06}s` }}>{word}</span>
+                      </span>
+                      {' '}
+                    </span>
+                  ))}
+                </span>
 
                 <span className="hero-slide-meta">
                   {heroPics[carouselIndex].kind === 'post' && heroPics[carouselIndex].author && (

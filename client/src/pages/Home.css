@@ -140,12 +140,6 @@
   color: var(--primary-color);
 }
 
-.hero-slide-kicker .kicker-spark {
-  color: #d4af37;
-  font-size: 0.9rem;
-  line-height: 1;
-}
-
 /* ── Minimal dynamic text composition (animates on every slide change) ── */
 .hero-slide-text {
   display: flex;
@@ -322,6 +316,41 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ── Title word-mask reveal ──
+   Adapted from 21st.dev "Text Reveal (Mask)" (soralabs): each word rises
+   into view inside an overflow-hidden mask, staggered word-by-word. */
+.hero-slide-name .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.hero-slide-name .mask-word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  /* headroom for ascenders and Thai tone/vowel marks so the mask never clips ink */
+  padding: 0.22em 0 0.14em;
+  margin: -0.22em 0 -0.14em;
+}
+
+.hero-slide-name .mask-word-inner {
+  display: inline-block;
+  transform: translateY(115%);
+  animation: maskWordUp 0.6s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+  will-change: transform;
+}
+
+@keyframes maskWordUp {
+  to { transform: translateY(0); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-slide-index,
   .hero-slide-name,
@@ -329,6 +358,13 @@
   .hero-slide-price,
   .hero-slide-view {
     animation: none;
+  }
+  .hero-slide-name .mask-word-inner {
+    animation: none;
+    transform: none;
+  }
+  .hero-slide-name .mask-word {
+    overflow: visible;
   }
   .slide-index-progress {
     animation: none;
@@ -345,6 +381,26 @@
   width: auto;
   align-self: flex-start;
   text-align: center;
+  /* Minimal editorial CTA — ghost outline, fills on hover */
+  background: transparent;
+  color: var(--primary-color);
+  border: 1px solid rgba(44, 76, 59, 0.45);
+  box-shadow: none;
+  padding: 12px 26px;
+  font-size: 0.88rem;
+  letter-spacing: 0.04em;
+  transition:
+    background-color 0.35s ease,
+    color 0.35s ease,
+    border-color 0.35s ease;
+}
+
+.hero-sidebar-cta .btn-luxury-primary:hover {
+  background: var(--primary-color);
+  color: #fff;
+  border-color: var(--primary-color);
+  box-shadow: none;
+  transform: none;
 }
 
 /* ── Button (kept from original) ── */
