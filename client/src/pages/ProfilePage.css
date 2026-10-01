@@ -558,7 +558,7 @@
   /* Inset, rounded cover floating below the fixed site header */
   .profile-cover {
     display: block;
-    width: min(1360px, calc(100% - 80px));
+    width: min(1408px, calc(100% - 32px));
     height: 420px;
     /* real header height, measured at runtime in ProfilePage.tsx */
     margin: var(--profile-header-h, 71px) auto 0;
