@@ -13,7 +13,7 @@ import './ProfilePage.css';
 
 
 const ProfilePage: React.FC = () => {
-  const { user, logout, updateProfile, openAuthModal } = useAuth();
+  const { user, loading: authLoading, logout, updateProfile, openAuthModal } = useAuth();
   const navigate = useNavigate();
   const [userPosts, setUserPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,14 +27,15 @@ const ProfilePage: React.FC = () => {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
 
-  // Redirect if not logged in — stable effect, no navigate in deps
-  const isLoggedIn = Boolean(user);
+  // Redirect if not logged in — but only after the session restore finished,
+  // otherwise a refresh fires this while `user` is still null and pops the
+  // sign-in modal even though the user is signed in.
   useEffect(() => {
-    if (!isLoggedIn) {
+    if (!authLoading && !user) {
       navigate('/');
       openAuthModal('login');
     }
-  }, [isLoggedIn, navigate, openAuthModal]);
+  }, [authLoading, user, navigate, openAuthModal]);
 
   const fetchUserPosts = async () => {
     if (!user) return;
