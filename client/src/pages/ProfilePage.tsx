@@ -172,6 +172,8 @@ const ProfilePage: React.FC = () => {
       </div>
 
       <div className="ig-profile-container">
+        {/* ── Profile hero: info overlaid on the cover ── */}
+        <div className="ig-profile-hero">
         {/* ── Instagram Header (Avatar + Stats) ── */}
         <div className="ig-header-row">
           <div className="ig-avatar-container">
@@ -245,7 +247,10 @@ const ProfilePage: React.FC = () => {
             </button>
           )}
         </div>
+        </div>
 
+        {/* ── Journals card: tabs + grid/feed ── */}
+        <div className="ig-content-card">
         {/* ── Content Tabs (Grid vs Feed) ── */}
         <div className="ig-tabs-row">
           <button 
@@ -305,6 +310,7 @@ const ProfilePage: React.FC = () => {
               <p>Share your travel experiences.</p>
             </div>
           )}
+        </div>
         </div>
       </div>
 
