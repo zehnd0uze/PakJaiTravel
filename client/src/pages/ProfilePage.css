@@ -560,7 +560,7 @@
     display: block;
     width: min(1360px, calc(100% - 80px));
     height: 420px;
-    margin: calc(80px + 10px) auto 0;
+    margin: 80px auto 0;
     border-radius: 18px;
     box-shadow: 0 10px 30px rgba(24, 48, 37, 0.12);
   }
@@ -725,7 +725,7 @@
     background: #fff;
     border-radius: 14px;
     box-shadow: 0 4px 18px rgba(24, 48, 37, 0.07);
-    margin-top: 8px;
+    margin-top: 0;
     overflow: hidden;
   }
 
