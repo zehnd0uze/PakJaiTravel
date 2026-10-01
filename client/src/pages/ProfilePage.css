@@ -724,6 +724,9 @@
     grid-area: avatar;
     align-self: center;
     margin-right: 0;
+    /* nudge the circle up without affecting the grid layout */
+    position: relative;
+    top: -20px;
   }
 
   .ig-story-ring {
