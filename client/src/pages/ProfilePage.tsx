@@ -24,26 +24,22 @@ const ProfilePage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'feed'>('grid');
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
   const [coverMenuOpen, setCoverMenuOpen] = useState(false);
   const [viewingPhoto, setViewingPhoto] = useState<'avatar' | 'cover' | null>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
-  const avatarMenuRef = useRef<HTMLDivElement>(null);
   const coverMenuRef = useRef<HTMLDivElement>(null);
 
-  // Close the upload menus when clicking anywhere outside them
+  // Close the cover upload menu when clicking anywhere outside it
   useEffect(() => {
-    if (!avatarMenuOpen && !coverMenuOpen) return;
+    if (!coverMenuOpen) return;
     const onDocClick = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (avatarMenuRef.current?.contains(target) || coverMenuRef.current?.contains(target)) return;
-      setAvatarMenuOpen(false);
+      if (coverMenuRef.current?.contains(e.target as Node)) return;
       setCoverMenuOpen(false);
     };
     document.addEventListener('mousedown', onDocClick);
     return () => document.removeEventListener('mousedown', onDocClick);
-  }, [avatarMenuOpen, coverMenuOpen]);
+  }, [coverMenuOpen]);
 
   // Redirect if not logged in — but only after the session restore finished,
   // otherwise a refresh fires this while `user` is still null and pops the
@@ -234,7 +230,7 @@ const ProfilePage: React.FC = () => {
         <div className="ig-profile-hero">
         {/* ── Instagram Header (Avatar + Stats) ── */}
         <div className="ig-header-row">
-          <div className="ig-avatar-container" ref={avatarMenuRef}>
+          <div className="ig-avatar-container">
             <div
               className="ig-story-ring"
               onClick={() => setViewingPhoto('avatar')}
@@ -249,30 +245,6 @@ const ProfilePage: React.FC = () => {
                 className={`ig-avatar${uploadingAvatar ? ' uploading' : ''}`}
               />
             </div>
-            <button
-              className="ig-avatar-add-btn"
-              onClick={() => setAvatarMenuOpen(v => !v)}
-              disabled={uploadingAvatar}
-              aria-label="Profile photo options"
-            >
-              +
-            </button>
-            {avatarMenuOpen && (
-              <div className="ig-upload-menu">
-                <button
-                  className="ig-upload-menu-item"
-                  onClick={() => { setAvatarMenuOpen(false); avatarInputRef.current?.click(); }}
-                >
-                  Upload new photo
-                </button>
-                <button
-                  className="ig-upload-menu-item"
-                  onClick={() => { setAvatarMenuOpen(false); setViewingPhoto('avatar'); }}
-                >
-                  View profile picture
-                </button>
-              </div>
-            )}
             <input
               ref={avatarInputRef}
               type="file"
@@ -430,11 +402,23 @@ const ProfilePage: React.FC = () => {
           <button className="ig-viewer-close" onClick={() => setViewingPhoto(null)} aria-label="Close">
             &times;
           </button>
-          <img
-            src={viewingPhoto === 'avatar' ? avatarSrc : coverSrc}
-            alt={viewingPhoto === 'avatar' ? 'Profile picture' : 'Cover photo'}
-            onClick={(e) => e.stopPropagation()}
-          />
+          <div className="ig-viewer-body" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={viewingPhoto === 'avatar' ? avatarSrc : coverSrc}
+              alt={viewingPhoto === 'avatar' ? 'Profile picture' : 'Cover photo'}
+              className={viewingPhoto === 'avatar' ? 'ig-viewer-avatar' : undefined}
+            />
+            <button
+              className="ig-viewer-change"
+              onClick={() => {
+                const ref = viewingPhoto === 'avatar' ? avatarInputRef : coverInputRef;
+                setViewingPhoto(null);
+                ref.current?.click();
+              }}
+            >
+              {viewingPhoto === 'avatar' ? 'Change profile photo' : 'Change cover photo'}
+            </button>
+          </div>
         </div>
       )}
 
