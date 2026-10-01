@@ -560,8 +560,8 @@
     display: block;
     width: min(1408px, calc(100% - 32px));
     height: 420px;
-    /* real header height, measured at runtime in ProfilePage.tsx */
-    margin: var(--profile-header-h, 71px) auto 0;
+    /* real header height + 20px breathing room, measured at runtime */
+    margin: calc(var(--profile-header-h, 71px) + 20px) auto 0;
     border-radius: 18px;
     /* paints above the journals card so the card tucks behind it */
     z-index: 2;
