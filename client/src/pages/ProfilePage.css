@@ -549,6 +549,7 @@
   .ig-profile-page {
     background-color: #f4f5f2;
     padding-bottom: 80px;
+    overflow-x: hidden; /* the full-bleed card breakout uses 100vw */
   }
 
   .ig-top-bar {
@@ -724,13 +725,16 @@
     background: rgba(255, 255, 255, 0.28);
   }
 
-  /* White journals card below the cover */
+  /* White journals card below the cover — full-bleed like the cover */
   .ig-content-card {
     background: #fff;
-    border-radius: 14px;
+    border-radius: 0;
     box-shadow: 0 4px 18px rgba(24, 48, 37, 0.07);
     /* tuck the card 5px behind the cover's bottom edge */
     margin-top: -5px;
+    /* break out of the centered container to the viewport edges */
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
     overflow: hidden;
   }
 
