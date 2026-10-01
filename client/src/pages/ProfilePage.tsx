@@ -6,6 +6,7 @@ import { uploadToCloudinary } from '../utils/cloudinary';
 import PostCard from '../components/PostCard';
 import CreatePostModal from '../components/CreatePostModal';
 import ProfileSettingsModal from '../components/ProfileSettingsModal';
+import JournalModal from '../components/JournalModal';
 import { type Post } from '../types';
 import './ProfilePage.css';
 
@@ -26,6 +27,7 @@ const ProfilePage: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [coverMenuOpen, setCoverMenuOpen] = useState(false);
   const [viewingPhoto, setViewingPhoto] = useState<'avatar' | 'cover' | null>(null);
+  const [activeJournal, setActiveJournal] = useState<number | null>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const coverMenuRef = useRef<HTMLDivElement>(null);
@@ -332,8 +334,8 @@ const ProfilePage: React.FC = () => {
           ) : userPosts.length > 0 ? (
             viewMode === 'grid' ? (
               <div className="ig-photo-grid">
-                {userPosts.map((post) => (
-                  <div key={post.id} className="ig-grid-item" onClick={() => setViewMode('feed')}>
+                {userPosts.map((post, i) => (
+                  <div key={post.id} className="ig-grid-item" onClick={() => setActiveJournal(i)}>
                     {post.imageUrl ? (
                       <img src={post.imageUrl} alt="Post thumbnail" />
                     ) : (
@@ -420,6 +422,17 @@ const ProfilePage: React.FC = () => {
             </button>
           </div>
         </div>
+      )}
+
+      {/* ── Journal post viewer (Instagram-style) ── */}
+      {activeJournal !== null && userPosts[activeJournal] && (
+        <JournalModal
+          posts={userPosts}
+          index={activeJournal}
+          onClose={() => setActiveJournal(null)}
+          onNavigate={setActiveJournal}
+          onUpdate={handlePostUpdate}
+        />
       )}
 
       {isSettingsOpen && (
