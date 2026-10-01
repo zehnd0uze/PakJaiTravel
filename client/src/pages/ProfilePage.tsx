@@ -73,17 +73,24 @@ const ProfilePage: React.FC = () => {
   }, [user?.id]);
 
   // Expose the fixed header's real height so the cover starts flush below it
-  // (the header is shorter on non-home pages due to .header-scrolled padding)
+  // (the header is shorter on non-home pages due to .header-scrolled padding),
+  // and drop its box-shadow so the gap strip keeps the same color as the page
+  // background instead of being darkened by the glass shadow.
   useEffect(() => {
     const syncHeader = () => {
       const header = document.querySelector<HTMLElement>('.header');
       if (header) {
         document.documentElement.style.setProperty('--profile-header-h', `${header.offsetHeight}px`);
+        header.style.boxShadow = 'none';
       }
     };
     syncHeader();
     window.addEventListener('resize', syncHeader);
-    return () => window.removeEventListener('resize', syncHeader);
+    return () => {
+      const header = document.querySelector<HTMLElement>('.header');
+      if (header) header.style.boxShadow = '';
+      window.removeEventListener('resize', syncHeader);
+    };
   }, []);
 
   const handlePostUpdate = (updatedPost: Post) => {
