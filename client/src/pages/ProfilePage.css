@@ -765,6 +765,10 @@
 
   .ig-content-area {
     padding: 20px;
+    /* invisible boundary like Instagram: grid stops before the screen edges */
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
   }
 
   /* Instagram-style density: more, smaller cells as the card widens */
