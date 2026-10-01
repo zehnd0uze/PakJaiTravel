@@ -35,6 +35,93 @@
   pointer-events: none;
 }
 
+/* ── Upload menus (avatar / cover) + photo viewer ── */
+.ig-upload-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 210px;
+  background: #fff;
+  border: 1px solid #ececec;
+  border-radius: 12px;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.18);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  z-index: 60;
+  animation: fadeIn 0.15s ease;
+}
+
+.ig-upload-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #1a1a1a;
+  cursor: pointer;
+  text-align: left;
+}
+
+.ig-upload-menu-item:hover {
+  background: #f4f5f2;
+}
+
+.ig-story-ring {
+  cursor: pointer;
+}
+
+.ig-photo-viewer {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 14, 12, 0.9);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  cursor: zoom-out;
+  animation: fadeIn 0.25s ease;
+}
+
+.ig-photo-viewer img {
+  max-width: min(90vw, 900px);
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+  background: #111;
+  cursor: default;
+}
+
+.ig-viewer-close {
+  position: absolute;
+  top: 24px;
+  right: 32px;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.ig-viewer-close:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+
 /* ── Accessibility ── */
 .sr-only {
   position: absolute;
@@ -442,10 +529,14 @@
   }
 
   /* Compact translucent change-cover pill over the photo */
-  .cover-upload-btn {
+  .cover-upload-wrap {
     position: absolute;
     top: 62px;
     right: 12px;
+    z-index: 4;
+  }
+
+  .cover-upload-btn {
     background: rgba(0, 0, 0, 0.4);
     color: #fff;
     border: 1px solid rgba(255, 255, 255, 0.25);
@@ -455,7 +546,6 @@
     font-weight: 600;
     cursor: pointer;
     backdrop-filter: blur(6px);
-    z-index: 4;
   }
 
   /* Header + bio + action buttons all overlap the cover bottom */
@@ -578,10 +668,14 @@
     );
   }
 
-  .cover-upload-btn {
+  .cover-upload-wrap {
     position: absolute;
     top: 20px;
     right: 20px;
+    z-index: 4;
+  }
+
+  .cover-upload-btn {
     background: rgba(0, 0, 0, 0.4);
     color: #fff;
     border: 1px solid rgba(255, 255, 255, 0.25);
@@ -591,7 +685,6 @@
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
-    z-index: 4;
   }
 
   .ig-profile-container {
