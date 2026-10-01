@@ -555,14 +555,13 @@
     display: none; /* Desktop relies on the main site header */
   }
 
-  /* Inset, rounded cover floating below the fixed site header */
+  /* Full-bleed cover: spans the whole width from the header down to the card */
   .profile-cover {
     display: block;
-    width: min(1408px, calc(100% - 32px));
-    height: 420px;
-    /* real header height + 20px breathing room, measured at runtime */
-    margin: calc(var(--profile-header-h, 71px) + 20px) auto 0;
-    border-radius: 18px;
+    width: 100%;
+    height: 440px;
+    margin: var(--profile-header-h, 71px) auto 0;
+    border-radius: 0;
     /* paints above the journals card so the card tucks behind it */
     z-index: 2;
     box-shadow: 0 10px 30px rgba(24, 48, 37, 0.12);
