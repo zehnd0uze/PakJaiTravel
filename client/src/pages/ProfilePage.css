@@ -755,7 +755,7 @@
   }
 
   .ig-avatar {
-    border: 4px solid rgba(255, 255, 255, 0.95);
+    border: none;
   }
 
   .ig-bio-section {
