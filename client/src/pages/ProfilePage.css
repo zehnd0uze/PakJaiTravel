@@ -560,9 +560,11 @@
     display: block;
     width: min(1360px, calc(100% - 80px));
     height: 420px;
-    /* fixed site header is 95px tall — start flush below it */
-    margin: 95px auto 0;
+    /* real header height, measured at runtime in ProfilePage.tsx */
+    margin: var(--profile-header-h, 71px) auto 0;
     border-radius: 18px;
+    /* paints above the journals card so the card tucks behind it */
+    z-index: 2;
     box-shadow: 0 10px 30px rgba(24, 48, 37, 0.12);
   }
 
@@ -599,9 +601,7 @@
     background: transparent;
     border-radius: 0;
     box-shadow: none;
-    /* Stack above the positioned cover when the hero pulls up onto it */
     position: relative;
-    z-index: 2;
   }
 
   /* Hero block pulled up onto the cover. It reserves exactly the height it
@@ -618,6 +618,9 @@
     column-gap: 36px;
     min-height: 340px;
     margin-top: -340px;
+    /* above the cover (z:2); the card below stays behind the cover (z:1-less) */
+    position: relative;
+    z-index: 3;
   }
 
   .ig-header-row {
@@ -705,20 +708,21 @@
   .ig-action-btn {
     flex: 0 1 auto;
     padding: 10px 22px;
-    background: rgba(233, 233, 233, 0.92);
-    border: none;
-    color: #1a1a1a;
+    /* glassmorphism on the cover */
+    background: rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.38);
+    color: #fff;
     border-radius: 8px;
     font-size: 0.9rem;
     font-weight: 600;
-    text-shadow: none;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
     transition: background 0.2s ease;
   }
 
   .ig-action-btn:hover {
-    background: #ffffff;
+    background: rgba(255, 255, 255, 0.28);
   }
 
   /* White journals card below the cover */

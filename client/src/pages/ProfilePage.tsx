@@ -72,6 +72,20 @@ const ProfilePage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
+  // Expose the fixed header's real height so the cover starts flush below it
+  // (the header is shorter on non-home pages due to .header-scrolled padding)
+  useEffect(() => {
+    const syncHeader = () => {
+      const header = document.querySelector<HTMLElement>('.header');
+      if (header) {
+        document.documentElement.style.setProperty('--profile-header-h', `${header.offsetHeight}px`);
+      }
+    };
+    syncHeader();
+    window.addEventListener('resize', syncHeader);
+    return () => window.removeEventListener('resize', syncHeader);
+  }, []);
+
   const handlePostUpdate = (updatedPost: Post) => {
     setUserPosts((prev) => prev.map((p) => (p.id === updatedPost.id ? updatedPost : p)));
   };
