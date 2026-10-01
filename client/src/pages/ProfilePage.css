@@ -767,7 +767,9 @@
     padding: 20px;
   }
 
+  /* Instagram-style density: more, smaller cells as the card widens */
   .ig-photo-grid {
     gap: 4px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
 }
