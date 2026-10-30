@@ -48,6 +48,7 @@ export const Home: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [mobileQuery, setMobileQuery] = useState('');
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [heroPaused, setHeroPaused] = useState(false);
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -127,14 +128,10 @@ export const Home: React.FC = () => {
         label: `View ${p.name}`,
       }));
 
-  // Auto-advance hero carousel every 4s
-  useEffect(() => {
-    const slideCount = Math.min(heroPics.length, 4) || 4;
-    const timer = setInterval(() => {
-      setCarouselIndex(prev => (prev + 1) % slideCount);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, [heroPics.length]);
+  // The active leaderboard row's progress bar drives auto-advance (see onAnimationEnd)
+  const activeIndex = heroPics.length > 0 ? carouselIndex % heroPics.length : 0;
+  const activePic = heroPics[activeIndex];
+  const advanceHero = () => setCarouselIndex(prev => (prev + 1) % Math.max(heroPics.length, 1));
 
   // Sleek, text-based mood categories replacing the cluttered emoji blocks
   const moods = [
@@ -251,117 +248,121 @@ export const Home: React.FC = () => {
         </section>
       )}
 
-      {/* ── New Two-Column Hero Section (desktop) ── */}
+      {/* ── Desktop hero: Picture of the Week stage + ranked leaderboard ── */}
       <section className="hero luxury-hero">
-        <div className="hero-overlay"></div>
-        <div className="hero-two-col">
-          {/* Left: Image Carousel */}
-          <div className="hero-carousel">
-            <div className="hero-carousel-track">
-              {(heroPics.length > 0 ? heroPics : [null, null, null, null]).map((pic, idx) => (
-                <div key={pic ? pic.id : idx} className={`hero-carousel-slide ${idx === carouselIndex ? 'active' : ''}`}>
-                  {pic ? (
-                    <img src={pic.imageUrl} alt={pic.title} loading={idx === 0 ? 'eager' : 'lazy'} />
-                  ) : (
-                    <div style={{ width: '100%', height: '100%', background: '#e0e0e0' }} />
+        <div className="hero-stage">
+          {heroPics.length > 0 ? (
+            heroPics.map((pic, idx) => (
+              <div key={pic.id} className={`hero-photo ${idx === activeIndex ? 'active' : ''}`} aria-hidden={idx !== activeIndex}>
+                <img src={pic.imageUrl} alt={idx === activeIndex ? pic.title : ''} loading={idx === 0 ? 'eager' : 'lazy'} />
+              </div>
+            ))
+          ) : (
+            <div className="hero-photo active">
+              <img src="/doiluangbg.jpg" alt="" />
+            </div>
+          )}
+
+          <div className="hero-stage-inner">
+            <div className="hero-copy">
+              <h1 className="hero-title">
+                {t('home.hero.titlePart1')}{' '}
+                <span className="hero-title-place">{t('home.hero.titlePart2')}</span>
+              </h1>
+              <p className="hero-lede">{t('home.hero.description')}</p>
+              <div className="hero-actions">
+                <button className="hero-cta" onClick={() => navigate('/hotels')}>
+                  {t('home.hero.exploreBtn')}
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+                </button>
+                <button className="hero-link" onClick={() => navigate('/community')}>
+                  {t('home.hero.sharePhoto', 'Share your photo')}
+                </button>
+              </div>
+            </div>
+
+            {heroPics.length > 0 && activePic && (
+              <div className={`potw ${heroPaused ? 'paused' : ''}`}>
+                <div className="potw-head">
+                  <h2 className="potw-title">
+                    {activePic.kind === 'post'
+                      ? t('home.hero.picturesOfWeek', 'Picture of the Week')
+                      : t('home.curatorsEdit.title')}
+                  </h2>
+                  {heroPics.length > 1 && (
+                    <button
+                      className="potw-toggle"
+                      onClick={() => setHeroPaused(p => !p)}
+                      aria-label={heroPaused ? t('home.hero.play', 'Play slideshow') : t('home.hero.pause', 'Pause slideshow')}
+                    >
+                      {heroPaused ? (
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                      ) : (
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                      )}
+                    </button>
                   )}
                 </div>
-              ))}
-            </div>
-            <div className="hero-carousel-dots">
-              {(heroPics.length > 0 ? heroPics : [null, null, null, null]).map((_, idx) => (
-                <button
-                  key={idx}
-                  className={`hero-carousel-dot ${idx === carouselIndex ? 'active' : ''}`}
-                  onClick={() => setCarouselIndex(idx)}
-                  aria-label={`Go to slide ${idx + 1}`}
-                />
-              ))}
-            </div>
-          </div>
 
-          {/* Right: Minimal dynamic text composition (syncs with carousel) */}
-          <div className="hero-sidebar">
-            <span className="hero-slide-kicker">
-              {t('home.hero.picturesOfWeek', 'Picture of the Week')}
-            </span>
-
-            {heroPics.length > 0 && heroPics[carouselIndex] ? (
-              <div
-                key={carouselIndex}
-                className="hero-slide-text"
-                onClick={() => navigate(heroPics[carouselIndex].href)}
-                role="button"
-                tabIndex={0}
-                aria-label={heroPics[carouselIndex].label}
-              >
-                <span className="hero-slide-name">
-                  <span className="sr-only">{heroPics[carouselIndex].title}</span>
-                  {heroPics[carouselIndex].title.split(/\s+/).filter(Boolean).map((word, i) => (
-                    <span key={i} aria-hidden="true">
-                      <span className="mask-word">
-                        <span className="mask-word-inner" style={{ animationDelay: `${0.06 + i * 0.06}s` }}>{word}</span>
-                      </span>
-                      {' '}
-                    </span>
+                <ol className="potw-list">
+                  {heroPics.map((pic, idx) => (
+                    <li key={pic.id}>
+                      <button
+                        className={`potw-item ${idx === activeIndex ? 'active' : ''}`}
+                        onClick={() => setCarouselIndex(idx)}
+                        aria-current={idx === activeIndex ? 'true' : undefined}
+                      >
+                        <span className="potw-rank" aria-hidden="true">{idx + 1}</span>
+                        <img className="potw-thumb" src={pic.imageUrl} alt="" loading="lazy" />
+                        <span className="potw-text">
+                          <span className="potw-name">{pic.title}</span>
+                          <span className="potw-meta">
+                            {pic.kind === 'post' ? (
+                              <>
+                                {pic.author && <span className="potw-meta-author">{pic.author}</span>}
+                                {pic.author && <span className="potw-meta-dot" aria-hidden="true">·</span>}
+                                <span className="potw-meta-stat">
+                                  <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                  {pic.votes} {t('home.hero.votes', 'votes')}
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                {pic.rating != null && pic.rating > 0 && (
+                                  <span className="potw-meta-stat">
+                                    <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                                    {pic.rating.toFixed(1)}
+                                  </span>
+                                )}
+                                {pic.rating != null && pic.rating > 0 && <span className="potw-meta-dot" aria-hidden="true">·</span>}
+                                <span className="potw-meta-stat">
+                                  ฿{Number(pic.price || 0).toLocaleString()} / {t('home.promo.perNight')}
+                                </span>
+                              </>
+                            )}
+                          </span>
+                        </span>
+                        {idx === activeIndex && heroPics.length > 1 && (
+                          <span
+                            key={`progress-${activeIndex}`}
+                            className="potw-progress"
+                            aria-hidden="true"
+                            onAnimationEnd={advanceHero}
+                          />
+                        )}
+                      </button>
+                    </li>
                   ))}
-                </span>
+                </ol>
 
-                <span className="hero-slide-meta">
-                  {heroPics[carouselIndex].kind === 'post' && heroPics[carouselIndex].author && (
-                    <span>{heroPics[carouselIndex].author}</span>
-                  )}
-                  {heroPics[carouselIndex].kind === 'post' && heroPics[carouselIndex].author && heroPics[carouselIndex].location && (
-                    <span className="slide-meta-divider" aria-hidden="true">—</span>
-                  )}
-                  {heroPics[carouselIndex].location && (
-                    <span>{heroPics[carouselIndex].location}</span>
-                  )}
-                  {heroPics[carouselIndex].kind === 'post' ? (
-                    <span className="slide-meta-votes">
-                      <svg viewBox="0 0 24 24" width="13" height="13" fill="var(--accent-color)" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                      {heroPics[carouselIndex].votes} {t('home.hero.votes', 'votes')}
-                    </span>
-                  ) : (
-                    <span className="slide-meta-divider" aria-hidden="true">—</span>
-                  )}
-                  {heroPics[carouselIndex].rating != null && heroPics[carouselIndex].rating > 0 && (
-                    <span className="slide-meta-rating">
-                      <svg viewBox="0 0 24 24" width="13" height="13" fill="#d4af37" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                      {heroPics[carouselIndex].rating!.toFixed(1)}
-                    </span>
-                  )}
-                </span>
-
-                {heroPics[carouselIndex].kind === 'property' && (
-                  <span className="hero-slide-price">
-                    <em>{t('home.promo.from', 'from')}</em>
-                    ฿{Number(heroPics[carouselIndex].price || 0).toLocaleString()}
-                    <span className="price-period">/ {t('home.promo.perNight')}</span>
-                  </span>
-                )}
-
-                <span className="hero-slide-view">
-                  {heroPics[carouselIndex].kind === 'post'
+                <button className="potw-open" onClick={() => navigate(activePic.href)} aria-label={activePic.label}>
+                  {activePic.kind === 'post'
                     ? t('home.hero.viewPost', 'View in Community')
                     : t('home.hero.viewStay', 'View this stay')}
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
-                </span>
-              </div>
-            ) : (
-              <div className="hero-sidebar-lines">
-                <div className="hero-sidebar-line"></div>
-                <div className="hero-sidebar-line"></div>
-                <div className="hero-sidebar-line"></div>
+                </button>
               </div>
             )}
-
-            <div className="hero-sidebar-cta">
-              <button className="btn-luxury-primary" onClick={() => navigate('/hotels')}>
-                {t('home.hero.exploreBtn')}
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
-              </button>
-            </div>
           </div>
         </div>
       </section>

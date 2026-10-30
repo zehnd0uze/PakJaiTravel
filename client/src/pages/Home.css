@@ -1,364 +1,390 @@
 /* ══════════════════════════════════════════════════════════
-   NEW HERO — Two-column: Carousel + Sidebar (Desktop)
-   Matches wireframe: light bg, editorial magazine style
+   HERO — "Picture of the Week" stage (Desktop / tablet)
+   The community's most-voted photo fills the stage; the ranked
+   list on the right is both the leaderboard and the controller.
 ══════════════════════════════════════════════════════════ */
 
 .luxury-hero {
-  background: var(--bg-color);
-  padding: var(--spacing-xl) 0 var(--spacing-lg);
-  padding-top: calc(80px + var(--spacing-xl)); /* Clear the fixed navbar */
-  min-height: auto;
-  height: auto;
-  display: block;
+  --hero-ink: #12211A;
+  --hero-blush: #F3DCCB;
+  --hero-cta: #A85A3A;
+  --hero-cta-hover: #8E4A2F;
+  --hero-slide-ms: 6500ms;
+
+  padding: 80px 16px 0; /* clear the fixed navbar */
   position: relative;
 }
 
-/* Remove old overlay — no longer needed */
-.luxury-hero .hero-overlay { display: none; }
-
-/* Two-column grid container */
-.hero-two-col {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: var(--spacing-lg);
-  align-items: start;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 var(--spacing-md);
-}
-
-/* ── Left: Image Carousel ── */
-.hero-carousel {
+.hero-stage {
   position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 10;
+  isolation: isolate;
+  height: clamp(580px, calc(100vh - 96px), 840px);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  background: #e0e0e0;
-  box-shadow: var(--shadow-md);
+  background: var(--primary-hover);
 }
 
-.hero-carousel-track {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.hero-carousel-slide {
+/* ── Photo layers: crossfade + slow settle ── */
+.hero-photo {
   position: absolute;
   inset: 0;
+  z-index: -2;
   opacity: 0;
-  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: opacity;
+  transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.hero-carousel-slide.active {
+.hero-photo.active {
   opacity: 1;
-  z-index: 1;
 }
 
-.hero-carousel-slide img {
+.hero-photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  transform: scale(1.06);
 }
 
-/* Carousel dot pagination */
-.hero-carousel-dots {
+.hero-photo.active img {
+  animation: heroSettle 9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes heroSettle {
+  from { transform: scale(1.06); }
+  to { transform: scale(1); }
+}
+
+/* Scrim: deep forest from the lower-left so type always reads */
+.hero-stage::after {
+  content: '';
   position: absolute;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(0deg, rgba(18, 33, 26, 0.88) 0%, rgba(18, 33, 26, 0.45) 38%, rgba(18, 33, 26, 0) 68%),
+    linear-gradient(90deg, rgba(18, 33, 26, 0.55) 0%, rgba(18, 33, 26, 0) 55%);
+  pointer-events: none;
+}
+
+/* ── Composition ── */
+.hero-stage-inner {
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+  align-items: end;
+  gap: clamp(32px, 4vw, 64px);
+  padding: clamp(32px, 4vw, 56px);
+}
+
+.hero-copy {
+  color: #fff;
+  max-width: 720px;
+}
+
+.hero-title {
+  font-family: var(--font-heading);
+  font-size: clamp(3.25rem, 6.4vw, 5.75rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  color: #fff;
+  text-wrap: balance;
+  margin-bottom: 22px;
+}
+
+.hero-title-place {
+  display: block;
+  color: var(--hero-blush);
+}
+
+.hero-lede {
+  font-size: clamp(1rem, 1.15vw, 1.15rem);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.84);
+  max-width: 38ch;
+  margin-bottom: 32px;
+}
+
+.hero-actions {
   display: flex;
-  gap: 10px;
-  z-index: 5;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px 28px;
 }
 
-.hero-carousel-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.35);
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  padding: 0;
-}
-
-.hero-carousel-dot.active {
-  background: var(--text-primary);
-  transform: scale(1.2);
-}
-
-.hero-carousel-dot:hover:not(.active) {
-  background: rgba(0, 0, 0, 0.55);
-}
-
-/* ── Right: Minimal text composition (no card, floats on page bg) ── */
-.hero-sidebar {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: var(--spacing-lg);
-  padding: var(--spacing-sm) 0;
-  position: relative;
-}
-
-.hero-sidebar-lines {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: var(--spacing-sm) 0;
-}
-
-.hero-sidebar-line {
-  height: 14px;
-  background: #e0e0e0;
-  border-radius: 7px;
-  width: 100%;
-}
-
-.hero-sidebar-line:nth-child(2) {
-  width: 95%;
-}
-
-.hero-sidebar-line:nth-child(3) {
-  width: 90%;
-}
-
-/* Section title above the composition */
-.hero-slide-kicker {
+.hero-cta {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-family: var(--font-heading);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--primary-color);
+  gap: 10px;
+  padding: 16px 28px;
+  border-radius: var(--radius-full);
+  background: var(--hero-cta);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 0.98rem;
+  font-weight: 600;
+  box-shadow: 0 12px 28px rgba(18, 33, 26, 0.35);
+  transition: background-color 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ── Minimal dynamic text composition (animates on every slide change) ── */
-.hero-slide-text {
+.hero-cta:hover {
+  background: var(--hero-cta-hover);
+  transform: translateY(-2px);
+}
+
+.hero-cta svg {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-cta:hover svg {
+  transform: translateX(3px);
+}
+
+.hero-link {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.45);
+  text-underline-offset: 6px;
+  text-decoration-thickness: 1px;
+  transition: text-decoration-color 0.25s ease;
+}
+
+.hero-link:hover {
+  text-decoration-color: var(--hero-blush);
+}
+
+.hero-cta:focus-visible,
+.hero-link:focus-visible,
+.potw-item:focus-visible,
+.potw-toggle:focus-visible,
+.potw-open:focus-visible {
+  outline: 2px solid var(--hero-blush);
+  outline-offset: 3px;
+}
+
+/* ── Picture of the Week leaderboard ── */
+.potw {
+  align-self: end;
+  background: rgba(18, 33, 26, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  padding: 20px 18px 16px;
+  color: #fff;
+  box-shadow: 0 24px 48px rgba(10, 20, 15, 0.35);
+}
+
+.potw-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 6px 12px;
+}
+
+.potw-title {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: #fff;
+}
+
+.potw-toggle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.potw-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.potw-list {
+  list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  cursor: pointer;
-  outline: none;
+  gap: 2px;
 }
 
-.hero-slide-text:focus-visible {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 8px;
-  border-radius: 4px;
+.potw-item {
+  position: relative;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 26px 52px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 8px 6px;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  overflow: hidden;
+  transition: background-color 0.25s ease;
 }
 
-/* Display name — the hero of the composition */
-.hero-slide-name {
+.potw-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.potw-item.active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.potw-rank {
   font-family: var(--font-heading);
-  font-size: clamp(2rem, 3.2vw, 2.8rem);
+  font-size: 1.35rem;
   font-weight: 600;
-  line-height: 1.12;
-  letter-spacing: -0.015em;
-  color: var(--text-primary);
-  animation: slideTextUp 0.6s 0.06s cubic-bezier(0.16, 1, 0.3, 1) both;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  transition: color 0.25s ease;
+}
+
+.potw-item.active .potw-rank {
+  color: var(--hero-blush);
+}
+
+.potw-thumb {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  display: block;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.potw-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.potw-name {
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.potw-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.7);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
   overflow: hidden;
 }
 
-/* Location · rating — quiet editorial caption */
-.hero-slide-meta {
+.potw-meta-author {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.potw-meta-stat {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  font-family: var(--font-body);
-  font-size: 0.74rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--text-secondary);
-  animation: slideTextUp 0.6s 0.12s cubic-bezier(0.16, 1, 0.3, 1) both;
+  gap: 4px;
+  flex-shrink: 0;
 }
 
-.hero-slide-meta .slide-meta-rating {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  text-transform: none;
-  letter-spacing: 0.04em;
+.potw-meta-dot {
+  opacity: 0.5;
+  flex-shrink: 0;
 }
 
-.hero-slide-meta .slide-meta-votes {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  text-transform: none;
-  letter-spacing: 0.04em;
+/* Time-to-next bar: its animationend advances the slideshow */
+.potw-progress {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
 }
 
-.hero-slide-meta .slide-meta-divider {
-  opacity: 0.45;
+.potw-progress::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--hero-blush);
+  transform-origin: left;
+  transform: scaleX(0);
+  animation: potwProgress var(--hero-slide-ms) linear forwards;
 }
 
-/* Price — small, refined, no shout */
-.hero-slide-price {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 7px;
-  font-family: var(--font-heading);
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  animation: slideTextUp 0.6s 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
+.potw.paused .potw-progress::after,
+.potw:hover .potw-progress::after,
+.potw:focus-within .potw-progress::after {
+  animation-play-state: paused;
 }
 
-.hero-slide-price em {
-  font-style: normal;
-  font-family: var(--font-body);
-  font-size: 0.72rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--text-secondary);
+@keyframes potwProgress {
+  to { transform: scaleX(1); }
 }
 
-.hero-slide-price .price-period {
-  font-family: var(--font-body);
-  font-size: 0.8rem;
-  font-weight: 400;
-  color: var(--text-secondary);
-}
-
-/* Underlined text link */
-.hero-slide-view {
+.potw-open {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  align-self: flex-start;
-  font-family: var(--font-body);
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  padding-bottom: 4px;
-  position: relative;
-  animation: slideTextUp 0.6s 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
-  transition: color 0.25s;
+  margin: 12px 6px 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--hero-blush);
+  transition: gap 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.hero-slide-view::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: 1px;
-  background: var(--primary-color);
-  transform-origin: left;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.hero-slide-text:hover .hero-slide-view {
-  color: var(--primary-color);
-}
-
-.hero-slide-text:hover .hero-slide-view svg {
-  transform: translateX(4px);
-}
-
-.hero-slide-view svg {
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes slideTextUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ── Title word-mask reveal ──
-   Adapted from 21st.dev "Text Reveal (Mask)" (soralabs): each word rises
-   into view inside an overflow-hidden mask, staggered word-by-word. */
-.hero-slide-name .sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.hero-slide-name .mask-word {
-  display: inline-block;
-  overflow: hidden;
-  vertical-align: bottom;
-  /* headroom for ascenders and Thai tone/vowel marks so the mask never clips ink */
-  padding: 0.22em 0 0.14em;
-  margin: -0.22em 0 -0.14em;
-}
-
-.hero-slide-name .mask-word-inner {
-  display: inline-block;
-  transform: translateY(115%);
-  animation: maskWordUp 0.6s cubic-bezier(0.19, 1, 0.22, 1) forwards;
-  will-change: transform;
-}
-
-@keyframes maskWordUp {
-  to { transform: translateY(0); }
+.potw-open:hover {
+  gap: 10px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-slide-index,
-  .hero-slide-name,
-  .hero-slide-meta,
-  .hero-slide-price,
-  .hero-slide-view {
-    animation: none;
-  }
-  .hero-slide-name .mask-word-inner {
-    animation: none;
-    transform: none;
-  }
-  .hero-slide-name .mask-word {
-    overflow: visible;
-  }
+  .hero-photo { transition: none; }
+  .hero-photo.active img { animation: none; transform: none; }
+  .hero-cta, .hero-cta svg { transition: none; }
 }
 
-.hero-sidebar-cta {
-  margin-top: auto;
-  padding-top: var(--spacing-sm);
-}
+/* Tablet: stack the leaderboard under the copy */
+@media (max-width: 1024px) {
+  .hero-stage {
+    height: auto;
+    min-height: 680px;
+  }
 
-.hero-sidebar-cta .btn-luxury-primary {
-  width: auto;
-  align-self: flex-start;
-  text-align: center;
-  /* Minimal editorial CTA — ghost outline, fills on hover */
-  background: transparent;
-  color: var(--primary-color);
-  border: 1px solid rgba(44, 76, 59, 0.45);
-  box-shadow: none;
-  padding: 12px 26px;
-  font-size: 0.88rem;
-  letter-spacing: 0.04em;
-  transition:
-    background-color 0.35s ease,
-    color 0.35s ease,
-    border-color 0.35s ease;
-}
+  /* Copy sits higher when stacked, so the scrim covers the whole frame */
+  .hero-stage::after {
+    background:
+      linear-gradient(0deg, rgba(18, 33, 26, 0.9) 0%, rgba(18, 33, 26, 0.55) 55%, rgba(18, 33, 26, 0.35) 100%);
+  }
 
-.hero-sidebar-cta .btn-luxury-primary:hover {
-  background: var(--primary-color);
-  color: #fff;
-  border-color: var(--primary-color);
-  box-shadow: none;
-  transform: none;
+  .hero-stage-inner {
+    grid-template-columns: 1fr;
+    align-content: end;
+    min-height: 680px;
+  }
+
+  .potw {
+    max-width: 480px;
+  }
 }
 
 /* ── Button (kept from original) ── */
@@ -563,10 +589,6 @@
    RESPONSIVE — Tablet (≤ 1024px)
 ═══════════════════════════════════════════════════════ */
 @media (max-width: 1024px) {
-  .hero-two-col {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-md);
-  }
   .destinations-grid { grid-template-columns: repeat(3, 1fr); }
   .editorial-mosaic { grid-template-columns: repeat(3, 1fr); }
 }
