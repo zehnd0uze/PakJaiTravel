@@ -5,7 +5,15 @@ import { uploadToCloudinary } from '../utils/cloudinary';
 import { supabase } from '../utils/supabase';
 import { compressImage } from '../utils/imageCompression';
 import PlaceSearchPicker from './PlaceSearchPicker';
+import { getPostPhotos, MAX_POST_PHOTOS } from '../utils/postPhotos';
 import './CreatePostModal.css';
+
+interface PostPhoto {
+  id: string;
+  preview: string;
+  url?: string;
+  file?: File;
+}
 
 interface CreatePostModalProps {
   onClose: () => void;
@@ -16,8 +24,10 @@ interface CreatePostModalProps {
 const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreated, postToEdit }) => {
   const { user } = useAuth();
   const [content, setContent] = useState(postToEdit?.content || '');
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(postToEdit?.imageUrl || null);
+  // Each photo is either already uploaded (url) or a new file waiting to upload
+  const [photos, setPhotos] = useState<PostPhoto[]>(() =>
+    postToEdit ? getPostPhotos(postToEdit).map(url => ({ id: url, preview: url, url })) : []
+  );
   const [rating, setRating] = useState<number>(postToEdit?.rating || 0);
   const [priceRating, setPriceRating] = useState<string>(postToEdit?.priceRating || '');
   const [priceValue, setPriceValue] = useState<number>(() => {
@@ -69,31 +79,48 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
   };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const originalFile = e.target.files[0];
-      
+    const picked = Array.from(e.target.files || []);
+    e.target.value = ''; // let the same file be picked again after removing it
+    if (picked.length === 0) return;
+
+    const room = MAX_POST_PHOTOS - photos.length;
+    if (room <= 0) {
+      setError(`เพิ่มรูปได้สูงสุด ${MAX_POST_PHOTOS} รูปต่อโพสต์`);
+      return;
+    }
+
+    const added: PostPhoto[] = [];
+    let tooBig = false;
+    for (const originalFile of picked.slice(0, room)) {
       // Auto-compress the image to prevent upload limits
       const file = await compressImage(originalFile);
 
       // Cloudinary unsigned upload limit is usually 10MB
       if (file.size > 10 * 1024 * 1024) {
-        setError('Image could not be compressed enough. Please select a smaller image under 10MB.');
-        return;
+        tooBig = true;
+        continue;
       }
-      
-      setError('');
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      added.push({ id: `${file.name}-${file.size}-${Math.random()}`, preview: URL.createObjectURL(file), file });
     }
+
+    if (tooBig) setError('บางรูปมีขนาดใหญ่เกิน 10MB จึงไม่ได้เพิ่ม');
+    else if (picked.length > room) setError(`เพิ่มรูปได้สูงสุด ${MAX_POST_PHOTOS} รูปต่อโพสต์`);
+    else setError('');
+
+    setPhotos(prev => [...prev, ...added]);
+  };
+
+  const removePhoto = (id: string) => {
+    setPhotos(prev => {
+      const gone = prev.find(p => p.id === id);
+      if (gone?.file) URL.revokeObjectURL(gone.preview);
+      return prev.filter(p => p.id !== id);
+    });
   };
 
   const submitPost = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim() && !imageFile && !imagePreview) {
+    if (!content.trim() && photos.length === 0) {
       setError('Please add a photo or write something.');
       return;
     }
@@ -101,16 +128,17 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
     setIsSubmitting(true);
 
     try {
-      let imageUrl = imagePreview || null;
-      if (imageFile) {
-        imageUrl = await uploadToCloudinary(imageFile);
-      }
+      // Upload new photos in parallel, keep the order the user arranged
+      const imageUrls = await Promise.all(
+        photos.map(p => (p.file ? uploadToCloudinary(p.file) : Promise.resolve(p.url!)))
+      );
 
       if (!user) throw new Error('Not authenticated');
 
       const postData = {
         content: content.trim(),
-        image_url: imageUrl,
+        image_url: imageUrls[0] || null,
+        images: imageUrls,
         property_id: propertyId || null,
         location_tag: locationTag.trim() || null,
         lat: coordinates?.lat || null,
@@ -123,18 +151,16 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
         author_avatar: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=2C4C3B&color=fff`
       };
 
-      if (isEditing) {
-        const { error } = await supabase
-          .from('posts')
-          .update(postData)
-          .eq('id', postToEdit.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('posts')
-          .insert(postData);
-        if (error) throw error;
+      const save = (data: Partial<typeof postData>) => isEditing
+        ? supabase.from('posts').update(data).eq('id', postToEdit.id)
+        : supabase.from('posts').insert(data);
+
+      let { error } = await save(postData);
+      // Database without the images column yet (supabase/add_post_images.sql): save the first photo only
+      if (error && /images/.test(error.message)) {
+        ({ error } = await save({ ...postData, images: undefined }));
       }
+      if (error) throw error;
 
       onPostCreated();
       onClose();
@@ -185,17 +211,32 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
               />
             </div>
 
-            {imagePreview && (
-              <div className="image-preview-container">
-                <img src={imagePreview} alt="Preview" />
-                <button 
-                  type="button" 
-                  className="remove-image-btn" 
-                  onClick={() => { setImageFile(null); setImagePreview(null); }}
-                  title="ลบรูปภาพ"
-                >
-                  &times;
-                </button>
+            {photos.length > 0 && (
+              <div className="photo-picker">
+                <div className="photo-picker-head">
+                  <span>รูปภาพ {photos.length}/{MAX_POST_PHOTOS}</span>
+                  {photos.length < MAX_POST_PHOTOS && (
+                    <button type="button" onClick={() => fileInputRef.current?.click()}>
+                      + เพิ่มรูป
+                    </button>
+                  )}
+                </div>
+                <ul className="photo-picker-grid">
+                  {photos.map((p, i) => (
+                    <li key={p.id} className="photo-picker-item">
+                      <img src={p.preview} alt={`รูปที่ ${i + 1}`} />
+                      {i === 0 && photos.length > 1 && <span className="photo-picker-cover">รูปปก</span>}
+                      <button
+                        type="button"
+                        className="photo-picker-remove"
+                        onClick={() => removePhoto(p.id)}
+                        aria-label={`ลบรูปที่ ${i + 1}`}
+                      >
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
 
@@ -272,8 +313,9 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
               <span className="add-to-post-label">เพิ่มลงในโพสต์</span>
               <div className="add-to-post-options">
                 <input 
-                  type="file" 
-                  accept="image/*" 
+                  type="file"
+                  accept="image/*"
+                  multiple
                   style={{ display: 'none' }} 
                   ref={fileInputRef}
                   onChange={handleImageChange}
@@ -310,7 +352,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreate
             type="submit" 
             form="fb-post-form" 
             className={`fb-post-btn ${isSubmitting ? 'submitting' : ''}`}
-            disabled={isSubmitting || (!content.trim() && !imageFile && !imagePreview)}
+            disabled={isSubmitting || (!content.trim() && photos.length === 0)}
           >
             {isSubmitting
               ? (isEditing ? 'กำลังบันทึก...' : 'กำลังโพสต์...')

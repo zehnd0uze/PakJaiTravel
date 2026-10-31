@@ -14,6 +14,8 @@ export interface Post {
   authorAvatar: string;
   content: string;
   imageUrl: string | null;
+  /** Every photo in order; imageUrl mirrors the first one */
+  images?: string[] | null;
   locationTag: string | null;
   lat?: number | null;
   lng?: number | null;

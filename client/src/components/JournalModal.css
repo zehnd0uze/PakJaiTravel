@@ -318,3 +318,51 @@
   .journal-modal-nav-prev { left: 10px; }
   .journal-modal-nav-next { right: 10px; }
 }
+
+/* ── Multi-photo browsing inside the viewer ── */
+.journal-modal-media {
+  position: relative;
+}
+
+.jm-photo-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.88);
+  color: #1a1c1a;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.2s ease;
+}
+
+.jm-photo-nav:hover {
+  background: #fff;
+}
+
+.jm-photo-nav:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.jm-photo-prev { left: 12px; }
+.jm-photo-next { right: 12px; }
+
+.jm-photo-count {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}

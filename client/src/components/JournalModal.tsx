@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabase';
+import { useTranslation } from 'react-i18next';
 import { type Post } from '../types';
+import { getPostPhotos } from '../utils/postPhotos';
 import './JournalModal.css';
 
 interface JournalModalProps {
   posts: Post[];
   index: number;
+  /** Photo to open at, for multi-photo posts */
+  photoIndex?: number;
   onClose: () => void;
   onNavigate: (index: number) => void;
   onUpdate: (post: Post) => void;
@@ -25,26 +29,41 @@ const formatTimeAgo = (dateString: string) => {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
-const JournalModal: React.FC<JournalModalProps> = ({ posts, index, onClose, onNavigate, onUpdate }) => {
+const JournalModal: React.FC<JournalModalProps> = ({ posts, index, photoIndex = 0, onClose, onNavigate, onUpdate }) => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const post = posts[index];
   const [commentText, setCommentText] = useState('');
   const [isLiking, setIsLiking] = useState(false);
   const [isCommenting, setIsCommenting] = useState(false);
+  const [photo, setPhoto] = useState(photoIndex);
   const commentInputRef = useRef<HTMLInputElement>(null);
 
+  const photos = post ? getPostPhotos(post) : [];
   const hasLiked = Boolean(user && post && (post.likes || []).includes(user.id));
 
-  // Keyboard: Esc closes, arrows navigate
+  // Moving to another post starts at its first photo (or the requested one)
+  useEffect(() => {
+    setPhoto(photoIndex);
+  }, [index, photoIndex]);
+
+  // Keyboard: Esc closes, arrows step through photos, then through posts
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
       if (e.key === 'Escape') onClose();
-      if (e.key === 'ArrowLeft' && index > 0) onNavigate(index - 1);
-      if (e.key === 'ArrowRight' && index < posts.length - 1) onNavigate(index + 1);
+      if (e.key === 'ArrowLeft') {
+        if (photo > 0) setPhoto(photo - 1);
+        else if (index > 0) onNavigate(index - 1);
+      }
+      if (e.key === 'ArrowRight') {
+        if (photo < photos.length - 1) setPhoto(photo + 1);
+        else if (index < posts.length - 1) onNavigate(index + 1);
+      }
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [index, posts.length, onClose, onNavigate]);
+  }, [index, posts.length, photo, photos.length, onClose, onNavigate]);
 
   if (!post) return null;
 
@@ -146,8 +165,25 @@ const JournalModal: React.FC<JournalModalProps> = ({ posts, index, onClose, onNa
       <div className="journal-modal" onClick={(e) => e.stopPropagation()}>
         {/* Left: picture */}
         <div className="journal-modal-media">
-          {post.imageUrl ? (
-            <img src={post.imageUrl} alt="Journal" />
+          {photos.length > 0 ? (
+            <>
+              <img src={photos[Math.min(photo, photos.length - 1)]} alt={post.content ? post.content.slice(0, 120) : 'Journal'} />
+              {photos.length > 1 && (
+                <>
+                  {photo > 0 && (
+                    <button className="jm-photo-nav jm-photo-prev" onClick={() => setPhoto(photo - 1)} aria-label={t('post.prevPhoto')}>
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                    </button>
+                  )}
+                  {photo < photos.length - 1 && (
+                    <button className="jm-photo-nav jm-photo-next" onClick={() => setPhoto(photo + 1)} aria-label={t('post.nextPhoto')}>
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+                    </button>
+                  )}
+                  <span className="jm-photo-count" aria-live="polite">{photo + 1} / {photos.length}</span>
+                </>
+              )}
+            </>
           ) : (
             <p className="journal-modal-noimg">{post.content}</p>
           )}
