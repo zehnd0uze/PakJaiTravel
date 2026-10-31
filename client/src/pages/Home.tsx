@@ -248,20 +248,12 @@ export const Home: React.FC = () => {
         </section>
       )}
 
-      {/* ── Desktop hero: Picture of the Week stage + ranked leaderboard ── */}
+      {/* ── Desktop hero: Doi Luang Chiang Dao backdrop + ranked leaderboard ── */}
       <section className="hero luxury-hero">
         <div className="hero-stage">
-          {heroPics.length > 0 ? (
-            heroPics.map((pic, idx) => (
-              <div key={pic.id} className={`hero-photo ${idx === activeIndex ? 'active' : ''}`} aria-hidden={idx !== activeIndex}>
-                <img src={pic.imageUrl} alt={idx === activeIndex ? pic.title : ''} loading={idx === 0 ? 'eager' : 'lazy'} />
-              </div>
-            ))
-          ) : (
-            <div className="hero-photo active">
-              <img src="/doiluangbg.jpg" alt="" />
-            </div>
-          )}
+          <div className="hero-photo active">
+            <img src="/doiluangbg.jpg" alt="" fetchPriority="high" />
+          </div>
 
           <div className="hero-stage-inner">
             <div className="hero-copy">
