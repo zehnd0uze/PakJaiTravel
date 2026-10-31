@@ -233,5 +233,52 @@
     "photoN": "Photo {{n}} of {{total}}",
     "prevPhoto": "Previous photo",
     "nextPhoto": "Next photo"
+  },
+  "createPost": {
+    "title": "Create post",
+    "titleEdit": "Edit post",
+    "close": "Close",
+    "public": "Public",
+    "textLabel": "Post text",
+    "placeholder": "How was your trip, {{name}}?",
+    "placeholderNoName": "How was your trip?",
+    "placeholderEdit": "Edit your post…",
+    "addPhotos": "Add photos",
+    "dropHint": "or drag and drop · up to {{max}}",
+    "photoCount": "{{count}} of {{max}} photos",
+    "cover": "Cover",
+    "removePhoto": "Remove photo {{n}}",
+    "addMore": "Add more photos",
+    "whereLabel": "Where was this?",
+    "wherePlaceholder": "Search a stay, café or place in Chiang Mai & Chiang Dao",
+    "reviewTitle": "Review",
+    "ratingLabel": "Your rating",
+    "rateN_one": "Rate {{count}} star",
+    "rateN_other": "Rate {{count}} stars",
+    "ratingWords": {
+      "1": "Poor",
+      "2": "Fair",
+      "3": "Good",
+      "4": "Very good",
+      "5": "Excellent"
+    },
+    "priceLabel": "Price level (THB)",
+    "potwTitle": "Enter Picture of the Week",
+    "potwHint": "Your photo can be voted onto the home page.",
+    "addToPost": "Add to your post",
+    "toolPhoto": "Photo",
+    "toolPlace": "Place",
+    "toolReview": "Review",
+    "post": "Post",
+    "save": "Save changes",
+    "uploading": "Uploading photos…",
+    "saving": "Saving…",
+    "dropHere": "Drop photos to add them",
+    "errors": {
+      "empty": "Add a photo or write something first.",
+      "maxPhotos": "You can add up to {{max}} photos per post.",
+      "tooBig": "Some photos are over 10MB and were not added.",
+      "generic": "Something went wrong. Please try again."
+    }
   }
 }

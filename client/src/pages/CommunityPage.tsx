@@ -138,7 +138,7 @@ const CommunityPage: React.FC = () => {
   };
 
   const userAvatar = user
-    ? user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=2C4C3B&color=fff`
+    ? user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=2C4C3B&color=fff`
     : null;
 
   const tabs: { id: FeedTab; label: string }[] = [
@@ -188,7 +188,7 @@ const CommunityPage: React.FC = () => {
               )}
               <button className="journal-composer-prompt" onClick={handleCreateClick}>
                 {user
-                  ? t('journal.composerPrompt', { name: user.name.split(' ')[0] })
+                  ? t('journal.composerPrompt', { name: (user.name || '').split(' ')[0] })
                   : t('journal.composerPromptGuest')}
               </button>
             </div>
