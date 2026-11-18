@@ -509,9 +509,7 @@ export const Home: React.FC = () => {
       {/* ══════════════════════════════════════════════════════════
           CHIANG DAO VALLEY ATLAS — Editorial Topographic Art Map
       ══════════════════════════════════════════════════════════ */}
-      {!loading && properties.length > 0 && (
-        <ChiangDaoArtMap properties={properties as any} />
-      )}
+      <ChiangDaoArtMap properties={properties as any} loading={loading} />
 
       {/* ══════════════════════════════════════════════════════════
           CURATOR'S SPOTLIGHT — Calm Editorial Split Feature

@@ -5,6 +5,7 @@ import './ChiangDaoArtMap.css';
 
 interface ChiangDaoArtMapProps {
   properties: Property[];
+  loading?: boolean;
 }
 
 type ZoneId = 'all' | 'nalao' | 'tham' | 'maemae' | 'muangkong' | 'town';
@@ -90,7 +91,7 @@ const formatPrice = (prop: Property) => {
   return `฿${raw.toLocaleString()}`;
 };
 
-export const ChiangDaoArtMap: React.FC<ChiangDaoArtMapProps> = ({ properties }) => {
+export const ChiangDaoArtMap: React.FC<ChiangDaoArtMapProps> = ({ properties, loading = false }) => {
   const navigate = useNavigate();
   const [activeZone, setActiveZone] = useState<ZoneId>('all');
 
@@ -143,8 +144,6 @@ export const ChiangDaoArtMap: React.FC<ChiangDaoArtMapProps> = ({ properties }) 
 
   const activeZoneMeta = ZONES.find(z => z.id === activeZone) || ZONES[0];
 
-  if (chiangDaoStays.length === 0) return null;
-
   return (
     <section className="cd-map-section" aria-label="Chiang Dao Valley Homestay Map">
       <div className="container">
@@ -155,7 +154,9 @@ export const ChiangDaoArtMap: React.FC<ChiangDaoArtMapProps> = ({ properties }) 
               Chiang Dao <em>Valley Atlas</em>
             </h2>
             <p className="section-subheading">
-              Explore {chiangDaoStays.length} homestays & nature retreats nestled around Doi Luang Chiang Dao.
+              {chiangDaoStays.length > 0
+                ? `Explore ${chiangDaoStays.length} homestays & nature retreats nestled around Doi Luang Chiang Dao.`
+                : 'Explore the villages & homestay valleys nestled around Doi Luang Chiang Dao.'}
             </p>
           </div>
 
@@ -336,7 +337,7 @@ export const ChiangDaoArtMap: React.FC<ChiangDaoArtMapProps> = ({ properties }) 
 
           {/* Right: Selected Homestay Card + Quick Directory */}
           <div className="cd-map-sidebar">
-            {selectedPin && (
+            {selectedPin ? (
               <article
                 className="cd-selected-card"
                 onClick={() => navigate(`/hotels/${selectedPin.prop.id}`)}
@@ -397,6 +398,37 @@ export const ChiangDaoArtMap: React.FC<ChiangDaoArtMapProps> = ({ properties }) 
                   </button>
                 </div>
               </article>
+            ) : (
+              <div className="cd-selected-card cd-empty-card">
+                <div className="cd-selected-media">
+                  <img src="/doiluangbg.jpg" alt="Doi Luang Chiang Dao" loading="lazy" />
+                  <span className="cd-selected-zone">{activeZoneMeta.label}</span>
+                </div>
+                <div className="cd-selected-body">
+                  <div className="cd-selected-top">
+                    <div>
+                      <span className="cd-selected-type">{activeZoneMeta.elevation}</span>
+                      <h3>{activeZoneMeta.label}</h3>
+                    </div>
+                  </div>
+                  <p className="cd-selected-desc">
+                    {loading
+                      ? 'Loading homestays in the Chiang Dao valley...'
+                      : activeZoneMeta.subtitle}
+                  </p>
+                  <button
+                    type="button"
+                    className="cd-selected-cta"
+                    onClick={() => navigate('/hotels')}
+                  >
+                    <span>Browse All Stays</span>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
             )}
 
             {/* Compact Switcher List of Chiang Dao Homestays */}
