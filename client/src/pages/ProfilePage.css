@@ -553,12 +553,13 @@
     z-index: 2;
   }
 
-  .ig-hero-left {
+  .ig-profile-hero {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 16px;
-    padding: 0 16px;
-    margin-bottom: 14px;
+    gap: 10px;
+    padding: 0 16px 14px;
+    text-align: center;
   }
 
   .ig-avatar-container {
@@ -589,8 +590,8 @@
   }
 
   .ig-bio-section {
-    margin-bottom: 8px;
-    text-align: left;
+    margin-bottom: 4px;
+    text-align: center;
   }
 
   .ig-display-name {
@@ -612,8 +613,8 @@
 
   /* Glassy translucent buttons sitting on the cover photo */
   .ig-action-buttons {
-    margin-top: 0;
-    margin-bottom: 10px;
+    margin-top: 4px;
+    margin-bottom: 6px;
     justify-content: center;
   }
 
@@ -637,7 +638,8 @@
 }
 /* ═══════════════════════════════════════════════════════
    DESKTOP (≥769px) — Full-bleed borderless cover from top:0
-   (under transparent top bar) + wide borderless gallery below
+   with profile picture & details centered in the cover image
+   + wide borderless gallery below
 ═══════════════════════════════════════════════════════ */
 @media (min-width: 769px) {
   .ig-profile-page {
@@ -664,10 +666,9 @@
   .profile-cover .cover-overlay {
     background: linear-gradient(
       180deg,
-      rgba(12, 22, 16, 0.44) 0%,
-      rgba(15, 24, 19, 0.04) 38%,
-      rgba(15, 24, 19, 0.36) 68%,
-      rgba(14, 24, 18, 0.86) 100%
+      rgba(12, 22, 16, 0.42) 0%,
+      rgba(15, 24, 19, 0.22) 50%,
+      rgba(14, 24, 18, 0.72) 100%
     );
   }
 
@@ -681,27 +682,19 @@
     position: relative;
   }
 
-  /* ── Horizon-Anchored Profile Bar:
-     Leaves the center mountain peak completely unobstructed,
-     aligning left identity with PAKJAI/Travel Journals and right actions with navbar! ── */
+  /* ── Centered Profile Hero inside the Cover Image ── */
   .ig-profile-hero {
     width: 100%;
-    margin: -176px auto 0;
-    padding: 0 clamp(24px, 4vw, 56px) 34px;
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 24px;
-    min-height: 176px;
-    position: relative;
-    z-index: 3;
-  }
-
-  .ig-hero-left {
+    max-width: 960px;
+    margin: -380px auto 0;
+    padding: 0 32px 24px;
     display: flex;
     align-items: center;
-    gap: 28px;
+    justify-content: center;
+    gap: 36px;
+    min-height: 380px;
+    position: relative;
+    z-index: 3;
   }
 
   .ig-avatar-container {
@@ -712,12 +705,12 @@
   }
 
   .ig-story-ring {
-    width: 128px;
-    height: 128px;
+    width: 172px;
+    height: 172px;
     padding: 0;
     border-radius: 50%;
     background: transparent;
-    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.42);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.42);
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
@@ -726,13 +719,13 @@
   }
 
   .ig-avatar {
-    border: 2.5px solid rgba(255, 255, 255, 0.85);
+    border: 3px solid rgba(255, 255, 255, 0.9);
   }
 
   .ig-identity-stack {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 14px;
   }
 
   .ig-bio-section {
@@ -743,7 +736,7 @@
   .ig-display-name {
     color: #fff;
     font-family: var(--font-heading);
-    font-size: clamp(1.75rem, 2.4vw, 2.2rem);
+    font-size: clamp(1.85rem, 2.5vw, 2.3rem);
     font-weight: 700;
     line-height: 1.15;
     letter-spacing: -0.02em;
@@ -753,7 +746,7 @@
 
   .ig-category {
     color: rgba(243, 220, 203, 0.95);
-    font-size: 0.92rem;
+    font-size: 0.94rem;
     font-weight: 500;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
   }
@@ -763,7 +756,7 @@
     align-items: center;
     justify-content: flex-start;
     gap: 24px;
-    margin: 2px 0 0;
+    margin: 0;
   }
 
   .ig-stat-item {
@@ -787,15 +780,15 @@
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
   }
 
-  /* Right-aligned Action Pills on the Horizon */
+  /* Action Pills directly under stats in the centered cluster */
   .ig-action-buttons {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    justify-content: flex-end;
+    justify-content: flex-start;
     gap: 10px;
-    margin: 0;
-    padding: 0 0 6px;
+    margin: 4px 0 0;
+    padding: 0;
   }
 
   .ig-action-btn {
