@@ -231,6 +231,12 @@ export const Header: React.FC = () => {
       {/* ── Mobile-only app bar (Trip.com-style) ── */}
       <div className={`mobile-top-bar ${stickySearch ? 'compact' : ''}`}>
         <div className="mobile-brand" onClick={() => navigate('/')} role="button" aria-label="PakJai home">
+          <svg className="logo-mark mobile-logo-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <path d="M5 24V15C5 8.92487 9.92487 4 16 4C22.0751 4 27 8.92487 27 15V24" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" opacity="0.88" />
+            <circle className="logo-mark-sun" cx="20.2" cy="11.8" r="2.5" fill="#E08D67" />
+            <path d="M4.5 24L13.2 12.2L19.4 20.6L22.6 16.2L27.5 24" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M7.5 27.2C12 25.8 20 25.8 24.5 27.2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" opacity="0.65" />
+          </svg>
           <span className="mobile-logo-text">PAKJAI</span>
         </div>
 
@@ -293,6 +299,16 @@ export const Header: React.FC = () => {
       <div className="container header-content desktop-only-header">
         {/* Logo */}
         <div className="logo-container" onClick={() => navigate('/')}>
+          <svg className="logo-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            {/* Sanctuary Arch */}
+            <path d="M5 24V15C5 8.92487 9.92487 4 16 4C22.0751 4 27 8.92487 27 15V24" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" opacity="0.85" />
+            {/* Rising Sun */}
+            <circle className="logo-mark-sun" cx="20.2" cy="11.8" r="2.6" fill="#E08D67" />
+            {/* Doi Luang Twin Ridges */}
+            <path d="M4.5 24L13.2 12.2L19.4 20.6L22.6 16.2L27.5 24" stroke="currentColor" strokeWidth="2.15" strokeLinecap="round" strokeLinejoin="round" />
+            {/* Valley Mist Wave */}
+            <path d="M7.5 27.2C12 25.8 20 25.8 24.5 27.2" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" opacity="0.65" />
+          </svg>
           <span className="logo-text" style={{ letterSpacing: '0.1em' }}>PAKJAI</span>
         </div>
 

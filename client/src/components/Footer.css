@@ -13,10 +13,21 @@
 }
 
 .footer-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-family: var(--font-heading);
-  font-size: 1.75rem;
+  font-size: 1.55rem;
   font-weight: 800;
+  letter-spacing: 0.08em;
   margin-bottom: var(--spacing-sm);
+}
+
+.footer-logo-mark {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  color: #ffffff;
 }
 
 .footer-logo span {

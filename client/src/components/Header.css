@@ -199,9 +199,30 @@
 }
 
 .logo-container {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  gap: 10px;
   cursor: pointer;
+}
+
+.logo-mark {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  color: #ffffff;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), color 0.25s ease;
+}
+
+.header-scrolled .logo-mark {
+  color: var(--primary-color);
+}
+
+.header-scrolled .logo-mark-sun {
+  fill: #C2704E;
+}
+
+.logo-container:hover .logo-mark {
+  transform: translateY(-1.5px);
 }
 
 .logo-text {
@@ -271,9 +292,16 @@
 }
 
 .mobile-brand {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  gap: 8px;
   cursor: pointer;
+}
+
+.mobile-logo-mark {
+  width: 24px;
+  height: 24px;
+  color: #fff !important;
 }
 
 .mobile-logo-text {

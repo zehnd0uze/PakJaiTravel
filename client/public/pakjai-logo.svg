@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" fill="none">
+  <!-- Minimalist Sanctuary Arch & Doi Luang Mountain Emblem -->
+  <rect x="2" y="2" width="32" height="32" rx="10" fill="#2C4C3B"/>
+  <!-- Warm Terracotta Rising Sun -->
+  <circle cx="22.5" cy="12.5" r="3.2" fill="#E08D67"/>
+  <!-- Doi Luang Main & Secondary Peaks -->
+  <path d="M6.5 25.5L15 12.5L21.5 22L24.5 17.5L29.5 25.5" stroke="#FAFCFA" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Tranquil Valley Horizon Wave -->
+  <path d="M8.5 28.5C13 27.1 23 27.1 27.5 28.5" stroke="#F3DCCB" stroke-width="1.6" stroke-linecap="round" opacity="0.85"/>
+</svg>

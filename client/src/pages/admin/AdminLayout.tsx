@@ -145,7 +145,13 @@ export const AdminLayout: React.FC = () => {
       {/* Sidebar */}
       <aside className="admin-sidebar">
         <div className="admin-sidebar-header">
-          <div className="admin-logo" onClick={() => navigate('/admin')}>
+          <div className="admin-logo" onClick={() => navigate('/admin')} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            <svg viewBox="0 0 32 32" width="22" height="22" fill="none" aria-hidden="true">
+              <path d="M5 24V15C5 8.92487 9.92487 4 16 4C22.0751 4 27 8.92487 27 15V24" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" opacity="0.85" />
+              <circle cx="20.2" cy="11.8" r="2.6" fill="#E08D67" />
+              <path d="M4.5 24L13.2 12.2L19.4 20.6L22.6 16.2L27.5 24" stroke="currentColor" strokeWidth="2.15" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M7.5 27.2C12 25.8 20 25.8 24.5 27.2" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" opacity="0.65" />
+            </svg>
             PAKJAI<span className="admin-label">Admin</span>
           </div>
           {adminEmail && <div className="admin-user-sub">{adminEmail}</div>}

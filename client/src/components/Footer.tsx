@@ -8,7 +8,15 @@ export const Footer: React.FC = () => {
     <footer className="footer">
       <div className="container footer-content">
         <div className="footer-column">
-          <h3 className="footer-logo">PakJai<span>Travel</span></h3>
+          <h3 className="footer-logo">
+            <svg className="footer-logo-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <path d="M5 24V15C5 8.92487 9.92487 4 16 4C22.0751 4 27 8.92487 27 15V24" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" opacity="0.85" />
+              <circle cx="20.2" cy="11.8" r="2.6" fill="#E08D67" />
+              <path d="M4.5 24L13.2 12.2L19.4 20.6L22.6 16.2L27.5 24" stroke="currentColor" strokeWidth="2.15" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M7.5 27.2C12 25.8 20 25.8 24.5 27.2" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" opacity="0.65" />
+            </svg>
+            PAKJAI
+          </h3>
           <p className="footer-desc">Your ultimate companion for exploring the hidden gems and popular destinations in Thailand.</p>
         </div>
         
