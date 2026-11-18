@@ -6,6 +6,7 @@ import { Button } from '../components/Button';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { ClaimPropertyModal } from '../components/ClaimPropertyModal';
+import { CHIANG_DAO_ATLAS_STAYS } from '../utils/chiangDaoStays';
 import './HotelDetail.css';
 
 interface Hotel {
@@ -44,6 +45,37 @@ export const HotelDetail: React.FC = () => {
   useEffect(() => {
     if (!id) return;
     const fetchHotel = async () => {
+      const atlasMatch = CHIANG_DAO_ATLAS_STAYS.find(s => s.id === id);
+      if (atlasMatch) {
+        setHotel({
+          id: atlasMatch.id,
+          name: atlasMatch.name,
+          type: atlasMatch.type,
+          rating: atlasMatch.rating || 4.8,
+          reviews: atlasMatch.reviews || 120,
+          pricePerNight: Number(atlasMatch.pricePerNight || 800),
+          priceType: atlasMatch.price_type || 'per_night',
+          currency: atlasMatch.currency || 'THB',
+          imageUrl: atlasMatch.imageUrl || '/doiluangbg.jpg',
+          images: atlasMatch.images?.length ? atlasMatch.images : [atlasMatch.imageUrl || '/doiluangbg.jpg'],
+          isVerified: atlasMatch.isVerified ?? true,
+          features: atlasMatch.features || [],
+          amenities: atlasMatch.amenities || [],
+          location: atlasMatch.location || 'Chiang Dao, Chiang Mai',
+          description: atlasMatch.description || '',
+          checkIn: '14:00',
+          checkOut: '11:00',
+          host: atlasMatch.host || { name: 'Verified Chiang Dao Host', since: '2020' },
+          contact: {
+            phone: atlasMatch.contact?.phone || '',
+            email: atlasMatch.contact?.email || '',
+            line: atlasMatch.contact?.line || '',
+          },
+        });
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('properties')
         .select(`
