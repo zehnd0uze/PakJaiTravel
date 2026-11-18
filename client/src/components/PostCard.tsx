@@ -87,17 +87,12 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClic
     if (like === hasLiked || isLiking) return;
     setIsLiking(true);
     try {
-      const likes = post.likes || [];
-      const updatedLikes = like ? [...likes, user.id] : likes.filter(id => id !== user.id);
-
-      const { error } = await supabase
-        .from('posts')
-        .update({ likes: updatedLikes })
-        .eq('id', post.id);
+      // Server-side toggle: only ever adds/removes the caller's own id
+      const { data, error } = await supabase.rpc('toggle_like', { target_post_id: post.id });
 
       if (error) throw error;
 
-      onUpdate({ ...post, likes: updatedLikes });
+      onUpdate({ ...post, likes: (data as string[]) || [] });
     } catch (err) {
       console.error('Failed to like post', err);
     } finally {

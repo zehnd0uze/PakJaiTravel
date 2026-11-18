@@ -1,286 +1,555 @@
-/* ── Journal Modal — Instagram-style post viewer ── */
+/* ══════════════════════════════════════════════════════════
+   PakJai Journal Modal — Editorial Story & Photo Lightbox
+══════════════════════════════════════════════════════════ */
+
 .journal-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 18, 16, 0.88);
-  z-index: 300;
+  background: rgba(10, 18, 14, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 2500; /* Above Header (z-index: 1000) */
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: fadeIn 0.2s ease;
+  padding: clamp(16px, 3vw, 40px);
+  animation: jmFadeIn 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.journal-modal-close {
-  position: fixed;
-  top: 20px;
-  right: 28px;
-  width: 42px;
-  height: 42px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.14);
-  color: #fff;
-  font-size: 26px;
-  line-height: 1;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s ease;
+@keyframes jmFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-.journal-modal-close:hover {
-  background: rgba(255, 255, 255, 0.26);
-}
-
+/* ── Outer Story-to-Story Navigation Arrows ── */
 .journal-modal-nav {
   position: fixed;
   top: 50%;
   transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   border: none;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.92);
-  color: #1a1a1a;
-  font-size: 26px;
-  line-height: 1;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #FFFFFF;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
-  transition: transform 0.15s ease;
-  z-index: 2;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  z-index: 2510;
 }
 
 .journal-modal-nav:hover {
-  transform: translateY(-50%) scale(1.08);
+  background: rgba(255, 255, 255, 0.26);
+  transform: translateY(-50%) scale(1.06);
 }
 
-.journal-modal-nav-prev { left: 28px; }
-.journal-modal-nav-next { right: 28px; }
+.journal-modal-nav-prev {
+  left: clamp(14px, 2.2vw, 32px);
+}
 
+.journal-modal-nav-next {
+  right: clamp(14px, 2.2vw, 32px);
+}
+
+/* ── Elevated Borderless Modal Container ── */
 .journal-modal {
-  display: flex;
-  max-width: min(1100px, 92vw);
-  max-height: 88vh;
-  background: #fff;
-  border-radius: 6px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) 420px;
+  width: min(1220px, 92vw);
+  height: min(840px, 88vh);
+  background: #FAFCFA;
+  border-radius: 26px;
   overflow: hidden;
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 36px 96px -16px rgba(5, 12, 9, 0.62);
 }
 
-/* Left: picture */
+/* ── Left: Media Stage ── */
 .journal-modal-media {
-  flex: 1 1 60%;
+  position: relative;
   min-width: 0;
-  background: #000;
+  min-height: 0;
+  background: #0D1611;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
-.journal-modal-media img {
+.jm-main-photo {
   width: 100%;
-  height: 88vh;
+  height: 100%;
   max-height: 88vh;
   object-fit: contain;
   display: block;
+  user-select: none;
 }
 
 .journal-modal-noimg {
-  color: #fff;
-  padding: 40px;
-  font-size: 1rem;
+  padding: 48px;
+  max-width: 48ch;
   text-align: center;
+  color: #F3F7F4;
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 1.65rem;
+  line-height: 1.45;
 }
 
-/* Right: panel */
+/* Multi-photo controls */
+.jm-photo-count {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  padding: 6px 13px;
+  border-radius: 999px;
+  background: rgba(13, 22, 17, 0.62);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #FFFFFF;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.jm-photo-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(8px);
+  color: #16261E;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.jm-photo-nav:hover {
+  background: #FFFFFF;
+  transform: translateY(-50%) scale(1.06);
+}
+
+.jm-photo-prev {
+  left: 16px;
+}
+
+.jm-photo-next {
+  right: 16px;
+}
+
+/* Thumbnail filmstrip at bottom of photo stage */
+.jm-thumbs {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 16px;
+  background: rgba(13, 22, 17, 0.58);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  max-width: calc(100% - 32px);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.jm-thumbs::-webkit-scrollbar {
+  display: none;
+}
+
+.jm-thumb {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  overflow: hidden;
+  background: none;
+  cursor: pointer;
+  opacity: 0.62;
+  flex-shrink: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.jm-thumb:hover {
+  opacity: 0.9;
+}
+
+.jm-thumb.active {
+  opacity: 1;
+  border-color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+.jm-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Right: Editorial Story & Conversation Panel ── */
 .journal-modal-panel {
-  flex: 0 0 400px;
   display: flex;
   flex-direction: column;
   min-width: 0;
-  background: #fff;
+  min-height: 0;
+  background: #FAFCFA;
 }
 
 .jm-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
-  padding: 14px 16px;
-  border-bottom: 1px solid #efefef;
+  padding: 18px 20px 14px;
+  background: #FFFFFF;
+}
+
+.jm-header-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
 }
 
 .jm-avatar {
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   object-fit: cover;
+  flex-shrink: 0;
+  background: #E4ECE6;
+}
+
+.jm-author-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .jm-author {
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: #1a1a1a;
-}
-
-.jm-location {
-  font-size: 0.82rem;
-  color: #686e69;
-  margin-left: 4px;
+  font-family: var(--font-heading, 'Outfit', sans-serif);
+  font-weight: 600;
+  font-size: 0.98rem;
+  color: #16261E;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.jm-submeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.76rem;
+  color: #63736A;
+}
+
+.jm-location {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #2C4C3B;
+  font-weight: 600;
+}
+
+.jm-post-date {
+  color: #7A8880;
+}
+
+.jm-close-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(44, 76, 59, 0.06);
+  color: #2C4C3B;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.jm-close-btn:hover {
+  background: rgba(44, 76, 59, 0.13);
+  transform: rotate(90deg);
+}
+
+/* ── Scrollable Story Entry + Traveler Notes ── */
 .jm-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: 14px 16px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
-.jm-caption {
+.jm-story-entry {
+  background: #FFFFFF;
+  border-radius: 18px;
+  padding: 16px 18px;
+  box-shadow: 0 8px 24px -16px rgba(20, 38, 29, 0.08);
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
   gap: 12px;
 }
 
-.jm-caption p {
+.jm-story-text {
   margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.45;
-  color: #1a1a1a;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #1A2A22;
+  white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 
-.jm-caption-body {
+.jm-rating-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.jm-rating-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: rgba(217, 155, 38, 0.12);
+  color: #8F610C;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.jm-price-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: rgba(44, 76, 59, 0.08);
+  color: #2C4C3B;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* Comments / Traveler Notes Section */
+.jm-comments-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.jm-comments-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6B7B72;
+  padding: 0 4px;
+}
+
+.jm-comments-badge {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(44, 76, 59, 0.08);
+  color: #2C4C3B;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.jm-comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.jm-comment-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: #FFFFFF;
+  box-shadow: 0 4px 16px -12px rgba(20, 38, 29, 0.06);
+}
+
+.jm-comment-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #E4ECE6;
+}
+
+.jm-comment-body {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 3px;
 }
 
-.jm-comment-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
+.jm-comment-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.jm-comment-author {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #16261E;
 }
 
 .jm-time {
   font-size: 0.72rem;
-  color: #8e8e8e;
+  color: #829188;
+  flex-shrink: 0;
 }
 
-.jm-rating {
-  align-items: center;
-}
-
-.jm-stars {
-  color: #d4af37;
-  letter-spacing: 2px;
-  font-size: 0.95rem;
-}
-
-.jm-price {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #2c4c3b;
-  margin-left: 8px;
+.jm-comment-text {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.48;
+  color: #2E3E35;
+  overflow-wrap: anywhere;
 }
 
 .jm-empty {
   text-align: center;
-  padding: 30px 10px;
-}
-
-.jm-empty h3 {
-  font-size: 1.05rem;
-  margin: 0 0 4px;
+  padding: 28px 18px;
+  border-radius: 16px;
+  background: rgba(44, 76, 59, 0.035);
 }
 
 .jm-empty p {
   margin: 0;
-  color: #8e8e8e;
-  font-size: 0.88rem;
+  color: #6B7B72;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+/* ── Bottom Interactive Footer ── */
+.jm-footer {
+  background: #FFFFFF;
+  padding: 14px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 -8px 24px -18px rgba(20, 38, 29, 0.08);
 }
 
 .jm-actions-bar {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 10px 16px 4px;
-  border-top: 1px solid #efefef;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .jm-actions-left {
   display: flex;
-  gap: 14px;
-}
-
-.jm-action {
-  background: none;
-  border: none;
-  padding: 4px;
-  cursor: pointer;
-  color: #1a1a1a;
-  display: flex;
   align-items: center;
-  transition: transform 0.12s ease, color 0.2s ease;
+  gap: 8px;
 }
 
-.jm-action:active {
-  transform: scale(0.88);
-}
-
-.jm-action.liked {
-  color: #ed4956;
-}
-
-.jm-likes {
-  font-size: 0.88rem;
+.jm-action-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(44, 76, 59, 0.055);
+  color: #26382E;
+  font-size: 0.83rem;
   font-weight: 600;
-  color: #1a1a1a;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
 }
 
-.jm-date {
-  padding: 0 16px 10px;
-  font-size: 0.72rem;
-  color: #8e8e8e;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+.jm-action-pill:hover {
+  background: rgba(44, 76, 59, 0.11);
 }
 
+.jm-action-pill:active {
+  transform: scale(0.95);
+}
+
+.jm-action-pill.liked {
+  background: rgba(217, 74, 74, 0.12);
+  color: #D94A4A;
+}
+
+/* Pill Comment Composer */
 .jm-comment-form {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 16px;
-  border-top: 1px solid #efefef;
+  gap: 8px;
+  padding: 5px 6px 5px 16px;
+  border-radius: 999px;
+  background: #F2F6F3;
 }
 
 .jm-comment-form input {
   flex: 1;
   border: none;
   outline: none;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-family: inherit;
-  color: #1a1a1a;
+  color: #16261E;
   background: transparent;
+}
+
+.jm-comment-form input::placeholder {
+  color: #7E8E85;
 }
 
 .jm-comment-form button {
   border: none;
-  background: none;
-  color: #2c4c3b;
-  font-weight: 700;
-  font-size: 0.9rem;
+  border-radius: 999px;
+  padding: 8px 18px;
+  background: #2C4C3B;
+  color: #FFFFFF;
+  font-weight: 600;
+  font-size: 0.82rem;
   cursor: pointer;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.jm-comment-form button:hover:not(:disabled) {
+  background: #213B2D;
 }
 
 .jm-comment-form button:disabled {
@@ -289,80 +558,38 @@
 }
 
 .jm-login-hint {
-  padding: 12px 16px;
-  border-top: 1px solid #efefef;
-  font-size: 0.85rem;
-  color: #686e69;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: #F2F6F3;
+  font-size: 0.84rem;
+  color: #63736A;
+  text-align: center;
 }
 
-/* ── Mobile: stack media over panel ── */
-@media (max-width: 768px) {
+/* ── Mobile & Tablet Responsive ── */
+@media (max-width: 900px) {
+  .journal-modal-overlay {
+    padding: 0;
+  }
+
   .journal-modal {
-    flex-direction: column;
+    grid-template-columns: 1fr;
+    grid-template-rows: 46vh 1fr;
     width: 100vw;
-    max-width: none;
-    max-height: 100vh;
     height: 100vh;
+    max-height: 100vh;
     border-radius: 0;
   }
 
-  .journal-modal-media img {
-    height: 45vh;
+  .jm-main-photo {
+    max-height: 46vh;
   }
 
-  .journal-modal-panel {
-    flex: 1;
-    flex-basis: auto;
+  .journal-modal-nav-prev {
+    left: 10px;
   }
 
-  .journal-modal-nav-prev { left: 10px; }
-  .journal-modal-nav-next { right: 10px; }
-}
-
-/* ── Multi-photo browsing inside the viewer ── */
-.journal-modal-media {
-  position: relative;
-}
-
-.jm-photo-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 36px;
-  height: 36px;
-  border: none;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.88);
-  color: #1a1c1a;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: background-color 0.2s ease;
-}
-
-.jm-photo-nav:hover {
-  background: #fff;
-}
-
-.jm-photo-nav:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
-}
-
-.jm-photo-prev { left: 12px; }
-.jm-photo-next { right: 12px; }
-
-.jm-photo-count {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  padding: 3px 10px;
-  border-radius: 9999px;
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
-  font-size: 0.78rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
+  .journal-modal-nav-next {
+    right: 10px;
+  }
 }

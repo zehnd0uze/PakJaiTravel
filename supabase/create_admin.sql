@@ -1,12 +1,18 @@
 -- Run this script in the Supabase SQL Editor to create a new Admin user directly
 -- This bypasses the public signup page and automatically sets the correct permissions.
+--
+-- SECURITY: Replace BOTH placeholders below before running, and NEVER commit
+-- real credentials back to git. Use a long random password (20+ chars).
 
 DO $$
 DECLARE
   new_user_id uuid;
-  admin_email text := 'admin_new@pakjai.com';
-  admin_password text := 'pakjai-admin-secure-2026';
+  admin_email text := 'CHANGE_ME@example.com';
+  admin_password text := 'CHANGE_ME_TO_A_LONG_RANDOM_PASSWORD';
 BEGIN
+  IF admin_email LIKE 'CHANGE_ME%' OR admin_password LIKE 'CHANGE_ME%' OR length(admin_password) < 16 THEN
+    RAISE EXCEPTION 'Set a real admin email and a password of at least 16 characters first.';
+  END IF;
   -- 1. Insert into auth.users (This safely creates the login credentials)
   INSERT INTO auth.users (
     instance_id,

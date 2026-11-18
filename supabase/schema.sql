@@ -118,14 +118,14 @@ begin
     coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1), 'User'), 
     new.email, 
     new.raw_user_meta_data->>'avatar_url',
-    coalesce(new.raw_user_meta_data->>'role', 'user')
+    'user' -- never trust client-supplied role (see security_hardening.sql)
   )
   on conflict (id) do update set
     email = excluded.email,
     name = coalesce(excluded.name, profiles.name);
   return new;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public;
 
 create or replace trigger on_auth_user_created
   after insert on auth.users

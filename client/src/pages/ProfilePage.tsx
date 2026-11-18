@@ -74,7 +74,17 @@ const ProfilePage: React.FC = () => {
         priceRating: p.price_rating,
         propertyId: p.property_id,
         createdAt: p.created_at,
-        updatedAt: p.updated_at
+        updatedAt: p.updated_at,
+        comments: (p.comments || [])
+          .map((c: { id: string; user_id: string; author_name: string; author_avatar: string; text: string; created_at: string }) => ({
+            id: c.id,
+            userId: c.user_id,
+            authorName: c.author_name,
+            authorAvatar: c.author_avatar,
+            text: c.text,
+            createdAt: c.created_at,
+          }))
+          .sort((a: { createdAt: string }, b: { createdAt: string }) => (a.createdAt || '').localeCompare(b.createdAt || '')),
       }));
       setUserPosts(formatted);
     } catch (err) {
