@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import './Home.css';
 import { AirbnbCard } from '../components/AirbnbCard';
 import { VerifiedBadge } from '../components/VerifiedBadge';
+import { ChiangDaoArtMap } from '../components/ChiangDaoArtMap';
 
 interface Property {
   id: string;
@@ -504,6 +505,13 @@ export const Home: React.FC = () => {
           )}
         </div>
       </section>
+
+      {/* ══════════════════════════════════════════════════════════
+          CHIANG DAO VALLEY ATLAS — Editorial Topographic Art Map
+      ══════════════════════════════════════════════════════════ */}
+      {!loading && properties.length > 0 && (
+        <ChiangDaoArtMap properties={properties as any} />
+      )}
 
       {/* ══════════════════════════════════════════════════════════
           CURATOR'S SPOTLIGHT — Calm Editorial Split Feature
