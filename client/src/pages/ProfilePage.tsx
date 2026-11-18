@@ -89,27 +89,6 @@ const ProfilePage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
-  // Expose the fixed header's real height so the cover starts flush below it
-  // (the header is shorter on non-home pages due to .header-scrolled padding),
-  // and drop its box-shadow so the gap strip keeps the same color as the page
-  // background instead of being darkened by the glass shadow.
-  useEffect(() => {
-    const syncHeader = () => {
-      const header = document.querySelector<HTMLElement>('.header');
-      if (header) {
-        document.documentElement.style.setProperty('--profile-header-h', `${header.offsetHeight}px`);
-        header.style.boxShadow = 'none';
-      }
-    };
-    syncHeader();
-    window.addEventListener('resize', syncHeader);
-    return () => {
-      const header = document.querySelector<HTMLElement>('.header');
-      if (header) header.style.boxShadow = '';
-      window.removeEventListener('resize', syncHeader);
-    };
-  }, []);
-
   const handlePostUpdate = (updatedPost: Post) => {
     setUserPosts((prev) => prev.map((p) => (p.id === updatedPost.id ? updatedPost : p)));
   };
@@ -305,68 +284,116 @@ const ProfilePage: React.FC = () => {
         </div>
         </div>
 
-        {/* ── Journals card: tabs + grid/feed ── */}
+        {/* ── Journals card: borderless wide gallery below cover ── */}
         <div className="ig-content-card">
-        {/* ── Content Tabs (Grid vs Feed) ── */}
-        <div className="ig-tabs-row">
-          <button 
-            className={`ig-tab ${viewMode === 'grid' ? 'active' : ''}`}
-            onClick={() => setViewMode('grid')}
-          >
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-              <path d="M3 3h7v7H3V3zm11 0h7v7h-7V3zm0 11h7v7h-7v-7zM3 14h7v7H3v-7z" />
-            </svg>
-          </button>
-          <button 
-            className={`ig-tab ${viewMode === 'feed' ? 'active' : ''}`}
-            onClick={() => setViewMode('feed')}
-          >
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-              <path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z" />
-            </svg>
-          </button>
-        </div>
-
-        {/* ── Post Feed / Grid Content ── */}
-        <div className="ig-content-area">
-          {loading ? (
-            <div className="profile-loading">Loading journals…</div>
-          ) : userPosts.length > 0 ? (
-            viewMode === 'grid' ? (
-              <div className="ig-photo-grid">
-                {userPosts.map((post, i) => (
-                  <div key={post.id} className="ig-grid-item" onClick={() => setActiveJournal(i)}>
-                    {post.imageUrl ? (
-                      <img src={post.imageUrl} alt="Post thumbnail" />
-                    ) : (
-                      <div className="ig-grid-item-text">
-                        <p>{post.content?.substring(0, 40)}{post.content && post.content.length > 40 ? '...' : ''}</p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="ig-feed-list">
-                {userPosts.map((post) => (
-                  <PostCard key={post.id} post={post} onUpdate={handlePostUpdate} />
-                ))}
-              </div>
-            )
-          ) : (
-            <div className="ig-empty-state">
-              <div className="ig-empty-icon">
-                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                  <polyline points="21 15 16 10 5 21"></polyline>
-                </svg>
-              </div>
-              <h2>No journals yet</h2>
-              <p>Share your travel experiences.</p>
+          <div className="ig-gallery-toolbar">
+            <div className="ig-gallery-title-group">
+              <h2 className="ig-gallery-heading">Travel Journals</h2>
+              <span className="ig-gallery-count">{totalReviews}</span>
             </div>
-          )}
-        </div>
+
+            <div className="ig-gallery-controls">
+              <button
+                type="button"
+                className="ig-share-moment-btn"
+                onClick={() => setIsModalOpen(true)}
+              >
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>New Journal</span>
+              </button>
+
+              <div className="ig-tabs-row" role="tablist">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={viewMode === 'grid'}
+                  className={`ig-tab ${viewMode === 'grid' ? 'active' : ''}`}
+                  onClick={() => setViewMode('grid')}
+                  title="Grid view"
+                >
+                  <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor">
+                    <path d="M3 3h7v7H3V3zm11 0h7v7h-7V3zm0 11h7v7h-7v-7zM3 14h7v7H3v-7z" />
+                  </svg>
+                  <span>Grid</span>
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={viewMode === 'feed'}
+                  className={`ig-tab ${viewMode === 'feed' ? 'active' : ''}`}
+                  onClick={() => setViewMode('feed')}
+                  title="Feed view"
+                >
+                  <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor">
+                    <path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z" />
+                  </svg>
+                  <span>Feed</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Post Feed / Grid Content ── */}
+          <div className="ig-content-area">
+            {loading ? (
+              <div className="profile-loading">Loading journals…</div>
+            ) : userPosts.length > 0 ? (
+              viewMode === 'grid' ? (
+                <div className="ig-photo-grid">
+                  {userPosts.map((post, i) => (
+                    <div key={post.id} className="ig-grid-item" onClick={() => setActiveJournal(i)}>
+                      {post.imageUrl ? (
+                        <>
+                          <img src={post.imageUrl} alt={post.content || 'Journal photo'} loading="lazy" />
+                          <div className="ig-grid-hover-overlay">
+                            {post.locationTag && (
+                              <span className="ig-grid-loc">{post.locationTag}</span>
+                            )}
+                            {post.content && (
+                              <p className="ig-grid-caption">{post.content}</p>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="ig-grid-item-text">
+                          <p>{post.content?.substring(0, 80)}{post.content && post.content.length > 80 ? '...' : ''}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="ig-feed-list">
+                  {userPosts.map((post) => (
+                    <PostCard key={post.id} post={post} onUpdate={handlePostUpdate} />
+                  ))}
+                </div>
+              )
+            ) : (
+              <div className="ig-empty-state">
+                <div className="ig-empty-icon">
+                  <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="3" ry="3"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                  </svg>
+                </div>
+                <h2>No journals yet</h2>
+                <p>Share your travel experiences from Chiang Mai & Chiang Dao.</p>
+                <button
+                  type="button"
+                  className="ig-share-moment-btn"
+                  style={{ marginTop: '14px' }}
+                  onClick={() => setIsModalOpen(true)}
+                >
+                  + Share your first photo
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

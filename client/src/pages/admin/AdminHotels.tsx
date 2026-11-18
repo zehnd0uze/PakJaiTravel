@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../utils/supabase';
 import { AdminPropertyImportModal } from './AdminPropertyImportModal';
@@ -19,7 +19,7 @@ interface Property {
   district?: string;
   status?: string;
   host_info?: { name?: string };
-  contact?: { phone?: string; bank?: string; accountNumber?: string; accountName?: string };
+  contact?: { phone?: string; line?: string; bank?: string; accountNumber?: string; accountName?: string };
 }
 
 export const AdminHotels: React.FC = () => {
@@ -27,7 +27,14 @@ export const AdminHotels: React.FC = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'pending' | 'draft'>('all');
   const [alert, setAlert] = useState<{ type: string; message: string } | null>(null);
+
+  const showNotice = (type: string, message: string) => {
+    setAlert({ type, message });
+    setTimeout(() => setAlert(null), 3200);
+  };
 
   const fetchProperties = async () => {
     setLoading(true);
@@ -46,15 +53,16 @@ export const AdminHotels: React.FC = () => {
           currency: p.currency || 'THB',
           rating: p.rating || 4.5,
           reviews: p.reviews || 0,
-          imageUrl: p.image_url || (Array.isArray(p.images) && p.images[0]) || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+          imageUrl: p.image_url || (Array.isArray(p.images) && p.images[0]) || '/doiluangbg.jpg',
           location: p.location || [p.district, p.province].filter(Boolean).join(', ') || 'Thailand',
-          isVerified: p.is_verified ?? true
+          isVerified: p.is_verified ?? true,
+          status: p.status || 'published',
         }));
         setProperties(formatted);
       }
     } catch (err: any) {
       console.error('Failed to load admin properties:', err);
-      setAlert({ type: 'error', message: err.message || 'Failed to load properties.' });
+      showNotice('error', err.message || 'Failed to load properties.');
     } finally {
       setLoading(false);
     }
@@ -63,6 +71,24 @@ export const AdminHotels: React.FC = () => {
   useEffect(() => {
     fetchProperties();
   }, []);
+
+  const filteredProperties = useMemo(() => {
+    return properties.filter(p => {
+      if (statusFilter !== 'all' && (p.status || 'published') !== statusFilter) {
+        return false;
+      }
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        return (
+          p.name?.toLowerCase().includes(q) ||
+          p.location?.toLowerCase().includes(q) ||
+          p.type?.toLowerCase().includes(q) ||
+          p.host_info?.name?.toLowerCase().includes(q)
+        );
+      }
+      return true;
+    });
+  }, [properties, statusFilter, searchQuery]);
 
   const handleDelete = async (id: string, name: string) => {
     if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return;
@@ -74,98 +100,109 @@ export const AdminHotels: React.FC = () => {
         .eq('id', id);
       if (error) throw error;
 
-      setAlert({ type: 'success', message: `"${name}" has been deleted.` });
+      showNotice('success', `"${name}" has been deleted.`);
       fetchProperties();
     } catch {
-      setAlert({ type: 'error', message: 'Failed to delete property.' });
+      showNotice('error', 'Failed to delete property.');
     }
-
-    setTimeout(() => setAlert(null), 3000);
   };
 
-  const handleApprove = async (id: string, name: string) => {
+  const handleStatusChange = async (id: string, name: string, nextStatus: string) => {
     try {
       const { error } = await supabase
         .from('properties')
-        .update({ status: 'published' })
+        .update({ status: nextStatus })
         .eq('id', id);
       if (error) throw error;
 
-      setAlert({ type: 'success', message: `"${name}" has been approved and published.` });
-      fetchProperties();
+      setProperties(prev => prev.map(p => (p.id === id ? { ...p, status: nextStatus } : p)));
+      showNotice('success', `"${name}" status updated to ${nextStatus}.`);
     } catch {
-      setAlert({ type: 'error', message: 'Failed to approve property.' });
+      showNotice('error', 'Failed to update status.');
     }
-
-    setTimeout(() => setAlert(null), 3000);
   };
 
-  const handleRevoke = async (id: string, name: string) => {
+  const handleToggleVerified = async (prop: Property) => {
+    const nextVal = !prop.isVerified;
     try {
       const { error } = await supabase
         .from('properties')
-        .update({ status: 'pending' })
-        .eq('id', id);
+        .update({ is_verified: nextVal })
+        .eq('id', prop.id);
       if (error) throw error;
 
-      setAlert({ type: 'info', message: `"${name}" has been moved back to pending.` });
-      fetchProperties();
+      setProperties(prev => prev.map(p => (p.id === prop.id ? { ...p, isVerified: nextVal } : p)));
+      showNotice('success', `"${prop.name}" ${nextVal ? 'marked as Verified' : 'unverified'}.`);
     } catch {
-      setAlert({ type: 'error', message: 'Failed to unapprove property.' });
+      showNotice('error', 'Failed to toggle verified status.');
     }
-
-    setTimeout(() => setAlert(null), 3000);
   };
 
   return (
     <>
       <div className="admin-topbar">
-        <h1>Properties</h1>
-        <div className="admin-topbar-actions" style={{ display: 'flex', gap: '10px' }}>
-          <button 
-            className="admin-btn admin-btn-secondary" 
-            onClick={() => setIsImportModalOpen(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+        <div>
+          <h1>Manage Properties ({properties.length})</h1>
+          <p className="admin-topbar-sub">Approve, verify, edit, or import accommodations across Chiang Mai & Chiang Dao</p>
+        </div>
+        <div className="admin-topbar-actions">
+          <button
+            className="admin-btn admin-btn-secondary"
+            onClick={() => navigate('/admin/database?table=properties')}
           >
-            📥 Import / Export Data
+            View in Database Studio
+          </button>
+          <button
+            className="admin-btn admin-btn-secondary"
+            onClick={() => setIsImportModalOpen(true)}
+          >
+            Bulk Import
           </button>
           <button className="admin-btn admin-btn-primary" onClick={() => navigate('/admin/hotels/new')}>
-            + Add Property
+            + Add New Property
           </button>
         </div>
       </div>
 
       <div className="admin-content">
         {alert && (
-          <div className={`admin-alert ${alert.type}`} style={alert.type === 'info' ? { background: '#e0f2fe', color: '#0369a1', borderLeft: '4px solid #0284c7' } : {}}>
+          <div className={`admin-alert ${alert.type === 'error' ? 'error' : 'success'}`}>
             {alert.message}
           </div>
         )}
 
         <div className="admin-table-wrapper">
-          <div className="admin-table-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2>All Properties ({properties.length})</h2>
+          <div className="admin-table-header">
+            <div className="admin-filter-pills">
+              {(['all', 'published', 'pending', 'draft'] as const).map((st) => (
+                <button
+                  key={st}
+                  type="button"
+                  className={`admin-filter-pill ${statusFilter === st ? 'active' : ''}`}
+                  onClick={() => setStatusFilter(st)}
+                >
+                  {st === 'all' ? 'All Stays' : st}
+                </button>
+              ))}
+            </div>
+
+            <div className="db-search-box" style={{ maxWidth: '320px' }}>
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search stay name, district, host..."
+              />
+            </div>
           </div>
 
           {loading ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-              <div className="spinner" style={{ width: '32px', height: '32px', margin: '0 auto 12px' }} />
-              <p>Loading accommodations...</p>
-            </div>
-          ) : properties.length === 0 ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-              <p style={{ marginBottom: '16px', fontSize: '1rem' }}>No properties found in the database.</p>
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-                <button 
-                  className="admin-btn admin-btn-secondary" 
-                  onClick={() => setIsImportModalOpen(true)}
-                >
-                  📥 Import from CSV / JSON
-                </button>
-                <button className="admin-btn admin-btn-primary" onClick={() => navigate('/admin/hotels/new')}>
-                  + Add Your First Property
-                </button>
-              </div>
+            <div style={{ padding: '40px', textAlign: 'center', color: '#6b7280' }}>
+              Loading properties...
             </div>
           ) : (
             <table className="admin-table">
@@ -174,17 +211,25 @@ export const AdminHotels: React.FC = () => {
                   <th>Property</th>
                   <th>Type</th>
                   <th>Price</th>
-                  <th>Rating</th>
+                  <th>Host & Contact</th>
+                  <th>Verified</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {properties.map(p => (
+                {filteredProperties.map((p) => (
                   <tr key={p.id}>
                     <td>
                       <div className="table-property-info">
-                        <img src={p.imageUrl} alt={p.name} className="table-property-thumb" />
+                        <img
+                          src={p.imageUrl}
+                          alt={p.name}
+                          className="table-property-thumb"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/doiluangbg.jpg';
+                          }}
+                        />
                         <div>
                           <div className="table-property-name">{p.name}</div>
                           <div className="table-property-location">{p.location}</div>
@@ -192,36 +237,48 @@ export const AdminHotels: React.FC = () => {
                       </div>
                     </td>
                     <td>{p.type}</td>
-                    <td>฿{p.pricePerNight.toLocaleString()} {p.priceType === 'per_person' ? '/ person' : '/ night'}</td>
-                    <td>{p.rating} ({p.reviews})</td>
                     <td>
-                      {p.status === 'pending' ? (
-                        <div style={{ display: 'inline-block', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d' }}>Pending</div>
-                      ) : p.status === 'draft' ? (
-                        <div style={{ display: 'inline-block', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, background: '#FFF3E0', color: '#E65100' }}>Draft</div>
-                      ) : (
-                        <div style={{ display: 'inline-block', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, background: '#E8FAF0', color: '#1B8A5A' }}>
-                          {p.status === 'published' ? 'Approved' : (p.status || 'Approved')}
-                        </div>
-                      )}
+                      <strong>฿{(p.pricePerNight || 0).toLocaleString()}</strong>
+                      <div style={{ fontSize: '0.72rem', color: '#6b7280' }}>
+                        {p.priceType === 'per_person' ? '/ person' : '/ night'}
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ fontSize: '0.84rem', fontWeight: 600 }}>{p.host_info?.name || 'Host'}</div>
+                      <div style={{ fontSize: '0.76rem', color: '#6b7280' }}>
+                        {p.contact?.phone || p.contact?.line || 'No phone/LINE'}
+                      </div>
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className={`db-bool-chip ${p.isVerified ? 'true' : 'false'}`}
+                        onClick={() => handleToggleVerified(p)}
+                        title="Click to toggle verified status"
+                      >
+                        {p.isVerified ? 'Verified' : 'Unverified'}
+                      </button>
+                    </td>
+                    <td>
+                      <span className={`status-badge ${p.status || 'published'}`}>
+                        {p.status || 'published'}
+                      </span>
                     </td>
                     <td>
                       <div className="table-actions">
-                        {p.status === 'pending' ? (
+                        {p.status !== 'published' ? (
                           <button
-                            className="table-action-btn"
-                            style={{ background: '#ecfdf5', color: '#059669', borderColor: '#a7f3d0' }}
-                            onClick={() => handleApprove(p.id, p.name)}
+                            className="table-action-btn primary"
+                            onClick={() => handleStatusChange(p.id, p.name, 'published')}
                           >
-                            Approve
+                            Publish
                           </button>
                         ) : (
                           <button
                             className="table-action-btn"
-                            style={{ background: '#fff7ed', color: '#c2410c', borderColor: '#fed7aa' }}
-                            onClick={() => handleRevoke(p.id, p.name)}
+                            onClick={() => handleStatusChange(p.id, p.name, 'pending')}
                           >
-                            Unapprove
+                            Unpublish
                           </button>
                         )}
                         <button
@@ -229,12 +286,6 @@ export const AdminHotels: React.FC = () => {
                           onClick={() => navigate(`/admin/hotels/${p.id}/edit`)}
                         >
                           Edit
-                        </button>
-                        <button
-                          className="table-action-btn"
-                          onClick={() => window.open(`/hotels/${p.id}`, '_blank')}
-                        >
-                          View
                         </button>
                         <button
                           className="table-action-btn danger"
@@ -246,6 +297,13 @@ export const AdminHotels: React.FC = () => {
                     </td>
                   </tr>
                 ))}
+                {filteredProperties.length === 0 && (
+                  <tr>
+                    <td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>
+                      No matching properties found.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           )}
@@ -257,8 +315,7 @@ export const AdminHotels: React.FC = () => {
         onClose={() => setIsImportModalOpen(false)}
         onSuccess={() => {
           fetchProperties();
-          setAlert({ type: 'success', message: 'Accommodations list successfully updated!' });
-          setTimeout(() => setAlert(null), 4000);
+          showNotice('success', 'Bulk property import completed.');
         }}
         currentProperties={properties}
       />
@@ -266,3 +323,4 @@ export const AdminHotels: React.FC = () => {
   );
 };
 
+export default AdminHotels;

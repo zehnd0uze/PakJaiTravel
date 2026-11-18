@@ -17,6 +17,7 @@ import { AdminHotels } from './pages/admin/AdminHotels';
 import { AdminHotelEdit } from './pages/admin/AdminHotelEdit';
 import { AdminUsers } from './pages/admin/AdminUsers';
 import { AdminClaims } from './pages/admin/AdminClaims';
+import { AdminDatabase } from './pages/admin/AdminDatabase';
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { AuthModal } from './components/AuthModal';
@@ -47,6 +48,7 @@ function App() {
               <Route path="hotels/new" element={<AdminHotelEdit />} />
               <Route path="claims" element={<AdminClaims />} />
               <Route path="users" element={<AdminUsers />} />
+              <Route path="database" element={<AdminDatabase />} />
             </Route>
 
             {/* Main public layout */}

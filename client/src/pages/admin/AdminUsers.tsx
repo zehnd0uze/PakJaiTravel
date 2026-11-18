@@ -1,20 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../utils/supabase';
 
 interface User {
   id: string;
   name: string;
   email: string;
-  role?: string;
+  role: string;
   createdAt: string;
   isVerified: boolean;
 }
 
 export const AdminUsers: React.FC = () => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editForm, setEditForm] = useState({ name: '', email: '', role: 'user' });
+  const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'host' | 'user'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState('');
 
   const fetchUsers = async () => {
@@ -30,7 +34,7 @@ export const AdminUsers: React.FC = () => {
         const formatted = (data as any[]).map(u => ({
           id: u.id,
           name: u.name || 'Anonymous',
-          email: u.email,
+          email: u.email || '',
           role: u.role || 'user',
           createdAt: u.created_at || new Date().toISOString(),
           isVerified: u.is_verified ?? false
@@ -49,6 +53,17 @@ export const AdminUsers: React.FC = () => {
     fetchUsers();
   }, []);
 
+  const filteredUsers = useMemo(() => {
+    return users.filter(u => {
+      if (roleFilter !== 'all' && u.role !== roleFilter) return false;
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        return u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
+      }
+      return true;
+    });
+  }, [users, roleFilter, searchQuery]);
+
   const handleDelete = async (id: string, name: string) => {
     if (!window.confirm(`Are you sure you want to delete user "${name}"? This action cannot be undone.`)) {
       return;
@@ -60,7 +75,6 @@ export const AdminUsers: React.FC = () => {
       });
 
       if (error) throw error;
-
       setUsers(users.filter(u => u.id !== id));
     } catch (err) {
       console.error('Delete error:', err);
@@ -68,23 +82,33 @@ export const AdminUsers: React.FC = () => {
     }
   };
 
-  const handleVerify = async (id: string, name: string) => {
-    if (!window.confirm(`Are you sure you want to manually verify the email for "${name}"?`)) {
-      return;
-    }
-
+  const handleToggleVerify = async (u: User) => {
+    const nextVal = !u.isVerified;
     try {
       const { error } = await supabase
         .from('profiles')
-        .update({ is_verified: true })
-        .eq('id', id);
+        .update({ is_verified: nextVal })
+        .eq('id', u.id);
 
       if (error) throw error;
-
-      setUsers(users.map(u => u.id === id ? { ...u, isVerified: true } : u));
+      setUsers(users.map(item => item.id === u.id ? { ...item, isVerified: nextVal } : item));
     } catch (err) {
       console.error('Verify error:', err);
-      alert('An error occurred while verifying the user.');
+      alert('Failed to update verification status.');
+    }
+  };
+
+  const handleQuickRoleChange = async (u: User, nextRole: string) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role: nextRole })
+        .eq('id', u.id);
+      if (error) throw error;
+      setUsers(users.map(item => item.id === u.id ? { ...item, role: nextRole } : item));
+    } catch (err) {
+      console.error('Role update error:', err);
+      alert('Failed to update role.');
     }
   };
 
@@ -119,136 +143,162 @@ export const AdminUsers: React.FC = () => {
   };
 
   return (
-    <>
+    <div>
       <div className="admin-topbar">
-        <h1>User Management</h1>
+        <div>
+          <h1>Users & Roles ({users.length})</h1>
+          <p className="admin-topbar-sub">Manage traveler accounts, host permissions, and administrator access</p>
+        </div>
+        <div className="admin-topbar-actions">
+          <button
+            type="button"
+            className="admin-btn admin-btn-secondary"
+            onClick={() => navigate('/admin/database?table=profiles')}
+          >
+            View in Database Studio
+          </button>
+        </div>
       </div>
 
       <div className="admin-content">
-        <div className="admin-card" style={{ background: '#fff', borderRadius: 'var(--radius-xl)', padding: '24px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
-          {loading ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-              <div className="spinner" style={{ width: '32px', height: '32px', margin: '0 auto 12px' }} />
-              <p>Loading users...</p>
+        <div className="admin-table-wrapper">
+          <div className="admin-table-header">
+            <div className="admin-filter-pills">
+              {(['all', 'admin', 'host', 'user'] as const).map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  className={`admin-filter-pill ${roleFilter === r ? 'active' : ''}`}
+                  onClick={() => setRoleFilter(r)}
+                >
+                  {r === 'all' ? 'All Users' : `${r}s`}
+                </button>
+              ))}
             </div>
-          ) : users.length === 0 ? (
-            <p style={{ padding: '20px', textAlign: 'center', color: 'var(--text-secondary)' }}>No registered users found.</p>
+
+            <div className="db-search-box" style={{ maxWidth: '300px' }}>
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search name or email..."
+              />
+            </div>
+          </div>
+
+          {loading ? (
+            <div style={{ padding: '40px', textAlign: 'center', color: '#6b7280' }}>Loading users...</div>
           ) : (
-            <div className="table-responsive">
-              <table className="admin-table" style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ borderBottom: '2px solid #eee' }}>
-                    <th style={{ padding: '12px' }}>Username</th>
-                    <th style={{ padding: '12px' }}>Email</th>
-                    <th style={{ padding: '12px' }}>Role</th>
-                    <th style={{ padding: '12px' }}>Status</th>
-                    <th style={{ padding: '12px' }}>Joined Date</th>
-                    <th style={{ padding: '12px', textAlign: 'right' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map(user => (
-                    <tr key={user.id} style={{ borderBottom: '1px solid #eee' }}>
-                      <td style={{ padding: '12px' }}><strong>{user.name}</strong></td>
-                      <td style={{ padding: '12px' }}>{user.email}</td>
-                      <td style={{ padding: '12px' }}>
-                        <span style={{ 
-                          background: user.role === 'admin' ? '#fee2e2' : user.role === 'host' ? '#e0e7ff' : '#f3f4f6', 
-                          color: user.role === 'admin' ? '#dc2626' : user.role === 'host' ? '#4338ca' : '#4b5563', 
-                          padding: '4px 10px', 
-                          borderRadius: '12px', 
-                          fontSize: '0.75rem', 
-                          fontWeight: 700,
-                          textTransform: 'uppercase'
-                        }}>
-                          {user.role || 'user'}
-                        </span>
-                      </td>
-                      <td style={{ padding: '12px' }}>
-                        {user.isVerified ? (
-                          <span style={{ background: '#d1fae5', color: '#065f46', padding: '4px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }}>Verified</span>
-                        ) : (
-                          <span style={{ background: '#f3f4f6', color: '#4b5563', padding: '4px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }}>Unverified</span>
-                        )}
-                      </td>
-                      <td style={{ padding: '12px' }}>{new Date(user.createdAt).toLocaleDateString()}</td>
-                      <td style={{ padding: '12px', textAlign: 'right' }}>
-                        {!user.isVerified && (
-                          <button 
-                            onClick={() => handleVerify(user.id, user.name)}
-                            style={{ marginRight: '8px', padding: '6px 12px', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' }}
-                          >
-                            Verify
-                          </button>
-                        )}
-                        <button 
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Email Verified</th>
+                  <th>Joined</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUsers.map((user) => (
+                  <tr key={user.id}>
+                    <td><strong>{user.name}</strong></td>
+                    <td>{user.email}</td>
+                    <td>
+                      <select
+                        value={user.role}
+                        onChange={(e) => handleQuickRoleChange(user, e.target.value)}
+                        className="admin-inline-role-select"
+                      >
+                        <option value="user">user</option>
+                        <option value="host">host</option>
+                        <option value="admin">admin</option>
+                      </select>
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className={`db-bool-chip ${user.isVerified ? 'true' : 'false'}`}
+                        onClick={() => handleToggleVerify(user)}
+                      >
+                        {user.isVerified ? 'Verified' : 'Unverified'}
+                      </button>
+                    </td>
+                    <td>{new Date(user.createdAt).toLocaleDateString()}</td>
+                    <td>
+                      <div className="table-actions">
+                        <button
+                          className="table-action-btn"
                           onClick={() => startEdit(user)}
-                          style={{ marginRight: '8px', padding: '6px 12px', background: '#e5e7eb', color: '#374151', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' }}
                         >
                           Edit
                         </button>
-                        <button 
+                        <button
+                          className="table-action-btn danger"
                           onClick={() => handleDelete(user.id, user.name)}
-                          style={{ padding: '6px 12px', background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' }}
                         >
                           Delete
                         </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       </div>
 
+      {/* Edit User Modal */}
       {editingUser && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
-        }}>
-          <div className="admin-card" style={{ width: '420px', maxWidth: '90%', background: '#fff', borderRadius: 'var(--radius-xl)', padding: '28px', boxShadow: 'var(--shadow-lg)' }}>
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '16px' }}>Edit User</h2>
-            <form onSubmit={handleUpdate}>
-              <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '6px', fontWeight: 600, fontSize: '0.85rem' }}>Username</label>
-                <input 
-                  type="text" 
-                  value={editForm.name} 
-                  onChange={e => setEditForm({...editForm, name: e.target.value})}
-                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #ddd', borderRadius: '6px' }}
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-card">
+            <h3>Edit User</h3>
+            {error && <div className="admin-alert error">{error}</div>}
+            <form onSubmit={handleUpdate} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div className="admin-form-group">
+                <label>Name</label>
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={e => setEditForm({ ...editForm, name: e.target.value })}
                   required
                 />
               </div>
-              <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '6px', fontWeight: 600, fontSize: '0.85rem' }}>Email</label>
-                <input 
-                  type="email" 
-                  value={editForm.email} 
-                  onChange={e => setEditForm({...editForm, email: e.target.value})}
-                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #ddd', borderRadius: '6px' }}
+              <div className="admin-form-group">
+                <label>Email</label>
+                <input
+                  type="email"
+                  value={editForm.email}
+                  onChange={e => setEditForm({ ...editForm, email: e.target.value })}
                   required
                 />
               </div>
-              <div style={{ marginBottom: '18px' }}>
-                <label style={{ display: 'block', marginBottom: '6px', fontWeight: 600, fontSize: '0.85rem' }}>Account Role</label>
+              <div className="admin-form-group">
+                <label>Role</label>
                 <select
                   value={editForm.role}
-                  onChange={e => setEditForm({...editForm, role: e.target.value})}
-                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff' }}
+                  onChange={e => setEditForm({ ...editForm, role: e.target.value })}
                 >
                   <option value="user">User</option>
                   <option value="host">Host</option>
                   <option value="admin">Admin</option>
                 </select>
               </div>
-              {error && <p style={{ color: '#dc2626', marginBottom: '15px', fontSize: '0.85rem' }}>{error}</p>}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                <button type="button" onClick={() => setEditingUser(null)} style={{ padding: '8px 16px', border: '1px solid #ddd', background: 'white', cursor: 'pointer', borderRadius: '6px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }}>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn-secondary"
+                  onClick={() => setEditingUser(null)}
+                >
                   Cancel
                 </button>
-                <button type="submit" style={{ padding: '8px 16px', background: 'var(--primary-color)', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '6px', fontWeight: 600 }}>
+                <button type="submit" className="admin-btn admin-btn-primary">
                   Save Changes
                 </button>
               </div>
@@ -256,6 +306,6 @@ export const AdminUsers: React.FC = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };

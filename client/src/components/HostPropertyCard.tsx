@@ -32,7 +32,6 @@ const HostPropertyCard: React.FC<HostPropertyCardProps> = ({ property, onEdit, o
       <div className="host-property-media" onClick={() => onEdit(property)} title={t('hostDashboard.card.edit')}>
         <img src={displayImage} alt={property.name} loading="lazy" />
         <span className={`host-status-pill ${statusKey}`}>
-          <span className="status-dot" />
           {property.status || 'published'}
         </span>
         <span className="host-photo-count">
@@ -41,7 +40,7 @@ const HostPropertyCard: React.FC<HostPropertyCardProps> = ({ property, onEdit, o
             <circle cx="8.5" cy="8.5" r="1.5" />
             <polyline points="21 15 16 10 5 21" />
           </svg>
-          {t('hostDashboard.card.photosCount', { count: photoCount })}
+          {photoCount === 1 ? '1 photo' : t('hostDashboard.card.photosCount', { count: photoCount })}
         </span>
       </div>
 

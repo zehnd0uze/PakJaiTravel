@@ -14,7 +14,7 @@ export const Header: React.FC = () => {
   const { user, logout, openAuthModal, verify, resendOtp } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const isHomePage = location.pathname === '/';
+  const isHomePage = location.pathname === '/' || location.pathname === '/profile';
   const menuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -378,30 +378,59 @@ export const Header: React.FC = () => {
                   id="user-avatar-btn"
                   aria-label="User menu"
                   aria-expanded={menuOpen}
-                  style={{ position: 'relative' }}
                 >
                   <span className="user-avatar">
-                    {/* Safe access — falls back to email initial or 'U' */}
-                    {(user.name?.[0] || user.email?.[0] || 'U').toUpperCase()}
+                    {user.avatar ? (
+                      <img src={user.avatar} alt={user.name || 'User'} className="user-avatar-img" />
+                    ) : (
+                      (user.name?.[0] || user.email?.[0] || 'U').toUpperCase()
+                    )}
                   </span>
                   {!user.isVerified && <span className="avatar-status-dot" />}
                 </button>
 
                 {menuOpen && (
                   <div className="user-dropdown" role="menu">
+                    {/* Profile Identity Card */}
                     <div className="user-dropdown-header">
-                      <span className="user-dropdown-name">{user.name || 'User'}</span>
-                      <span className="user-dropdown-email">{user.email}</span>
-                      {user.role === 'host' && (
-                        <div className="verified-host-tag" style={{ color: '#2c4c3b', fontSize: '0.75rem', fontWeight: 700, marginTop: '4px' }}>
-                          {t('header.userMenu.certifiedHost')}
+                      <div className="udh-top-row">
+                        <div className="udh-avatar-wrap">
+                          <span className="udh-avatar">
+                            {user.avatar ? (
+                              <img src={user.avatar} alt={user.name || 'User'} />
+                            ) : (
+                              (user.name?.[0] || user.email?.[0] || 'U').toUpperCase()
+                            )}
+                          </span>
+                          {user.isVerified && (
+                            <span className="udh-verified-tick" title="Verified Account">
+                              <svg viewBox="0 0 20 20" width="11" height="11" fill="currentColor">
+                                <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
+                              </svg>
+                            </span>
+                          )}
                         </div>
-                      )}
-                      {!user.isVerified ? (
-                        <div className="unverified-badge">{t('header.userMenu.unverified', 'UNVERIFIED ACCOUNT')}</div>
-                      ) : (
-                        <div className="verified-badge" style={{ backgroundColor: '#10b981', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '0.65rem', fontWeight: 800, marginTop: '4px', alignSelf: 'flex-start', letterSpacing: '0.05em' }}>VERIFIED ACCOUNT</div>
-                      )}
+
+                        <div className="udh-identity">
+                          <span className="user-dropdown-name">{user.name || 'User'}</span>
+                          <span className="user-dropdown-email">{user.email}</span>
+                        </div>
+                      </div>
+
+                      <div className="udh-role-row">
+                        {user.role === 'host' ? (
+                          <span className="udh-role-pill host">
+                            <svg viewBox="0 0 20 20" width="12" height="12" fill="currentColor">
+                              <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
+                            </svg>
+                            {t('header.userMenu.certifiedHost')}
+                          </span>
+                        ) : user.isVerified ? (
+                          <span className="udh-role-pill verified">Verified Member</span>
+                        ) : (
+                          <span className="udh-role-pill unverified">{t('header.userMenu.unverified', 'Unverified Account')}</span>
+                        )}
+                      </div>
                     </div>
 
                     {!user.isVerified && (
@@ -468,7 +497,7 @@ export const Header: React.FC = () => {
                             <button 
                               onClick={handleInlineResend}
                               disabled={verifyLoading}
-                              style={{ background: 'none', border: 'none', color: '#3b82f6', fontSize: '0.75rem', cursor: 'pointer', textDecoration: 'underline', alignSelf: 'center' }}
+                              style={{ background: 'none', border: 'none', color: '#2c4c3b', fontSize: '0.75rem', cursor: 'pointer', textDecoration: 'underline', alignSelf: 'center' }}
                             >
                               Resend code
                             </button>
@@ -477,26 +506,89 @@ export const Header: React.FC = () => {
                       </div>
                     )}
 
-                    <div className="user-dropdown-divider" />
-                    <button className="user-dropdown-item" role="menuitem" onClick={() => { setMenuOpen(false); navigate('/profile'); }}>
-                      {t('header.userMenu.profile')}
-                    </button>
-                    {user.role === 'host' ? (
-                      <button className="user-dropdown-item" role="menuitem" onClick={() => { setMenuOpen(false); navigate('/dashboard'); }} style={{ fontWeight: 600, color: '#2c4c3b' }}>
-                        {t('header.userMenu.hostDashboard')}
+                    <div className="user-dropdown-nav">
+                      <button
+                        className="user-dropdown-item"
+                        role="menuitem"
+                        onClick={() => { setMenuOpen(false); navigate('/profile'); }}
+                      >
+                        <span className="udi-icon">
+                          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                          </svg>
+                        </span>
+                        <span className="udi-label">{t('header.userMenu.profile')}</span>
+                        <span className="udi-arrow" aria-hidden="true">›</span>
                       </button>
-                    ) : (
-                      <button className="user-dropdown-item" role="menuitem" onClick={() => { setMenuOpen(false); navigate('/become-host'); }} style={{ fontWeight: 600 }}>
-                        {t('header.userMenu.becomeHost')}
+
+                      {user.role === 'host' ? (
+                        <button
+                          className="user-dropdown-item host-item"
+                          role="menuitem"
+                          onClick={() => { setMenuOpen(false); navigate('/dashboard'); }}
+                        >
+                          <span className="udi-icon">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                              <polyline points="9 22 9 12 15 12 15 22" />
+                            </svg>
+                          </span>
+                          <span className="udi-label">{t('header.userMenu.hostDashboard')}</span>
+                          <span className="udi-arrow" aria-hidden="true">›</span>
+                        </button>
+                      ) : (
+                        <button
+                          className="user-dropdown-item host-item"
+                          role="menuitem"
+                          onClick={() => { setMenuOpen(false); navigate('/become-host'); }}
+                        >
+                          <span className="udi-icon">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                              <line x1="12" y1="11" x2="12" y2="17" />
+                              <line x1="9" y1="14" x2="15" y2="14" />
+                            </svg>
+                          </span>
+                          <span className="udi-label">{t('header.userMenu.becomeHost')}</span>
+                          <span className="udi-arrow" aria-hidden="true">›</span>
+                        </button>
+                      )}
+
+                      <button
+                        className="user-dropdown-item"
+                        role="menuitem"
+                        onClick={() => { setMenuOpen(false); navigate('/community'); }}
+                      >
+                        <span className="udi-icon">
+                          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                            <circle cx="8.5" cy="8.5" r="1.5" />
+                            <polyline points="21 15 16 10 5 21" />
+                          </svg>
+                        </span>
+                        <span className="udi-label">{t('header.userMenu.communityFeed')}</span>
+                        <span className="udi-arrow" aria-hidden="true">›</span>
                       </button>
-                    )}
-                    <button className="user-dropdown-item" role="menuitem" onClick={() => { setMenuOpen(false); navigate('/community'); }}>
-                      {t('header.userMenu.communityFeed')}
-                    </button>
-                    <div className="user-dropdown-divider" />
-                    <button className="user-dropdown-item logout-item" role="menuitem" onClick={handleLogout} id="logout-btn">
-                      {t('header.userMenu.logout')}
-                    </button>
+                    </div>
+
+                    <div className="user-dropdown-footer">
+                      <button
+                        className="user-dropdown-item logout-item"
+                        role="menuitem"
+                        onClick={handleLogout}
+                        id="logout-btn"
+                      >
+                        <span className="udi-icon">
+                          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                          </svg>
+                        </span>
+                        <span className="udi-label">{t('header.userMenu.logout')}</span>
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

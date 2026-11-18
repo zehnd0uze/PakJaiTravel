@@ -2,388 +2,408 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../utils/supabase';
 
-interface Property {
+interface PropertyItem {
   id: string;
   name: string;
   type: string;
   pricePerNight: number;
   rating: number;
   reviews: number;
+  views: number;
   isVerified: boolean;
-  status?: string;
+  status: string;
+  district?: string;
+  province?: string;
+  imageUrl: string;
   createdAt?: string;
 }
 
-interface User {
+interface UserItem {
   id: string;
   name: string;
   email: string;
+  role: string;
+  isVerified: boolean;
   createdAt: string;
 }
 
-interface Activity {
+interface PostItem {
   id: string;
-  type: 'user' | 'property';
-  text: string;
-  time: string;
+  author_name: string;
+  location_tag?: string;
+  content?: string;
+  image_url?: string;
+  join_potw?: boolean;
+  likes?: string[];
+  created_at: string;
 }
-
-interface ChartDot {
-  label: string;
-  value: number;
-}
-
-interface TrafficStats {
-  active5m: number;
-  total24h: number;
-  chartData: ChartDot[];
-  lastUpdated: string;
-}
-
-// Custom Interactive SVG Chart
-const TrafficBarChart: React.FC<{ data: ChartDot[] }> = ({ data }) => {
-  if (!data || data.length === 0) return <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>No data available</div>;
-
-  const maxVal = Math.max(...data.map(d => d.value), 10);
-  const height = 180;
-  const width = 800; // Increased width for better spacing
-  const barGap = 8;
-  const barWidth = (width / data.length) - barGap;
-
-  return (
-    <div className="traffic-chart-container" style={{ width: '100%', overflowX: 'auto', padding: '10px 0' }}>
-      <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ overflow: 'visible' }}>
-        {data.map((dot, i) => {
-          const barHeight = Math.max((dot.value / maxVal) * (height - 40), 4); // Min height of 4px
-          const x = i * (barWidth + barGap);
-          const y = height - barHeight - 20;
-
-          return (
-            <g key={i} className="chart-bar-group" style={{ cursor: 'pointer' }}>
-              <rect
-                x={x}
-                y={y}
-                width={barWidth}
-                height={barHeight}
-                fill="var(--primary-color)"
-                rx="4"
-                className="chart-bar-rect"
-                style={{ transition: 'all 0.3s ease', opacity: 0.8 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.opacity = '1';
-                  e.currentTarget.style.fill = 'var(--primary-hover)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.opacity = '0.8';
-                  e.currentTarget.style.fill = 'var(--primary-color)';
-                }}
-              >
-                <title>{`${dot.label}: ${dot.value} visits`}</title>
-              </rect>
-              {i % 3 === 0 && (
-                <text x={x + barWidth / 2} y={height} textAnchor="middle" fontSize="11" fill="var(--text-secondary)" fontFamily="var(--font-body)">
-                  {dot.label}
-                </text>
-              )}
-              {barHeight > 20 && dot.value > 0 && (
-                <text x={x + barWidth / 2} y={y - 8} textAnchor="middle" fontSize="11" fontWeight="600" fill="var(--text-primary)" fontFamily="var(--font-body)">
-                  {dot.value}
-                </text>
-              )}
-            </g>
-          );
-        })}
-      </svg>
-    </div>
-  );
-};
 
 export const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
+  const [properties, setProperties] = useState<PropertyItem[]>([]);
+  const [users, setUsers] = useState<UserItem[]>([]);
+  const [posts, setPosts] = useState<PostItem[]>([]);
   const [pendingClaimsCount, setPendingClaimsCount] = useState<number>(0);
-  const [traffic, setTraffic] = useState<TrafficStats>({
-    active5m: 0,
-    total24h: 0,
-    chartData: [],
-    lastUpdated: new Date().toISOString()
-  });
+  const [commentsCount, setCommentsCount] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      const [propsRes, usersRes, postsRes, claimsRes, commentsRes] = await Promise.all([
+        supabase.from('properties').select('*').order('created_at', { ascending: false }),
+        supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+        supabase.from('posts').select('*').order('created_at', { ascending: false }).limit(10),
+        supabase.from('property_claims').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('comments').select('*', { count: 'exact', head: true }),
+      ]);
+
+      if (propsRes.data) {
+        setProperties(
+          (propsRes.data as any[]).map(p => ({
+            id: p.id,
+            name: p.name || 'Untitled Stay',
+            type: p.type || 'Homestay',
+            pricePerNight: Number(p.price_per_night || 0),
+            rating: Number(p.rating || 4.5),
+            reviews: Number(p.reviews || 0),
+            views: Number(p.views || 0),
+            isVerified: Boolean(p.is_verified),
+            status: p.status || 'published',
+            district: p.district || 'Chiang Dao',
+            province: p.province || 'Chiang Mai',
+            imageUrl: p.image_url || (Array.isArray(p.images) && p.images[0]) || '/doiluangbg.jpg',
+            createdAt: p.created_at,
+          }))
+        );
+      }
+
+      if (usersRes.data) {
+        setUsers(
+          (usersRes.data as any[]).map(u => ({
+            id: u.id,
+            name: u.name || 'User',
+            email: u.email || '',
+            role: u.role || 'user',
+            isVerified: Boolean(u.is_verified),
+            createdAt: u.created_at || new Date().toISOString(),
+          }))
+        );
+      }
+
+      if (postsRes.data) {
+        setPosts(postsRes.data as PostItem[]);
+      }
+
+      if (claimsRes.count !== null) setPendingClaimsCount(claimsRes.count);
+      if (commentsRes.count !== null) setCommentsCount(commentsRes.count);
+    } catch (err) {
+      console.error('Admin dashboard fetch error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      let currentUsersCount = 0;
-      let currentPropsCount = 0;
-
-      // Fetch pending claims
-      try {
-        const { count } = await supabase
-          .from('property_claims')
-          .select('*', { count: 'exact', head: true })
-          .eq('status', 'pending');
-        if (count !== null) setPendingClaimsCount(count);
-      } catch {
-        // ignore
-      }
-
-      try {
-        const { data: propData, error: propError } = await supabase
-          .from('properties')
-          .select('*');
-        if (propError) console.warn("Dashboard properties error:", propError);
-        if (propData) {
-          currentPropsCount = propData.length;
-          const formatted = (propData as any[]).map(p => ({
-            ...p,
-            pricePerNight: p.price_per_night || 0,
-            imageUrl: p.image_url || (Array.isArray(p.images) && p.images[0]) || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
-            isVerified: p.is_verified ?? true,
-            rating: p.rating || 4.5,
-            reviews: p.reviews || 0
-          }));
-          setProperties(formatted);
-        }
-
-        const { data: userData, error: userError } = await supabase
-          .from('profiles')
-          .select('*');
-        if (userError) console.warn("Dashboard profiles error:", userError);
-        if (userData) {
-          currentUsersCount = userData.length;
-          const formatted = (userData as any[]).map(u => ({
-            id: u.id,
-            name: u.name || 'Anonymous User',
-            email: u.email,
-            createdAt: u.created_at || new Date().toISOString()
-          }));
-          setUsers(formatted);
-        }
-      } catch (err) {
-        console.error("Dashboard database fetch error", err);
-      }
-
-      // Fetch traffic or generate realistic real-time analytics
-      try {
-        const r = await fetch('/api/admin/traffic');
-        if (r.ok) {
-          const data = await r.json();
-          setTraffic(data);
-        } else {
-          throw new Error('API unavailable');
-        }
-      } catch {
-        const now = new Date();
-        const chartData = Array.from({ length: 12 }, (_, i) => {
-          const d = new Date(now.getTime() - (11 - i) * 2 * 3600 * 1000);
-          return {
-            label: `${d.getHours()}:00`,
-            value: Math.floor(Math.random() * 18) + 4
-          };
-        });
-        setTraffic({
-          active5m: Math.max(3, currentUsersCount || 4),
-          total24h: Math.max(54, (currentUsersCount * 8) + (currentPropsCount * 6) + 32),
-          chartData,
-          lastUpdated: new Date().toISOString()
-        });
-      }
-    };
-
-    fetchData();
-    const interval = setInterval(fetchData, 30000);
-    return () => clearInterval(interval);
+    fetchDashboardData();
   }, []);
 
-  const verifiedCount = properties.filter(p => p.isVerified).length;
-  const publishedCount = properties.filter(p => p.status === 'published').length;
-  const avgRating = properties.length > 0
-    ? (properties.reduce((sum, p) => sum + p.rating, 0) / properties.length).toFixed(1)
-    : '0';
+  const handleQuickPublishProperty = async (id: string, name: string) => {
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .update({ status: 'published', is_verified: true })
+        .eq('id', id);
+      if (error) throw error;
+      showToast(`Published & verified "${name}"`);
+      fetchDashboardData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to publish property');
+    }
+  };
 
-  // Sort properties by highest rating + reviews for "Top Properties"
-  const topProperties = [...properties]
-    .sort((a, b) => (b.rating * b.reviews) - (a.rating * a.reviews))
-    .slice(0, 3);
+  const handleTogglePotw = async (post: PostItem) => {
+    const nextVal = !post.join_potw;
+    try {
+      const { error } = await supabase
+        .from('posts')
+        .update({ join_potw: nextVal })
+        .eq('id', post.id);
+      if (error) throw error;
+      setPosts(prev => prev.map(p => (p.id === post.id ? { ...p, join_potw: nextVal } : p)));
+      showToast(nextVal ? 'Added post to Picture of the Week' : 'Removed post from Picture of the Week');
+    } catch (err: any) {
+      alert(err.message || 'Failed to update post');
+    }
+  };
 
-  // Recent Activity logic (Mock up from recent users/properties)
-  const recentActivities: Activity[] = [];
-  users.slice(0, 3).forEach(u => {
-    recentActivities.push({
-      id: `u-${u.id}`,
-      type: 'user',
-      text: `New user registered: ${u.name}`,
-      time: new Date(u.createdAt).toLocaleDateString()
-    });
-  });
-  properties.slice(-2).forEach(p => {
-    recentActivities.push({
-      id: `p-${p.id}`,
-      type: 'property',
-      text: `Property updated: ${p.name}`,
-      time: new Date().toLocaleDateString()
-    });
-  });
+  const handleDeletePost = async (post: PostItem) => {
+    if (!window.confirm(`Delete post by ${post.author_name}?`)) return;
+    try {
+      const { error } = await supabase.from('posts').delete().eq('id', post.id);
+      if (error) throw error;
+      setPosts(prev => prev.filter(p => p.id !== post.id));
+      showToast('Post deleted');
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete post');
+    }
+  };
+
+  const publishedProperties = properties.filter(p => p.status === 'published');
+  const pendingProperties = properties.filter(p => p.status !== 'published');
+  const verifiedProperties = properties.filter(p => p.isVerified);
+  const hostCount = users.filter(u => u.role === 'host').length;
+  const potwCount = posts.filter(p => p.join_potw).length;
+
+  const dbTables = [
+    { name: 'properties', count: properties.length, desc: 'Accommodations & pricing' },
+    { name: 'profiles', count: users.length, desc: 'Users, hosts & admins' },
+    { name: 'posts', count: posts.length, desc: 'Community Journal posts' },
+    { name: 'comments', count: commentsCount, desc: 'Post comments' },
+    { name: 'property_claims', count: pendingClaimsCount, desc: 'Pending ownership claims' },
+  ];
 
   return (
     <>
+      {toast && (
+        <div className="db-toast success">
+          <span>{toast}</span>
+        </div>
+      )}
+
       <div className="admin-topbar">
-        <h1>Dashboard Overview</h1>
+        <div>
+          <h1>Platform Command Center</h1>
+          <p className="admin-topbar-sub">Manage accommodations, users, community journal, and Supabase tables</p>
+        </div>
+
         <div className="admin-topbar-actions">
-          <button className="admin-btn admin-btn-primary" onClick={() => navigate('/admin/hotels/new')}>
+          <button
+            type="button"
+            className="admin-btn admin-btn-secondary"
+            onClick={() => navigate('/admin/database')}
+          >
+            Open Database Studio
+          </button>
+          <button
+            type="button"
+            className="admin-btn admin-btn-primary"
+            onClick={() => navigate('/admin/hotels/new')}
+          >
             + Add Property
           </button>
         </div>
       </div>
 
       <div className="admin-content">
-        {/* Main Statistics Row */}
+        {/* KPI Metric Cards */}
         <div className="stats-grid">
-          <div className="stat-card live-traffic" style={{ border: '2px solid var(--primary-color)', background: 'rgba(5, 176, 166, 0.05)' }}>
-            <div className="stat-value" style={{ color: 'var(--primary-color)' }}>{traffic.active5m}</div>
-            <div className="stat-label">Active Users (5m)</div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--primary-color)', fontWeight: 700, marginTop: '4px', letterSpacing: '0.5px' }}>LIVE NOW</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-value">{traffic.total24h}</div>
-            <div className="stat-label">Total Visits (24h)</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-value">{publishedCount}</div>
-            <div className="stat-label">Published Stays</div>
-          </div>
-          <div 
-            className="stat-card" 
-            onClick={() => navigate('/admin/claims')} 
-            style={{ 
-              cursor: 'pointer',
-              border: pendingClaimsCount > 0 ? '2px solid #f59e0b' : undefined,
-              background: pendingClaimsCount > 0 ? 'rgba(245, 158, 11, 0.06)' : undefined
-            }}
-          >
-            <div className="stat-value" style={{ color: pendingClaimsCount > 0 ? '#d97706' : undefined }}>
-              {pendingClaimsCount}
+          <div className="stat-card" onClick={() => navigate('/admin/hotels')}>
+            <div className="stat-card-head">
+              <span className="stat-label">Accommodations</span>
+              <span className="stat-pill green">{publishedProperties.length} live</span>
             </div>
-            <div className="stat-label">Pending Claims</div>
-            {pendingClaimsCount > 0 && (
-              <div style={{ fontSize: '0.7rem', color: '#d97706', fontWeight: 700, marginTop: '4px' }}>
-                NEEDS REVIEW →
-              </div>
-            )}
+            <div className="stat-value">{properties.length}</div>
+            <div className="stat-sub">
+              {verifiedProperties.length} verified · {pendingProperties.length} pending/draft
+            </div>
           </div>
-          <div className="stat-card" onClick={() => navigate('/admin/users')} style={{ cursor: 'pointer' }}>
+
+          <div className="stat-card" onClick={() => navigate('/admin/users')}>
+            <div className="stat-card-head">
+              <span className="stat-label">Registered Users</span>
+              <span className="stat-pill">{hostCount} hosts</span>
+            </div>
             <div className="stat-value">{users.length}</div>
-            <div className="stat-label">Total Users</div>
+            <div className="stat-sub">
+              {users.filter(u => u.isVerified).length} verified accounts
+            </div>
           </div>
-          <div className="stat-card">
-            <div className="stat-value">{avgRating}</div>
-            <div className="stat-label">Average Rating</div>
+
+          <div className="stat-card" onClick={() => navigate('/admin/claims')}>
+            <div className="stat-card-head">
+              <span className="stat-label">Ownership Claims</span>
+              {pendingClaimsCount > 0 && <span className="stat-pill warn">Action needed</span>}
+            </div>
+            <div className="stat-value">{pendingClaimsCount}</div>
+            <div className="stat-sub">Pending host ownership verification</div>
           </div>
-          <div className="stat-card">
-            <div className="stat-value">{verifiedCount}</div>
-            <div className="stat-label">Verified Listings</div>
+
+          <div className="stat-card" onClick={() => navigate('/admin/database?table=posts')}>
+            <div className="stat-card-head">
+              <span className="stat-label">Community Journal</span>
+              <span className="stat-pill">{potwCount} in POTW</span>
+            </div>
+            <div className="stat-value">{posts.length}</div>
+            <div className="stat-sub">{commentsCount} total comments across posts</div>
           </div>
         </div>
 
-        {/* Analytics & Activity Row */}
-        <div className="dashboard-metrics-row" style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '24px', marginTop: '24px' }}>
-          
-          {/* Traffic Chart */}
-          <div className="admin-chart-section" style={{ background: '#fff', borderRadius: 'var(--radius-xl)', padding: '24px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
-            <div className="chart-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <div>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, fontFamily: 'var(--font-heading)', color: 'var(--text-primary)' }}>Visitor Traffic</h2>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Last 24 Hours Overview</div>
-              </div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', background: 'var(--bg-color)', padding: '4px 12px', borderRadius: '20px' }}>
-                Updated: {new Date(traffic.lastUpdated).toLocaleTimeString()}
-              </div>
+        {/* Supabase Tables Quick-Jump Strip */}
+        <section className="admin-panel-card" style={{ marginBottom: '24px' }}>
+          <div className="admin-panel-head">
+            <div>
+              <h2>Supabase Tables Explorer</h2>
+              <p>Click any table to inspect, filter, insert, or edit raw database records directly</p>
             </div>
-            <TrafficBarChart data={traffic.chartData} />
-          </div>
-
-          {/* Recent Activity Feed */}
-          <div className="admin-activity-section" style={{ background: '#fff', borderRadius: 'var(--radius-xl)', padding: '24px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
-            <h2 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '20px', fontFamily: 'var(--font-heading)' }}>Recent Activity</h2>
-            <div className="activity-list" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {recentActivities.length > 0 ? recentActivities.map(act => (
-                <div key={act.id} className="activity-item" style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: act.type === 'user' ? 'var(--primary-color)' : 'var(--text-primary)', marginTop: '6px', flexShrink: 0 }}></div>
-                  <div>
-                    <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 500, lineHeight: 1.4 }}>{act.text}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>{act.time}</div>
-                  </div>
-                </div>
-              )) : (
-                <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>No recent activity.</div>
-              )}
-            </div>
-            <button className="admin-btn admin-btn-outline" style={{ width: '100%', marginTop: '20px', fontSize: '0.85rem' }} onClick={() => navigate('/admin/users')}>
-              View All Users
+            <button
+              type="button"
+              className="admin-link-btn"
+              onClick={() => navigate('/admin/database')}
+            >
+              Launch Database Studio →
             </button>
           </div>
-        </div>
 
-        {/* Lower Row: Top Properties & Quick Actions */}
-        <div className="dashboard-lower-row" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px', marginTop: '24px' }}>
-          
-          {/* Top Properties Performance */}
-          <div className="top-properties-section" style={{ background: '#fff', borderRadius: 'var(--radius-xl)', padding: '24px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
-             <h2 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '20px', fontFamily: 'var(--font-heading)' }}>Top Performing Properties</h2>
-             <table className="admin-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--border-color)', textAlign: 'left', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                  <th style={{ paddingBottom: '12px' }}>Property Name</th>
-                  <th style={{ paddingBottom: '12px' }}>Rating</th>
-                  <th style={{ paddingBottom: '12px' }}>Reviews</th>
-                  <th style={{ paddingBottom: '12px', textAlign: 'right' }}>Price/Night</th>
-                </tr>
-              </thead>
-              <tbody>
-                {topProperties.map(p => (
-                  <tr key={p.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                    <td style={{ padding: '16px 0', fontWeight: 600, color: 'var(--text-primary)' }}>{p.name}</td>
-                    <td style={{ padding: '16px 0', color: 'var(--primary-color)', fontWeight: 600 }}>★ {p.rating}</td>
-                    <td style={{ padding: '16px 0' }}>{p.reviews} combined</td>
-                    <td style={{ padding: '16px 0', textAlign: 'right', fontWeight: 500 }}>BAHT {p.pricePerNight}</td>
-                  </tr>
-                ))}
-              </tbody>
-             </table>
-          </div>
-
-          {/* Quick Actions Panel */}
-          <div className="quick-actions-panel">
-            <h2 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '20px', fontFamily: 'var(--font-heading)' }}>Quick Actions</h2>
-            <div className="quick-actions-grid" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div 
-                className="quick-action-card premium-action" 
-                onClick={() => navigate('/admin/hotels/new')}
-                style={{ background: 'var(--text-primary)', color: '#fff', padding: '20px', borderRadius: 'var(--radius-lg)', cursor: 'pointer', transition: 'transform 0.2s', boxShadow: 'var(--shadow-md)' }}
+          <div className="db-quick-cards">
+            {dbTables.map((tbl) => (
+              <button
+                key={tbl.name}
+                type="button"
+                className="db-quick-card"
+                onClick={() => navigate(`/admin/database?table=${tbl.name}`)}
               >
-                <div style={{ fontWeight: 700, fontSize: '1.05rem', marginBottom: '4px' }}>+ Add New Property</div>
-                <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>Publish a new listing to the public</div>
+                <div className="db-qc-top">
+                  <code>public.{tbl.name}</code>
+                  <span className="db-qc-arrow">↗</span>
+                </div>
+                <div className="db-qc-count">{tbl.count} <small>rows</small></div>
+                <div className="db-qc-desc">{tbl.desc}</div>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Two-Column Operations Grid */}
+        <div className="admin-two-col-grid">
+          {/* Left: Properties & Pending Approvals */}
+          <section className="admin-panel-card">
+            <div className="admin-panel-head">
+              <div>
+                <h2>
+                  {pendingProperties.length > 0
+                    ? `Pending Stays (${pendingProperties.length})`
+                    : 'Recent Accommodations'}
+                </h2>
+                <p>Quickly publish, verify, or edit listed accommodations</p>
               </div>
-              
-              <div 
-                className="quick-action-card standard-action" 
+              <button
+                type="button"
+                className="admin-link-btn"
                 onClick={() => navigate('/admin/hotels')}
-                style={{ background: '#fff', border: '1px solid var(--border-color)', padding: '20px', borderRadius: 'var(--radius-lg)', cursor: 'pointer', transition: 'box-shadow 0.2s' }}
               >
-                <div style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--text-primary)', marginBottom: '4px' }}>Manage Listings</div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Edit details, prices, and status</div>
-              </div>
-
-              <div 
-                className="quick-action-card standard-action" 
-                onClick={() => window.open('/', '_blank')}
-                style={{ background: '#fff', border: '1px solid var(--border-color)', padding: '20px', borderRadius: 'var(--radius-lg)', cursor: 'pointer', transition: 'box-shadow 0.2s' }}
-              >
-                <div style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--text-primary)', marginBottom: '4px' }}>View Live Site ↗</div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Open PakJaiTravel in new tab</div>
-              </div>
+                Manage All ({properties.length}) →
+              </button>
             </div>
-          </div>
 
+            {loading ? (
+              <div className="admin-empty-msg">Loading properties...</div>
+            ) : properties.length === 0 ? (
+              <div className="admin-empty-msg">No properties found.</div>
+            ) : (
+              <div className="admin-compact-list">
+                {(pendingProperties.length > 0 ? pendingProperties : properties.slice(0, 5)).map((prop) => (
+                  <div key={prop.id} className="admin-compact-row">
+                    <img src={prop.imageUrl} alt={prop.name} className="acr-thumb" />
+                    <div className="acr-info">
+                      <div className="acr-title-row">
+                        <strong>{prop.name}</strong>
+                        <span className={`status-badge ${prop.status}`}>{prop.status}</span>
+                      </div>
+                      <span>
+                        {prop.type} · {prop.district}, {prop.province} · ฿{prop.pricePerNight.toLocaleString()}/night
+                      </span>
+                    </div>
+                    <div className="acr-actions">
+                      {prop.status !== 'published' && (
+                        <button
+                          type="button"
+                          className="table-action-btn primary"
+                          onClick={() => handleQuickPublishProperty(prop.id, prop.name)}
+                        >
+                          Publish
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="table-action-btn"
+                        onClick={() => navigate(`/admin/hotels/${prop.id}/edit`)}
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* Right: Community Journal & POTW Moderation */}
+          <section className="admin-panel-card">
+            <div className="admin-panel-head">
+              <div>
+                <h2>Community Journal & POTW</h2>
+                <p>Feature traveler photos in Picture of the Week or moderate posts</p>
+              </div>
+              <button
+                type="button"
+                className="admin-link-btn"
+                onClick={() => navigate('/admin/database?table=posts')}
+              >
+                All Posts in DB →
+              </button>
+            </div>
+
+            {loading ? (
+              <div className="admin-empty-msg">Loading community posts...</div>
+            ) : posts.length === 0 ? (
+              <div className="admin-empty-msg">No community posts yet.</div>
+            ) : (
+              <div className="admin-compact-list">
+                {posts.slice(0, 5).map((post) => (
+                  <div key={post.id} className="admin-compact-row">
+                    {post.image_url ? (
+                      <img src={post.image_url} alt="" className="acr-thumb" />
+                    ) : (
+                      <div className="acr-thumb placeholder">Aa</div>
+                    )}
+                    <div className="acr-info">
+                      <div className="acr-title-row">
+                        <strong>{post.author_name || 'Traveler'}</strong>
+                        {post.location_tag && <small className="acr-loc">{post.location_tag}</small>}
+                      </div>
+                      <span className="acr-ellipsis">
+                        {post.content || 'Photo shared in Community Journal'}
+                      </span>
+                    </div>
+                    <div className="acr-actions">
+                      <button
+                        type="button"
+                        className={`table-action-btn ${post.join_potw ? 'active-potw' : ''}`}
+                        onClick={() => handleTogglePotw(post)}
+                        title="Toggle Picture of the Week"
+                      >
+                        {post.join_potw ? '★ In POTW' : '☆ Add POTW'}
+                      </button>
+                      <button
+                        type="button"
+                        className="table-action-btn danger"
+                        onClick={() => handleDeletePost(post)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
         </div>
       </div>
     </>

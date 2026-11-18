@@ -6,14 +6,14 @@
     "addListing": "+ เพิ่มที่พัก",
     "listProperty": "ลงประกาศที่พัก",
     "userMenu": {
-      "certifiedHost": "✓ โฮสต์ที่ได้รับการรับรอง",
+      "certifiedHost": "โฮสต์ที่ได้รับการรับรอง",
       "unverified": "บัญชียังไม่ยืนยัน",
       "verifyPrompt": "ยืนยันอีเมลเพื่อปลดล็อกทุกฟีเจอร์",
       "verifyNow": "ยืนยันตอนนี้",
       "profile": "โปรไฟล์",
-      "hostDashboard": "🏡 แดชบอร์ดโฮสต์",
+      "hostDashboard": "แดชบอร์ดโฮสต์",
       "becomeHost": "สมัครเป็นโฮสต์",
-      "communityFeed": "คอมมูนิตี้",
+      "communityFeed": "บันทึกการเดินทาง",
       "logout": "ออกจากระบบ"
     },
     "login": "เข้าสู่ระบบ",

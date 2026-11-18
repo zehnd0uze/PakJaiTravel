@@ -12,9 +12,9 @@ interface HostPostCreationProps {
 }
 
 const PROMPT_SUGGESTIONS = [
-  { label: 'Morning Mist & Weather', prefix: '🌅 Morning update from our stay: ' },
-  { label: 'Room Availability', prefix: '🛏️ Availability update for upcoming dates: ' },
-  { label: 'Seasonal Highlight', prefix: '🌿 Special experience at our property right now: ' }
+  { label: 'Morning Mist & Weather', prefix: 'Morning update from our stay: ' },
+  { label: 'Room Availability', prefix: 'Availability update for upcoming dates: ' },
+  { label: 'Seasonal Highlight', prefix: 'Special experience at our property right now: ' }
 ];
 
 const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated, initialPropertyId }) => {
@@ -157,7 +157,6 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated, init
     <div className="host-post-box animate-fade-in">
       {selectedProperty && (
         <div className="composer-linked-stay">
-          <span className="composer-linked-dot" />
           <span>Posting update linked to <strong>{selectedProperty.name}</strong></span>
         </div>
       )}

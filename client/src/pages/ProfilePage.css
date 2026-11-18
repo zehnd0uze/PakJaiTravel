@@ -649,75 +649,81 @@
   }
 }
 /* ═══════════════════════════════════════════════════════
-   DESKTOP (≥769px) — inset rounded cover, profile info overlaid
-   on it, white journals card below
+   DESKTOP (≥769px) — Full-bleed borderless cover from top:0
+   (under transparent top bar) + wide borderless gallery below
 ═══════════════════════════════════════════════════════ */
 @media (min-width: 769px) {
   .ig-profile-page {
-    background-color: #f4f5f2;
+    background-color: var(--bg-color, #FAFCFA);
     padding-bottom: 80px;
-    overflow-x: hidden; /* the full-bleed card breakout uses 100vw */
+    overflow-x: hidden;
   }
 
   .ig-top-bar {
-    display: none; /* Desktop relies on the main site header */
+    display: none;
   }
 
-  /* Full-bleed cover: spans the whole width from the header down to the card */
+  /* Full-bleed cover starts at top: 0 behind the transparent navbar */
   .profile-cover {
     display: block;
     width: 100%;
-    height: 440px;
-    margin: var(--profile-header-h, 71px) auto 0;
+    height: 500px;
+    margin: 0 auto;
     border-radius: 0;
-    /* paints above the journals card so the card tucks behind it */
     z-index: 2;
-    box-shadow: 0 10px 30px rgba(24, 48, 37, 0.12);
+    box-shadow: none;
   }
 
   .profile-cover .cover-overlay {
     background: linear-gradient(
       180deg,
-      rgba(15, 24, 19, 0.32) 0%,
-      rgba(15, 24, 19, 0.08) 38%,
-      rgba(15, 24, 19, 0.55) 68%,
-      rgba(15, 24, 19, 0.85) 100%
+      rgba(12, 22, 16, 0.46) 0%,
+      rgba(15, 24, 19, 0.1) 36%,
+      rgba(15, 24, 19, 0.52) 70%,
+      rgba(15, 24, 19, 0.84) 100%
     );
   }
 
   .cover-upload-wrap {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 86px;
+    right: clamp(24px, 4vw, 56px);
     z-index: 4;
   }
 
   .cover-upload-btn {
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(255, 255, 255, 0.16);
     color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    border: none;
     border-radius: 999px;
-    backdrop-filter: blur(6px);
-    padding: 8px 18px;
-    font-size: 0.85rem;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 9px 18px;
+    font-size: 0.84rem;
     font-weight: 600;
     cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .cover-upload-btn:hover {
+    background: rgba(255, 255, 255, 0.26);
   }
 
   .ig-profile-container {
-    max-width: 1000px;
+    max-width: 100%;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0;
     background: transparent;
     border-radius: 0;
     box-shadow: none;
     position: relative;
   }
 
-  /* Hero block pulled up onto the cover. It reserves exactly the height it
-     borrows (min-height = negative margin) so the card below starts at the
-     cover's bottom edge, and centers the info cluster on the lower half. */
+  /* Keep the beloved profile cover hero layout */
   .ig-profile-hero {
+    max-width: 1140px;
+    margin: -340px auto 0;
+    padding: 0 clamp(24px, 4vw, 56px);
     display: grid;
     grid-template-columns: auto 1fr;
     grid-template-areas:
@@ -727,8 +733,6 @@
     align-content: center;
     column-gap: 36px;
     min-height: 340px;
-    margin-top: -340px;
-    /* above the cover (z:2); the card below stays behind the cover (z:1-less) */
     position: relative;
     z-index: 3;
   }
@@ -741,9 +745,8 @@
     grid-area: avatar;
     align-self: center;
     margin-right: 0;
-    /* nudge the circle up without affecting the grid layout */
     position: relative;
-    top: -50px;
+    top: -40px;
   }
 
   .ig-story-ring {
@@ -751,7 +754,7 @@
     height: 168px;
     padding: 0;
     background: transparent;
-    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.38);
   }
 
   .ig-avatar {
@@ -767,27 +770,28 @@
 
   .ig-display-name {
     color: #fff;
-    font-size: 1.45rem;
+    font-family: var(--font-heading);
+    font-size: 1.65rem;
     font-weight: 700;
     text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
     margin: 0 0 4px;
   }
 
   .ig-category {
-    color: rgba(255, 255, 255, 0.92);
-    font-size: 1.02rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
   }
 
   .ig-bio-text {
-    display: none; /* keep the email off the cover */
+    display: none;
   }
 
   .ig-stats-container {
     grid-area: stats;
     justify-content: flex-start;
     gap: 36px;
-    margin: 10px 0 0;
+    margin: 12px 0 0;
   }
 
   .ig-stat-item {
@@ -814,79 +818,206 @@
     grid-area: actions;
     justify-content: flex-start;
     gap: 10px;
-    margin: 26px 0 0;
+    margin: 24px 0 0;
     padding: 0;
   }
 
   .ig-action-btn {
     flex: 0 1 auto;
     padding: 10px 22px;
-    /* glassmorphism on the cover */
     background: rgba(255, 255, 255, 0.16);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.38);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: none;
     color: #fff;
-    border-radius: 8px;
+    border-radius: 999px;
     font-size: 0.9rem;
     font-weight: 600;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
-    transition: background 0.2s ease;
+    transition: background 0.2s ease, transform 0.2s ease;
   }
 
   .ig-action-btn:hover {
     background: rgba(255, 255, 255, 0.28);
+    transform: translateY(-1px);
   }
 
-  /* White journals card below the cover — full-bleed like the cover */
+  /* ── Borderless Wide Gallery Section Below Cover ── */
   .ig-content-card {
-    background: #fff;
+    background: var(--bg-color, #FAFCFA);
     border-radius: 0;
-    box-shadow: 0 4px 18px rgba(24, 48, 37, 0.07);
-    /* tuck the card 5px behind the cover's bottom edge */
-    margin-top: -5px;
-    /* break out of the centered container to the viewport edges */
-    width: 100vw;
-    margin-left: calc(50% - 50vw);
-    overflow: hidden;
+    box-shadow: none;
+    border: none;
+    width: 100%;
+    padding: 36px clamp(24px, 4vw, 56px) 60px;
+  }
+
+  .ig-gallery-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .ig-gallery-title-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ig-gallery-heading {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  .ig-gallery-count {
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(44, 76, 59, 0.08);
+    color: var(--primary-color);
+    font-family: var(--font-heading);
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .ig-gallery-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .ig-share-moment-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    border-radius: 999px;
+    background: var(--primary-color);
+    color: #ffffff;
+    border: none;
+    font-size: 0.86rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .ig-share-moment-btn:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
   }
 
   .ig-tabs-row {
-    justify-content: center;
-    gap: 48px;
-    padding: 14px 0;
-    border-top: none;
-    border-bottom: 1px solid #ececec;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 999px;
+    background: rgba(24, 36, 28, 0.05);
+    border: none;
   }
 
   .ig-tab {
     flex: none;
-    padding: 2px 6px;
-    color: #b0b0b0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #616B64;
+    border: none;
+    transition: all 0.2s ease;
   }
 
   .ig-tab svg {
-    width: 18px;
-    height: 18px;
+    width: 15px;
+    height: 15px;
   }
 
   .ig-tab.active {
-    color: #1a1a1a;
+    background: #ffffff;
+    color: var(--primary-color);
     border: none;
-    margin-top: 0;
+    box-shadow: 0 2px 8px rgba(22, 36, 27, 0.06);
   }
 
   .ig-content-area {
-    padding: 20px;
-    /* invisible boundary like Instagram: grid stops before the screen edges */
-    max-width: 1400px;
+    padding: 0;
+    max-width: 100%;
     width: 100%;
-    margin: 0 auto;
+    margin: 0;
   }
 
-  /* Instagram-style density: more, smaller cells as the card widens */
   .ig-photo-grid {
-    gap: 4px;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 20px;
+  }
+
+  .ig-grid-item {
+    aspect-ratio: 4 / 3;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #EAEEEB;
+    position: relative;
+  }
+
+  .ig-grid-item img {
+    transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .ig-grid-item:hover img {
+    transform: scale(1.04);
+  }
+
+  .ig-grid-hover-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 45%, rgba(14, 24, 18, 0.78) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 20px;
+    color: #ffffff;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .ig-grid-item:hover .ig-grid-hover-overlay {
+    opacity: 1;
+  }
+
+  .ig-grid-loc {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #F3DCCB;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+
+  .ig-grid-caption {
+    font-size: 0.92rem;
+    line-height: 1.45;
+    color: #ffffff;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .ig-feed-list {
+    max-width: 720px;
+    margin: 0 auto;
+    background: transparent;
+    gap: 20px;
+    padding: 0;
   }
 }

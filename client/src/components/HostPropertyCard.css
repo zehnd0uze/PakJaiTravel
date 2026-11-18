@@ -40,56 +40,35 @@
 
 .host-status-pill {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  top: 10px;
+  left: 10px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 0.7rem;
+  padding: 4px 9px;
+  border-radius: 6px;
+  font-size: 0.66rem;
   font-weight: 700;
-  text-transform: capitalize;
-  letter-spacing: 0.02em;
-  background: rgba(255, 255, 255, 0.94);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: rgba(22, 36, 27, 0.82);
   backdrop-filter: blur(6px);
-  color: #1f2937;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-}
-
-.host-status-pill .status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #16a34a;
+  color: #ffffff;
 }
 
 .host-status-pill.published,
 .host-status-pill.active {
-  color: #166534;
-}
-
-.host-status-pill.published .status-dot,
-.host-status-pill.active .status-dot {
-  background: #16a34a;
+  background: rgba(28, 56, 41, 0.86);
+  color: #ffffff;
 }
 
 .host-status-pill.pending {
-  color: #92400e;
-  background: rgba(254, 243, 199, 0.96);
-}
-
-.host-status-pill.pending .status-dot {
-  background: #d97706;
+  background: rgba(146, 64, 14, 0.88);
+  color: #ffffff;
 }
 
 .host-status-pill.draft {
-  color: #4b5563;
-  background: rgba(243, 244, 246, 0.96);
-}
-
-.host-status-pill.draft .status-dot {
-  background: #6b7280;
+  background: rgba(55, 65, 81, 0.85);
+  color: #ffffff;
 }
 
 .host-photo-count {

@@ -6,14 +6,14 @@
     "addListing": "+ Add Listing",
     "listProperty": "List your property",
     "userMenu": {
-      "certifiedHost": "✓ Certified Host",
+      "certifiedHost": "Certified Host",
       "unverified": "Unverified Account",
       "verifyPrompt": "Verify your email to unlock all features.",
       "verifyNow": "Verify Now",
       "profile": "Profile",
-      "hostDashboard": "🏡 Host Dashboard",
+      "hostDashboard": "Host Dashboard",
       "becomeHost": "Become a Host",
-      "communityFeed": "Community Feed",
+      "communityFeed": "Community Journal",
       "logout": "Log out"
     },
     "login": "Log in",

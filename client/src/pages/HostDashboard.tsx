@@ -311,7 +311,6 @@ const HostDashboard: React.FC = () => {
       <div className="host-dashboard-wrapper">
         <div className="container dashboard-gate animate-fade-in">
           <div className="gate-card">
-            <span className="gate-icon">🏡</span>
             <h2>Become a Verified Host</h2>
             <p>
               Welcome, {user.name}! To activate your host status and access the dashboard, list your first accommodation below.
@@ -358,8 +357,8 @@ const HostDashboard: React.FC = () => {
         <div className="container">
           <div className="workspace-header-top">
             <div className="workspace-title-area">
-              <div className="workspace-eyebrow-row">
-                <span className="workspace-eyebrow-badge">{t('hostDashboard.workspaceBadge')}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '6px' }}>
+                <h1 style={{ margin: 0 }}>{t('hostDashboard.title')}</h1>
                 <span className="workspace-certified-pill">
                   <svg viewBox="0 0 20 20" width="13" height="13" fill="currentColor">
                     <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
@@ -367,7 +366,6 @@ const HostDashboard: React.FC = () => {
                   {t('hostDashboard.certifiedHost')}
                 </span>
               </div>
-              <h1>{t('hostDashboard.title')}</h1>
               <p>{t('hostDashboard.welcome', { name: user?.name })}</p>
             </div>
 
@@ -566,10 +564,10 @@ const HostDashboard: React.FC = () => {
                           <span className="claim-prop-name">{claim.property_name}</span>
                           <span className={`claim-status-badge ${claim.status}`}>
                             {claim.status === 'approved'
-                              ? `✓ ${t('hostDashboard.claims.approved')}`
+                              ? t('hostDashboard.claims.approved')
                               : claim.status === 'rejected'
-                              ? `✕ ${t('hostDashboard.claims.rejected')}`
-                              : `⏳ ${t('hostDashboard.claims.pending')}`}
+                              ? t('hostDashboard.claims.rejected')
+                              : t('hostDashboard.claims.pending')}
                           </span>
                         </div>
                       ))}
@@ -584,7 +582,6 @@ const HostDashboard: React.FC = () => {
                   </div>
                 ) : properties.length === 0 ? (
                   <div className="empty-state-card">
-                    <div className="empty-state-icon">🌿</div>
                     <h3>{t('hostDashboard.empty.title')}</h3>
                     <p>{t('hostDashboard.empty.desc')}</p>
                     <div className="empty-state-actions">
@@ -697,7 +694,7 @@ const HostDashboard: React.FC = () => {
 
                 {metrics.doneCount === metrics.totalSteps && (
                   <div className="readiness-complete-banner">
-                    <span>✨ {t('hostDashboard.checklist.allDone')}</span>
+                    <span>{t('hostDashboard.checklist.allDone')}</span>
                   </div>
                 )}
               </div>

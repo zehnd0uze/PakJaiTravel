@@ -8,35 +8,38 @@ export const AdminLayout: React.FC = () => {
   const location = useLocation();
   const [checking, setChecking] = useState(true);
   const [pendingClaimsCount, setPendingClaimsCount] = useState(0);
-
-  const navItems = [
-    { path: '/admin', label: 'Dashboard', exact: true },
-    { path: '/admin/hotels', label: 'Properties' },
-    { path: '/admin/claims', label: 'Ownership Claims', badge: pendingClaimsCount },
-    { path: '/admin/users', label: 'Users' },
-  ];
+  const [pendingPropsCount, setPendingPropsCount] = useState(0);
+  const [adminEmail, setAdminEmail] = useState('');
 
   const isActive = (path: string, exact?: boolean) => {
     if (exact) return location.pathname === path;
     return location.pathname.startsWith(path);
   };
 
-  const fetchPendingClaims = async () => {
+  const fetchBadges = async () => {
     try {
-      const { count, error } = await supabase
+      const { count: cCount } = await supabase
         .from('property_claims')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'pending');
-      if (!error && count !== null) {
-        setPendingClaimsCount(count);
-      }
+      if (cCount !== null) setPendingClaimsCount(cCount);
+    } catch {
+      // ignore
+    }
+
+    try {
+      const { count: pCount } = await supabase
+        .from('properties')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+      if (pCount !== null) setPendingPropsCount(pCount);
     } catch {
       // ignore
     }
   };
 
   useEffect(() => {
-    fetchPendingClaims();
+    fetchBadges();
   }, [location.pathname]);
 
   useEffect(() => {
@@ -46,14 +49,21 @@ export const AdminLayout: React.FC = () => {
         const token = localStorage.getItem('admin_token');
         
         let userId: string | null = null;
+        let email = '';
         if (token) {
           const { data: { user } } = await supabase.auth.getUser(token);
-          if (user) userId = user.id;
+          if (user) {
+            userId = user.id;
+            email = user.email || '';
+          }
         }
         
         if (!userId) {
           const { data: { user } } = await supabase.auth.getUser();
-          if (user) userId = user.id;
+          if (user) {
+            userId = user.id;
+            email = user.email || '';
+          }
         }
 
         if (!userId) {
@@ -66,7 +76,7 @@ export const AdminLayout: React.FC = () => {
 
         const { data: profile } = await supabase
           .from('profiles')
-          .select('role')
+          .select('role, email')
           .eq('id', userId)
           .single();
 
@@ -79,6 +89,7 @@ export const AdminLayout: React.FC = () => {
         }
 
         if (isMounted) {
+          setAdminEmail(profile.email || email);
           setChecking(false);
         }
       } catch (err) {
@@ -101,10 +112,10 @@ export const AdminLayout: React.FC = () => {
 
   if (checking) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', fontFamily: 'var(--font-body)' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div className="spinner" style={{ width: '40px', height: '40px', margin: '0 auto 16px' }} />
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Verifying admin access...</p>
+      <div className="admin-Verify-screen">
+        <div className="admin-Verify-box">
+          <div className="spinner" />
+          <p>Verifying administrator session...</p>
         </div>
       </div>
     );
@@ -115,54 +126,115 @@ export const AdminLayout: React.FC = () => {
       {/* Sidebar */}
       <aside className="admin-sidebar">
         <div className="admin-sidebar-header">
-          <div className="admin-logo">
-            PakJai<span className="logo-accent">Travel</span>
-            <span className="admin-label">Admin</span>
+          <div className="admin-logo" onClick={() => navigate('/admin')}>
+            PAKJAI<span className="admin-label">Admin</span>
           </div>
+          {adminEmail && <div className="admin-user-sub">{adminEmail}</div>}
         </div>
 
         <nav className="admin-nav">
           <div className="admin-nav-section">
-            <div className="admin-nav-title">Main</div>
-            {navItems.map((item) => (
-              <button
-                key={item.path}
-                className={`admin-nav-item ${isActive(item.path, item.exact) ? 'active' : ''}`}
-                onClick={() => navigate(item.path)}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-              >
-                <span>{item.label}</span>
-                {item.badge !== undefined && item.badge > 0 && (
-                  <span style={{
-                    background: '#ef4444',
-                    color: '#ffffff',
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                    padding: '2px 7px',
-                    borderRadius: '10px',
-                    lineHeight: 1
-                  }}>
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            ))}
+            <div className="admin-nav-title">Operations</div>
+
+            <button
+              className={`admin-nav-item ${isActive('/admin', true) ? 'active' : ''}`}
+              onClick={() => navigate('/admin')}
+            >
+              <span className="admin-nav-icon">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="7" height="7" rx="1" />
+                  <rect x="14" y="3" width="7" height="7" rx="1" />
+                  <rect x="14" y="14" width="7" height="7" rx="1" />
+                  <rect x="3" y="14" width="7" height="7" rx="1" />
+                </svg>
+              </span>
+              <span className="admin-nav-label">Overview</span>
+            </button>
+
+            <button
+              className={`admin-nav-item ${isActive('/admin/hotels') ? 'active' : ''}`}
+              onClick={() => navigate('/admin/hotels')}
+            >
+              <span className="admin-nav-icon">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+              </span>
+              <span className="admin-nav-label">Properties</span>
+              {pendingPropsCount > 0 && (
+                <span className="admin-nav-badge warn">{pendingPropsCount}</span>
+              )}
+            </button>
+
+            <button
+              className={`admin-nav-item ${isActive('/admin/claims') ? 'active' : ''}`}
+              onClick={() => navigate('/admin/claims')}
+            >
+              <span className="admin-nav-icon">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                  <line x1="7" y1="7" x2="7.01" y2="7" />
+                </svg>
+              </span>
+              <span className="admin-nav-label">Ownership Claims</span>
+              {pendingClaimsCount > 0 && (
+                <span className="admin-nav-badge alert">{pendingClaimsCount}</span>
+              )}
+            </button>
+
+            <button
+              className={`admin-nav-item ${isActive('/admin/users') ? 'active' : ''}`}
+              onClick={() => navigate('/admin/users')}
+            >
+              <span className="admin-nav-icon">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </span>
+              <span className="admin-nav-label">Users & Roles</span>
+            </button>
           </div>
 
           <div className="admin-nav-section">
-            <div className="admin-nav-title">System</div>
-            <button className="admin-nav-item" onClick={() => navigate('/admin')}>
-              <span>Settings</span>
+            <div className="admin-nav-title">Supabase Data</div>
+
+            <button
+              className={`admin-nav-item ${isActive('/admin/database') ? 'active' : ''}`}
+              onClick={() => navigate('/admin/database')}
+            >
+              <span className="admin-nav-icon">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <ellipse cx="12" cy="5" rx="9" ry="3" />
+                  <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+                  <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+                </svg>
+              </span>
+              <span className="admin-nav-label">Database Studio</span>
             </button>
           </div>
         </nav>
 
         <div className="admin-sidebar-footer">
-          <button className="admin-back-btn" onClick={handleLogout} style={{ color: '#dc2626', borderColor: '#fee2e2', background: '#fef2f2', marginBottom: '12px' }}>
-            Logout Admin
+          <button className="admin-footer-link" onClick={() => navigate('/')}>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+            <span>Public Site</span>
           </button>
-          <button className="admin-back-btn" onClick={() => navigate('/')}>
-            ← Back to Public Site
+
+          <button className="admin-footer-link logout" onClick={handleLogout}>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            <span>Sign out</span>
           </button>
         </div>
       </aside>
