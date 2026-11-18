@@ -197,7 +197,7 @@ export const Home: React.FC = () => {
   const featuredStay = properties[0];
   const activeAtmoObj = ATMOSPHERE_MODES.find(m => m.id === atmosphere) || ATMOSPHERE_MODES[0];
 
-  // Combine dynamic stays + scenic moments for the gliding filmstrip
+  // Combine verified stays + curated destinations for the calm destination strip (no duplicate loop)
   const filmstripItems = useMemo(() => {
     const stayItems = properties.map(p => ({
       title: p.name,
@@ -211,9 +211,7 @@ export const Home: React.FC = () => {
       href: `/hotels?q=${encodeURIComponent(m.query)}`,
       img: m.img
     }));
-    const combined = [...stayItems, ...staticItems];
-    // Duplicate for seamless infinite CSS loop
-    return [...combined, ...combined];
+    return [...stayItems, ...staticItems].slice(0, 5);
   }, [properties]);
 
   return (

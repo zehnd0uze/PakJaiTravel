@@ -452,55 +452,42 @@
 }
 
 /* ══════════════════════════════════════════════════════════
-   GLIDING FILMSTRIP MARQUEE ("Moments in Motion")
+   DESTINATION & STAY STRIP — Calm, Stationary, Borderless Row
 ══════════════════════════════════════════════════════════ */
 .gliding-ribbon-section {
   width: 100%;
-  overflow: hidden;
-  padding: 18px 0 8px;
+  padding: 20px clamp(24px, 4vw, 56px) 4px;
   position: relative;
-  /* Soft fade on left and right edges so it feels borderless */
-  mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
 }
 
 .gliding-track {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  width: max-content;
-  animation: glideFilmstrip 42s linear infinite;
-}
-
-.gliding-ribbon-section:hover .gliding-track {
-  animation-play-state: paused;
-}
-
-@keyframes glideFilmstrip {
-  0% { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(-50%, 0, 0); }
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  width: 100%;
 }
 
 .gliding-card {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 18px 8px 8px;
-  border-radius: 999px;
-  background: rgba(44, 76, 59, 0.045);
+  padding: 8px 14px 8px 8px;
+  border-radius: 16px;
+  background: rgba(44, 76, 59, 0.04);
   cursor: pointer;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease;
+  min-width: 0;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.25s ease;
 }
 
 .gliding-card:hover {
-  transform: translateY(-3px) scale(1.02);
-  background: rgba(44, 76, 59, 0.1);
+  transform: translateY(-2px);
+  background: rgba(44, 76, 59, 0.085);
 }
 
 .gliding-thumb {
-  width: 44px;
+  width: 52px;
   height: 44px;
-  border-radius: 50%;
+  border-radius: 11px;
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -510,26 +497,51 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.gliding-card:hover .gliding-thumb img {
+  transform: scale(1.06);
 }
 
 .gliding-meta {
   display: flex;
   flex-direction: column;
-  line-height: 1.25;
+  line-height: 1.28;
+  min-width: 0;
 }
 
 .gliding-meta strong {
   font-family: var(--font-heading);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 600;
   color: var(--text-primary);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .gliding-meta span {
-  font-size: 0.76rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 1100px) {
+  .gliding-track {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+  .gliding-track::-webkit-scrollbar {
+    display: none;
+  }
+  .gliding-card {
+    flex: 0 0 220px;
+  }
 }
 
 /* ══════════════════════════════════════════════════════════
