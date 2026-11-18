@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import HostPostCreation from '../components/HostPostCreation';
 import PostCard from '../components/PostCard';
@@ -20,9 +21,15 @@ interface UserClaim {
 }
 
 const HostDashboard: React.FC = () => {
+  const { t } = useTranslation();
   const { user, updateProfile } = useAuth();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<'properties' | 'updates'>('properties');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'pending'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [promotedPropertyId, setPromotedPropertyId] = useState<string | undefined>(undefined);
+  const [openGuideIndex, setOpenGuideIndex] = useState<number | null>(0);
+
   const [posts, setPosts] = useState<Post[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
   const [userClaims, setUserClaims] = useState<UserClaim[]>([]);
@@ -166,15 +173,135 @@ const HostDashboard: React.FC = () => {
     }
   };
 
-  const handlePromote = (_property: Property) => {
+  const handlePromote = (property: Property) => {
+    setPromotedPropertyId(property.id);
     setActiveTab('updates');
+    window.scrollTo({ top: 240, behavior: 'smooth' });
   };
+
+  // Computed KPI Metrics & Readiness Checklist
+  const metrics = useMemo(() => {
+    const publishedCount = properties.filter(p => !p.status || p.status === 'published' || p.status === 'active').length;
+    const inReviewCount = properties.length - publishedCount;
+    const totalViews = properties.reduce((acc, p) => acc + (Number(p.views) || 0), 0);
+    const totalLikes = posts.reduce((acc, p) => acc + (p.likes?.length || 0), 0);
+    const totalComments = posts.reduce((acc, p) => acc + (p.comments?.length || 0), 0);
+
+    const hasListing = properties.length > 0;
+    const hasPhotos = properties.some(p => (p.images?.length || 0) >= 3);
+    const hasContact = properties.some(p => Boolean(p.contact?.phone?.trim() || p.contact?.line?.trim()));
+    const hasDetails = properties.some(
+      p => Boolean(p.description && p.description.trim().length >= 30) &&
+           ((p.amenities?.length || 0) + (p.features?.length || 0)) >= 4
+    );
+    const hasPost = posts.length > 0;
+
+    const checklist = [
+      {
+        id: 'listed',
+        label: t('hostDashboard.checklist.stepListed'),
+        done: hasListing,
+        onAction: () => { setPropertyToEdit(undefined); setShowPropertyModal(true); }
+      },
+      {
+        id: 'photos',
+        label: t('hostDashboard.checklist.stepPhotos'),
+        done: hasPhotos,
+        onAction: () => {
+          const target = properties.find(p => (p.images?.length || 0) < 3) || properties[0];
+          setPropertyToEdit(target);
+          setShowPropertyModal(true);
+        }
+      },
+      {
+        id: 'contact',
+        label: t('hostDashboard.checklist.stepContact'),
+        done: hasContact,
+        onAction: () => {
+          const target = properties.find(p => !p.contact?.phone?.trim() && !p.contact?.line?.trim()) || properties[0];
+          setPropertyToEdit(target);
+          setShowPropertyModal(true);
+        }
+      },
+      {
+        id: 'details',
+        label: t('hostDashboard.checklist.stepDetails'),
+        done: hasDetails,
+        onAction: () => {
+          const target = properties[0];
+          setPropertyToEdit(target);
+          setShowPropertyModal(true);
+        }
+      },
+      {
+        id: 'post',
+        label: t('hostDashboard.checklist.stepPost'),
+        done: hasPost,
+        onAction: () => {
+          if (properties[0]) setPromotedPropertyId(properties[0].id);
+          setActiveTab('updates');
+        }
+      }
+    ];
+
+    const doneCount = checklist.filter(c => c.done).length;
+    const readinessPct = Math.round((doneCount / checklist.length) * 100);
+
+    return {
+      publishedCount,
+      inReviewCount,
+      totalViews,
+      totalLikes,
+      totalComments,
+      checklist,
+      doneCount,
+      totalSteps: checklist.length,
+      readinessPct
+    };
+  }, [properties, posts, t]);
+
+  const filteredProperties = useMemo(() => {
+    return properties.filter(prop => {
+      const status = (prop.status || 'published').toLowerCase();
+      if (statusFilter === 'published' && status !== 'published' && status !== 'active') {
+        return false;
+      }
+      if (statusFilter === 'pending' && (status === 'published' || status === 'active')) {
+        return false;
+      }
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchName = prop.name?.toLowerCase().includes(q);
+        const matchDistrict = prop.district?.toLowerCase().includes(q);
+        const matchType = prop.type?.toLowerCase().includes(q);
+        return matchName || matchDistrict || matchType;
+      }
+      return true;
+    });
+  }, [properties, statusFilter, searchQuery]);
+
+  const guides = [
+    {
+      title: t('hostDashboard.resources.guide1Title'),
+      body: t('hostDashboard.resources.guide1Body')
+    },
+    {
+      title: t('hostDashboard.resources.guide2Title'),
+      body: t('hostDashboard.resources.guide2Body')
+    },
+    {
+      title: t('hostDashboard.resources.guide3Title'),
+      body: t('hostDashboard.resources.guide3Body')
+    }
+  ];
 
   if (!user) {
     return (
-      <div className="container dashboard-gate animate-fade-in" style={{ padding: '100px 20px', textAlign: 'center' }}>
-        <h2>Sign In Required</h2>
-        <p>Please sign in to access your host dashboard.</p>
+      <div className="container dashboard-gate animate-fade-in">
+        <div className="gate-card">
+          <h2>Sign In Required</h2>
+          <p>Please sign in to access your host dashboard.</p>
+        </div>
       </div>
     );
   }
@@ -182,22 +309,22 @@ const HostDashboard: React.FC = () => {
   if (user?.role !== 'host') {
     return (
       <div className="host-dashboard-wrapper">
-        <div className="container dashboard-gate animate-fade-in" style={{ padding: '100px 20px', textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
-          <span style={{ fontSize: '3rem', display: 'block', marginBottom: '16px' }}>🏡</span>
-          <h2 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '2rem', marginBottom: '16px', color: 'var(--primary-color)' }}>
-            Become a Verified Host
-          </h2>
-          <p style={{ color: '#666', lineHeight: 1.6, marginBottom: '32px' }}>
-            Welcome, {user.name}! To activate your host status and access the dashboard, you must first list an accommodation. Click below to add your property.
-          </p>
-          <Button 
-            variant="primary" 
-            size="lg" 
-            onClick={handleActivateHost}
-            disabled={activating}
-          >
-            {activating ? 'Activating Host Mode...' : 'Add Property & Activate Host Mode'}
-          </Button>
+        <div className="container dashboard-gate animate-fade-in">
+          <div className="gate-card">
+            <span className="gate-icon">🏡</span>
+            <h2>Become a Verified Host</h2>
+            <p>
+              Welcome, {user.name}! To activate your host status and access the dashboard, list your first accommodation below.
+            </p>
+            <Button 
+              variant="primary" 
+              size="lg" 
+              onClick={handleActivateHost}
+              disabled={activating}
+            >
+              {activating ? 'Activating Host Mode...' : 'Add Property & Activate Host Mode'}
+            </Button>
+          </div>
         </div>
         
         {showPropertyModal && (
@@ -226,73 +353,223 @@ const HostDashboard: React.FC = () => {
 
   return (
     <div className="host-dashboard animate-fade-in">
-      <div className="dashboard-hero">
+      {/* Editorial Workspace Header */}
+      <header className="dashboard-workspace-header">
         <div className="container">
-          <div className="hero-content-small">
-            <h1>Host Dashboard</h1>
-            <p>Welcome back, {user?.name}. Manage your accommodations and connect with travelers.</p>
+          <div className="workspace-header-top">
+            <div className="workspace-title-area">
+              <div className="workspace-eyebrow-row">
+                <span className="workspace-eyebrow-badge">{t('hostDashboard.workspaceBadge')}</span>
+                <span className="workspace-certified-pill">
+                  <svg viewBox="0 0 20 20" width="13" height="13" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
+                  </svg>
+                  {t('hostDashboard.certifiedHost')}
+                </span>
+              </div>
+              <h1>{t('hostDashboard.title')}</h1>
+              <p>{t('hostDashboard.welcome', { name: user?.name })}</p>
+            </div>
+
+            <div className="workspace-primary-actions">
+              <button
+                type="button"
+                className="ws-btn ws-btn-secondary"
+                onClick={() => setShowClaimModal(true)}
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                  <line x1="7" y1="7" x2="7.01" y2="7" />
+                </svg>
+                <span>{t('hostDashboard.claimBtn')}</span>
+              </button>
+
+              <button
+                type="button"
+                className="ws-btn ws-btn-primary"
+                onClick={() => { setPropertyToEdit(undefined); setShowPropertyModal(true); }}
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>{t('hostDashboard.addBtn')}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* KPI Summary Strip */}
+          <div className="dashboard-kpi-strip">
+            <div className="kpi-card" onClick={() => setActiveTab('properties')}>
+              <div className="kpi-card-top">
+                <span className="kpi-label">{t('hostDashboard.stats.activeStays')}</span>
+                <span className="kpi-icon-box">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                  </svg>
+                </span>
+              </div>
+              <div className="kpi-value">{properties.length}</div>
+              <div className="kpi-sub">
+                <span className="kpi-sub-highlight">{t('hostDashboard.stats.publishedCount', { count: metrics.publishedCount })}</span>
+                {metrics.inReviewCount > 0 && (
+                  <span> · {t('hostDashboard.stats.inReviewCount', { count: metrics.inReviewCount })}</span>
+                )}
+              </div>
+            </div>
+
+            <div className="kpi-card">
+              <div className="kpi-card-top">
+                <span className="kpi-label">{t('hostDashboard.stats.totalViews')}</span>
+                <span className="kpi-icon-box">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                </span>
+              </div>
+              <div className="kpi-value">{metrics.totalViews.toLocaleString()}</div>
+              <div className="kpi-sub">{t('hostDashboard.stats.viewsSub')}</div>
+            </div>
+
+            <div className="kpi-card" onClick={() => setActiveTab('updates')}>
+              <div className="kpi-card-top">
+                <span className="kpi-label">{t('hostDashboard.stats.communityUpdates')}</span>
+                <span className="kpi-icon-box">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                  </svg>
+                </span>
+              </div>
+              <div className="kpi-value">{posts.length}</div>
+              <div className="kpi-sub">
+                {t('hostDashboard.stats.engagementSub', { likes: metrics.totalLikes, comments: metrics.totalComments })}
+              </div>
+            </div>
+
+            <div className="kpi-card">
+              <div className="kpi-card-top">
+                <span className="kpi-label">{t('hostDashboard.stats.readiness')}</span>
+                <span className="kpi-readiness-badge">{metrics.readinessPct}%</span>
+              </div>
+              <div className="kpi-progress-track">
+                <div className="kpi-progress-fill" style={{ width: `${metrics.readinessPct}%` }} />
+              </div>
+              <div className="kpi-sub">
+                {t('hostDashboard.stats.readinessSub', { done: metrics.doneCount, total: metrics.totalSteps })}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="dashboard-tabs-bar">
-        <div className="container tabs-container">
-          <button 
-            className={`tab-btn ${activeTab === 'properties' ? 'active' : ''}`}
-            onClick={() => setActiveTab('properties')}
-          >
-            My Accommodations ({properties.length})
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'updates' ? 'active' : ''}`}
-            onClick={() => setActiveTab('updates')}
-          >
-            Community Updates ({posts.length})
-          </button>
-        </div>
-      </div>
-
+      {/* Main Content Container */}
       <div className="container dashboard-main">
+        {/* Segmented Navigation & Filter Toolbar */}
+        <div className="dashboard-toolbar">
+          <div className="segmented-tabs" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'properties'}
+              className={`seg-tab-btn ${activeTab === 'properties' ? 'active' : ''}`}
+              onClick={() => setActiveTab('properties')}
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              </svg>
+              <span>{t('hostDashboard.tabs.accommodations')}</span>
+              <span className="seg-tab-count">{properties.length}</span>
+            </button>
+
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'updates'}
+              className={`seg-tab-btn ${activeTab === 'updates' ? 'active' : ''}`}
+              onClick={() => setActiveTab('updates')}
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+              </svg>
+              <span>{t('hostDashboard.tabs.updates')}</span>
+              <span className="seg-tab-count">{posts.length}</span>
+            </button>
+          </div>
+
+          {activeTab === 'properties' && properties.length > 0 && (
+            <div className="toolbar-filters">
+              <div className="status-filter-pills">
+                <button
+                  type="button"
+                  className={`filter-pill ${statusFilter === 'all' ? 'active' : ''}`}
+                  onClick={() => setStatusFilter('all')}
+                >
+                  {t('hostDashboard.filters.all')}
+                </button>
+                <button
+                  type="button"
+                  className={`filter-pill ${statusFilter === 'published' ? 'active' : ''}`}
+                  onClick={() => setStatusFilter('published')}
+                >
+                  {t('hostDashboard.filters.published')}
+                </button>
+                {metrics.inReviewCount > 0 && (
+                  <button
+                    type="button"
+                    className={`filter-pill ${statusFilter === 'pending' ? 'active' : ''}`}
+                    onClick={() => setStatusFilter('pending')}
+                  >
+                    {t('hostDashboard.filters.pending')}
+                  </button>
+                )}
+              </div>
+
+              {properties.length > 1 && (
+                <div className="toolbar-search-box">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={t('hostDashboard.filters.searchPlaceholder')}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* 2-Column Workspace Grid */}
         <div className="dashboard-grid">
           <div className="dashboard-content">
             {activeTab === 'properties' ? (
               <div className="properties-section">
-                {/* Pending Claims Status Notification */}
+                {/* Pending Ownership Claims Banner */}
                 {userClaims.length > 0 && (
-                  <div style={{
-                    marginBottom: '24px',
-                    padding: '16px 20px',
-                    background: '#f0fdf4',
-                    border: '1px solid #bbf7d0',
-                    borderRadius: '16px'
-                  }}>
-                    <div style={{ fontWeight: 700, color: '#166534', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span>🏷️</span>
-                      <span>Your Property Ownership Requests ({userClaims.length})</span>
+                  <div className="claims-banner">
+                    <div className="claims-banner-header">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                        <line x1="7" y1="7" x2="7.01" y2="7" />
+                      </svg>
+                      <span>{t('hostDashboard.claims.title')} ({userClaims.length})</span>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div className="claims-list">
                       {userClaims.map(claim => (
-                        <div key={claim.id} style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          background: '#ffffff',
-                          padding: '10px 14px',
-                          borderRadius: '10px',
-                          border: '1px solid #e2e8f0',
-                          fontSize: '0.9rem'
-                        }}>
-                          <span style={{ fontWeight: 600, color: '#1e293b' }}>{claim.property_name}</span>
-                          <span style={{
-                            fontSize: '0.78rem',
-                            fontWeight: 700,
-                            padding: '4px 10px',
-                            borderRadius: '20px',
-                            background: claim.status === 'approved' ? '#dcfce7' : claim.status === 'rejected' ? '#fee2e2' : '#fef3c7',
-                            color: claim.status === 'approved' ? '#166534' : claim.status === 'rejected' ? '#991b1b' : '#92400e',
-                            textTransform: 'uppercase'
-                          }}>
-                            {claim.status === 'approved' ? '✓ Approved' : claim.status === 'rejected' ? '✕ Rejected' : '⏳ Pending Review'}
+                        <div key={claim.id} className="claim-item-row">
+                          <span className="claim-prop-name">{claim.property_name}</span>
+                          <span className={`claim-status-badge ${claim.status}`}>
+                            {claim.status === 'approved'
+                              ? `✓ ${t('hostDashboard.claims.approved')}`
+                              : claim.status === 'rejected'
+                              ? `✕ ${t('hostDashboard.claims.rejected')}`
+                              : `⏳ ${t('hostDashboard.claims.pending')}`}
                           </span>
                         </div>
                       ))}
@@ -300,30 +577,40 @@ const HostDashboard: React.FC = () => {
                   </div>
                 )}
 
-                <div className="section-header-row" style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <h2 className="section-label" style={{ margin: 0 }}>Your Accommodations</h2>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <button 
-                      className="add-property-btn"
-                      style={{ background: '#ffffff', color: '#2e7d32', border: '1.5px solid #2e7d32' }}
-                      onClick={() => setShowClaimModal(true)}
-                    >
-                      🏷️ Claim Existing Listing
-                    </button>
-                    <button 
-                      className="add-property-btn"
-                      onClick={() => { setPropertyToEdit(undefined); setShowPropertyModal(true); }}
-                    >
-                      + Add New Accommodation
-                    </button>
-                  </div>
-                </div>
-
                 {loading ? (
-                  <div className="loading-state">Loading accommodations...</div>
-                ) : properties.length > 0 ? (
+                  <div className="dashboard-skeleton-list">
+                    <div className="skeleton-card" />
+                    <div className="skeleton-card" />
+                  </div>
+                ) : properties.length === 0 ? (
+                  <div className="empty-state-card">
+                    <div className="empty-state-icon">🌿</div>
+                    <h3>{t('hostDashboard.empty.title')}</h3>
+                    <p>{t('hostDashboard.empty.desc')}</p>
+                    <div className="empty-state-actions">
+                      <button
+                        type="button"
+                        className="ws-btn ws-btn-primary"
+                        onClick={() => { setPropertyToEdit(undefined); setShowPropertyModal(true); }}
+                      >
+                        + {t('hostDashboard.empty.cta')}
+                      </button>
+                      <button
+                        type="button"
+                        className="ws-btn ws-btn-secondary"
+                        onClick={() => setShowClaimModal(true)}
+                      >
+                        {t('hostDashboard.claimBtn')}
+                      </button>
+                    </div>
+                  </div>
+                ) : filteredProperties.length === 0 ? (
+                  <div className="empty-state-card">
+                    <p>{t('hostDashboard.empty.noFilterMatch')}</p>
+                  </div>
+                ) : (
                   <div className="properties-list">
-                    {properties.map(prop => (
+                    {filteredProperties.map(prop => (
                       <HostPropertyCard 
                         key={prop.id} 
                         property={prop} 
@@ -333,31 +620,28 @@ const HostDashboard: React.FC = () => {
                       />
                     ))}
                   </div>
-                ) : (
-                  <div className="empty-state-box glass-panel" style={{ textAlign: 'center', padding: '60px 30px' }}>
-                    <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '16px' }}>🌿</span>
-                    <h3 style={{ marginBottom: '8px' }}>No accommodations listed yet</h3>
-                    <p style={{ color: '#666', maxWidth: '400px', margin: '0 auto 24px' }}>
-                      Start your journey by adding your first homestay, resort, villa, or guesthouse!
-                    </p>
-                    <button 
-                      className="add-property-btn"
-                      onClick={() => { setPropertyToEdit(undefined); setShowPropertyModal(true); }}
-                      style={{ padding: '12px 28px' }}
-                    >
-                      + List Your First Accommodation
-                    </button>
-                  </div>
                 )}
               </div>
             ) : (
               <div className="updates-section">
-                <h2 className="section-label">Share an Update</h2>
-                <HostPostCreation onPostCreated={fetchData} />
+                <div className="updates-composer-header">
+                  <h2>{t('hostDashboard.updates.composerTitle')}</h2>
+                  <p>{t('hostDashboard.updates.composerSub')}</p>
+                </div>
 
-                <h2 className="section-label" style={{ marginTop: '40px' }}>Recent Posts</h2>
+                <HostPostCreation
+                  onPostCreated={fetchData}
+                  initialPropertyId={promotedPropertyId}
+                />
+
+                <div className="updates-feed-header">
+                  <h2>{t('hostDashboard.updates.recentTitle')} ({posts.length})</h2>
+                </div>
+
                 {loading ? (
-                  <div className="loading-state">Loading feed...</div>
+                  <div className="dashboard-skeleton-list">
+                    <div className="skeleton-card" />
+                  </div>
                 ) : posts.length > 0 ? (
                   <div className="host-posts-list">
                     {posts.map(post => (
@@ -365,33 +649,98 @@ const HostDashboard: React.FC = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="empty-state-box glass-panel">
-                    <p>No updates yet. Share photos or news about your property to attract guests!</p>
+                  <div className="empty-state-card">
+                    <p>{t('hostDashboard.updates.emptyUpdates')}</p>
                   </div>
                 )}
               </div>
             )}
           </div>
 
+          {/* Sticky Right Sidebar */}
           <aside className="dashboard-sidebar">
-            <div className="sidebar-card glass-panel luxury-insight">
-              <h3>Direct Booking Tip</h3>
-              <p>Accommodations with high-resolution photos and detailed amenities receive <strong>3x more traveler inquiries</strong>.</p>
-              <button 
-                className="sidebar-action-btn" 
-                onClick={() => { setPropertyToEdit(undefined); setShowPropertyModal(true); }}
-              >
-                + Add Accommodation
-              </button>
-            </div>
-            
-            <div className="sidebar-card glass-panel">
-              <h3>Host Resources</h3>
-              <ul className="tips-list">
-                <li>Photography & Lighting Guide</li>
-                <li>Write Compelling Descriptions</li>
-                <li>Verified Owner Standards</li>
-              </ul>
+            <div className="dashboard-sidebar-sticky">
+              {/* Interactive Listing Readiness Checklist */}
+              <div className="sidebar-panel readiness-panel">
+                <div className="sidebar-panel-header">
+                  <div>
+                    <h3>{t('hostDashboard.checklist.title')}</h3>
+                    <p className="sidebar-panel-sub">{t('hostDashboard.checklist.subtitle')}</p>
+                  </div>
+                </div>
+
+                <ul className="readiness-checklist">
+                  {metrics.checklist.map(item => (
+                    <li key={item.id} className={`checklist-item ${item.done ? 'done' : 'pending'}`}>
+                      <span className="checklist-check" aria-hidden="true">
+                        {item.done ? (
+                          <svg viewBox="0 0 20 20" width="14" height="14" fill="currentColor">
+                            <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
+                          </svg>
+                        ) : (
+                          <span className="checklist-empty-circle" />
+                        )}
+                      </span>
+                      <span className="checklist-text">{item.label}</span>
+                      {!item.done && (
+                        <button
+                          type="button"
+                          className="checklist-action-link"
+                          onClick={item.onAction}
+                        >
+                          {t('hostDashboard.checklist.fixNow')} →
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+
+                {metrics.doneCount === metrics.totalSteps && (
+                  <div className="readiness-complete-banner">
+                    <span>✨ {t('hostDashboard.checklist.allDone')}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Expandable Host Handbook */}
+              <div className="sidebar-panel handbook-panel">
+                <h3>{t('hostDashboard.resources.title')}</h3>
+                <div className="handbook-accordion">
+                  {guides.map((guide, idx) => {
+                    const isOpen = openGuideIndex === idx;
+                    return (
+                      <div key={idx} className={`handbook-item ${isOpen ? 'open' : ''}`}>
+                        <button
+                          type="button"
+                          className="handbook-trigger"
+                          onClick={() => setOpenGuideIndex(isOpen ? null : idx)}
+                          aria-expanded={isOpen}
+                        >
+                          <span>{guide.title}</span>
+                          <svg
+                            viewBox="0 0 24 24"
+                            width="15"
+                            height="15"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="handbook-chevron"
+                          >
+                            <polyline points="6 9 12 15 18 9" />
+                          </svg>
+                        </button>
+                        {isOpen && (
+                          <div className="handbook-body">
+                            <p>{guide.body}</p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </aside>
         </div>
@@ -420,4 +769,3 @@ const HostDashboard: React.FC = () => {
 };
 
 export default HostDashboard;
-

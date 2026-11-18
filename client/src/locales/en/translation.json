@@ -280,5 +280,86 @@
       "tooBig": "Some photos are over 10MB and were not added.",
       "generic": "Something went wrong. Please try again."
     }
+  },
+  "hostDashboard": {
+    "workspaceBadge": "Host Workspace",
+    "certifiedHost": "Certified Host",
+    "title": "Host Dashboard",
+    "welcome": "Welcome back, {{name}}. Manage your accommodations, track listing readiness, and connect directly with travelers.",
+    "claimBtn": "Claim Existing Listing",
+    "addBtn": "Add Accommodation",
+    "stats": {
+      "activeStays": "Active Stays",
+      "publishedCount": "{{count}} published",
+      "inReviewCount": "{{count}} pending / draft",
+      "totalViews": "Total Views",
+      "viewsSub": "Across all listed stays",
+      "communityUpdates": "Community Updates",
+      "engagementSub": "{{likes}} likes · {{comments}} comments",
+      "readiness": "Listing Readiness",
+      "readinessSub": "{{done}} of {{total}} best practices met"
+    },
+    "tabs": {
+      "accommodations": "My Accommodations",
+      "updates": "Community Updates"
+    },
+    "filters": {
+      "all": "All",
+      "published": "Published",
+      "pending": "Pending / Draft",
+      "searchPlaceholder": "Filter stays by name or district..."
+    },
+    "claims": {
+      "title": "Ownership Claim Requests",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "pending": "Pending Review"
+    },
+    "card": {
+      "photosCount": "{{count}} photos",
+      "views": "{{count}} views",
+      "verified": "Verified Stay",
+      "contactReady": "Direct Contact Ready",
+      "contactMissing": "Add Phone / LINE",
+      "amenitiesCount": "{{count}} amenities",
+      "checkIn": "Check-in {{time}}",
+      "viewLive": "View Live",
+      "postUpdate": "Post Update",
+      "edit": "Edit Details",
+      "delete": "Delete listing",
+      "confirmDelete": "Are you sure you want to delete \"{{name}}\"?"
+    },
+    "empty": {
+      "title": "No accommodations listed yet",
+      "desc": "Start welcoming travelers by adding your homestay, mountain cabin, boutique resort, or guesthouse.",
+      "cta": "List Your First Accommodation",
+      "noFilterMatch": "No accommodations match your current filter."
+    },
+    "updates": {
+      "composerTitle": "Share a Property Update",
+      "composerSub": "Post fresh morning views, seasonal availability, or special offers to appear in the Community Journal.",
+      "recentTitle": "Your Published Updates",
+      "emptyUpdates": "You haven't posted any updates yet. Share photos or news about your stay to attract travelers!"
+    },
+    "checklist": {
+      "title": "Direct Booking Readiness",
+      "subtitle": "Complete these steps so travelers can find and book with you directly (3× more inquiries).",
+      "stepListed": "List at least 1 accommodation",
+      "stepPhotos": "Upload 3+ high-resolution photos",
+      "stepContact": "Add Phone or LINE ID for direct booking",
+      "stepDetails": "Add description & 4+ guest amenities",
+      "stepPost": "Share an update in Community Journal",
+      "fixNow": "Complete",
+      "allDone": "Your listings are fully optimized for direct traveler inquiries!"
+    },
+    "resources": {
+      "title": "Host Handbook",
+      "guide1Title": "Photography & Lighting Guide",
+      "guide1Body": "Shoot during golden hour (6:30–8:00 AM or 4:30–6:00 PM) to capture Chiang Dao's mountain mist. Include at least 1 wide exterior shot, 2 bright bedroom angles, and 1 dining/balcony view.",
+      "guide2Title": "Direct Booking & LINE Setup",
+      "guide2Body": "PakJai connects travelers directly to you with 0% commission. Make sure your LINE ID and phone number are up to date under 'Host & Rules' when editing your listing.",
+      "guide3Title": "Verified Owner Standards",
+      "guide3Body": "Verified hosts receive a badge and priority placement in the Heritage Collection. Keep pricing transparent and respond promptly to traveler inquiries."
+    }
   }
 }

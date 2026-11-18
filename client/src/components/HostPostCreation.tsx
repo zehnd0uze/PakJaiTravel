@@ -8,13 +8,20 @@ import './HostPostCreation.css';
 
 interface HostPostCreationProps {
   onPostCreated?: () => void;
+  initialPropertyId?: string;
 }
 
-const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated }) => {
+const PROMPT_SUGGESTIONS = [
+  { label: 'Morning Mist & Weather', prefix: '🌅 Morning update from our stay: ' },
+  { label: 'Room Availability', prefix: '🛏️ Availability update for upcoming dates: ' },
+  { label: 'Seasonal Highlight', prefix: '🌿 Special experience at our property right now: ' }
+];
+
+const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated, initialPropertyId }) => {
   const { user } = useAuth();
   const [content, setContent] = useState('');
   const [imageUrl, setImageUrl] = useState('');
-  const [propertyId, setPropertyId] = useState('');
+  const [propertyId, setPropertyId] = useState(initialPropertyId || '');
   const [myProperties, setMyProperties] = useState<Property[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -22,6 +29,15 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated }) =>
   
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (initialPropertyId) {
+      setPropertyId(initialPropertyId);
+      setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 100);
+    }
+  }, [initialPropertyId]);
 
   // Auto-expand textarea
   useEffect(() => {
@@ -49,6 +65,9 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated }) =>
             isVerified: p.is_verified
           }));
           setMyProperties(formatted);
+          if (!propertyId && !initialPropertyId && formatted.length === 1) {
+            setPropertyId(formatted[0].id);
+          }
         }
       } catch (err) {
         console.error("Failed to fetch owned properties", err);
@@ -86,6 +105,15 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated }) =>
     }
   };
 
+  const handleApplyPrompt = (prefix: string) => {
+    if (!content.trim()) {
+      setContent(prefix);
+    } else if (!content.includes(prefix)) {
+      setContent(prev => `${prefix}${prev}`);
+    }
+    textareaRef.current?.focus();
+  };
+
   const handlePublish = async () => {
     if (!content.trim() && !imageUrl) {
       setError('Please add some content or an image to your post');
@@ -115,7 +143,6 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated }) =>
 
       setContent('');
       setImageUrl('');
-      setPropertyId('');
       if (onPostCreated) onPostCreated();
     } catch (err: any) {
       setError(err.message || 'Failed to publish post');
@@ -124,8 +151,17 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated }) =>
     }
   };
 
+  const selectedProperty = myProperties.find(p => p.id === propertyId);
+
   return (
-    <div className="host-post-box glass-panel animate-fade-in">
+    <div className="host-post-box animate-fade-in">
+      {selectedProperty && (
+        <div className="composer-linked-stay">
+          <span className="composer-linked-dot" />
+          <span>Posting update linked to <strong>{selectedProperty.name}</strong></span>
+        </div>
+      )}
+
       <div className="post-box-header">
         <img 
           src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Host')}&background=2C4C3B&color=fff`} 
@@ -135,7 +171,7 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated }) =>
         <div className="post-textarea-wrapper">
           <textarea
             ref={textareaRef}
-            placeholder={`What's happening at your property, ${user?.name?.split(' ')[0]}?`}
+            placeholder={`Share today's atmosphere, mountain view, or room availability at ${selectedProperty?.name || 'your property'}, ${user?.name?.split(' ')[0]}...`}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             disabled={isSubmitting}
@@ -143,10 +179,24 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated }) =>
         </div>
       </div>
 
+      <div className="composer-prompt-chips">
+        <span className="prompt-chips-label">Quick topics:</span>
+        {PROMPT_SUGGESTIONS.map((item) => (
+          <button
+            key={item.label}
+            type="button"
+            className="prompt-chip-btn"
+            onClick={() => handleApplyPrompt(item.prefix)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+
       {imageUrl && (
         <div className="post-preview-image">
           <img src={imageUrl} alt="Preview" />
-          <button className="remove-img" onClick={() => setImageUrl('')}>&times;</button>
+          <button className="remove-img" onClick={() => setImageUrl('')} title="Remove image">&times;</button>
         </div>
       )}
 
@@ -168,19 +218,25 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated }) =>
             disabled={isUploading}
             title="Upload Photo"
           >
-            {isUploading ? '...' : (
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19.75 12.04c-.07-.07-.15-.14-.24-.19L17 10.67V6.5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h7.08c-.05-.33-.08-.66-.08-1 0-3.31 2.69-6 6-6 .25 0 .5.02.75.04zm-14.75-5.54h10v3.46l-2.02 1.17c-.36.21-.57.59-.57 1.01v.96L10 14.5l-2-2-4.22 4.22V6.5zM18 16c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm1 5h-2v2h-2v-2h-2v-2h2v-2h2v2h2v2z"/></svg>
-            )}
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <polyline points="21 15 16 10 5 21" />
+            </svg>
+            <span>{isUploading ? 'Uploading...' : 'Add Photo'}</span>
           </button>
           
           <div className="property-tag-selector">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" className="tag-icon"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 8.25c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25z"/></svg>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="tag-icon">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+              <line x1="7" y1="7" x2="7.01" y2="7" />
+            </svg>
             <select 
               value={propertyId} 
               onChange={(e) => setPropertyId(e.target.value)}
               className="tag-dropdown"
             >
-              <option value="">Tag a listing...</option>
+              <option value="">Tag an accommodation...</option>
               {myProperties.map(prop => (
                 <option key={prop.id} value={prop.id}>{prop.name}</option>
               ))}
@@ -193,7 +249,7 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated }) =>
           onClick={handlePublish} 
           disabled={isSubmitting || (!content.trim() && !imageUrl)}
         >
-          {isSubmitting ? 'Publishing...' : 'Publish Post'}
+          {isSubmitting ? 'Publishing...' : 'Publish Update'}
         </button>
       </div>
     </div>
