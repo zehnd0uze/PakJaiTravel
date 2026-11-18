@@ -209,11 +209,15 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClic
   const myAvatar = user
     ? user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=2C4C3B&color=fff`
     : '';
+  const displayAuthorAvatar =
+    isOwner && user?.avatar
+      ? user.avatar
+      : post.authorAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.authorName || 'U')}&background=2C4C3B&color=fff`;
 
   return (
     <article className={`pc-post ${isDeleting ? 'deleting' : ''}`}>
       <header className="pc-post-head">
-        <img src={post.authorAvatar} alt="" className="pc-avatar" />
+        <img src={displayAuthorAvatar} alt="" className="pc-avatar" />
         <div className="pc-post-who">
           <span className="pc-author">{post.authorName}</span>
           <div className="pc-post-line">
@@ -326,22 +330,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClic
         </div>
       )}
 
-      {(likeCount > 0 || comments.length > 0) && (
-        <div className="pc-stats">
-          {likeCount > 0 ? (
-            <span className="pc-stats-likes">
-              <span className="pc-stats-heart" aria-hidden="true"><HeartIcon filled size={11} /></span>
-              {t('post.likes', { count: likeCount })}
-            </span>
-          ) : <span />}
-          {comments.length > 0 && (
-            <button className="pc-stats-comments" onClick={handleCommentsClick}>
-              {t('post.commentsCount', { count: comments.length })}
-            </button>
-          )}
-        </div>
-      )}
-
       <div className="pc-actions">
         <button
           className={`pc-action pc-like ${hasLiked ? 'liked' : ''}`}
@@ -349,16 +337,16 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClic
           disabled={isLiking}
           aria-pressed={hasLiked}
         >
-          <HeartIcon filled={hasLiked} size={20} />
-          {t('post.like')}
+          <HeartIcon filled={hasLiked} size={18} />
+          <span>{likeCount > 0 ? `${likeCount} · ${t('post.like')}` : t('post.like')}</span>
         </button>
         <button className="pc-action" onClick={() => commentInputRef.current ? commentInputRef.current.focus() : handleCommentsClick()}>
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" aria-hidden="true"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.3 7.5L3.5 20.5l1.4-4.6A8.4 8.4 0 1 1 20.5 11.6z"/></svg>
-          {t('post.comment')}
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" aria-hidden="true"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.3 7.5L3.5 20.5l1.4-4.6A8.4 8.4 0 1 1 20.5 11.6z"/></svg>
+          <span>{comments.length > 0 ? `${comments.length} · ${t('post.comment')}` : t('post.comment')}</span>
         </button>
         <button className="pc-action" onClick={handleShare}>
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" aria-hidden="true"><path d="M21.5 3 10 14.5M21.5 3l-7 18-4.5-6.5L3 10z"/></svg>
-          {copied ? t('post.linkCopied') : t('post.share')}
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" aria-hidden="true"><path d="M21.5 3 10 14.5M21.5 3l-7 18-4.5-6.5L3 10z"/></svg>
+          <span>{copied ? t('post.linkCopied') : t('post.share')}</span>
         </button>
       </div>
 

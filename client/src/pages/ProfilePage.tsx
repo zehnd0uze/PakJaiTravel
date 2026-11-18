@@ -160,7 +160,7 @@ const ProfilePage: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Cover Photo (overlaid by profile info on mobile, banner on desktop) ── */}
+      {/* ── Cover Photo (full-bleed cinematic panorama) ── */}
       <div className="profile-cover">
         <img
           src={coverSrc}
@@ -168,120 +168,128 @@ const ProfilePage: React.FC = () => {
           className={`cover-img${uploadingCover ? ' uploading' : ''}`}
         />
         <div className="cover-overlay" />
-        <div className="cover-upload-wrap" ref={coverMenuRef}>
-          <button
-            className="cover-upload-btn"
-            onClick={() => setCoverMenuOpen(v => !v)}
-            disabled={uploadingCover}
-          >
-            {uploadingCover ? 'Saving...' : 'Change Cover'}
-          </button>
-          {coverMenuOpen && (
-            <div className="ig-upload-menu">
-              <button
-                className="ig-upload-menu-item"
-                onClick={() => { setCoverMenuOpen(false); coverInputRef.current?.click(); }}
-              >
-                Upload new cover
-              </button>
-              <button
-                className="ig-upload-menu-item"
-                onClick={() => { setCoverMenuOpen(false); setViewingPhoto('cover'); }}
-              >
-                View cover photo
-              </button>
-            </div>
-          )}
-          <input
-            ref={coverInputRef}
-            type="file"
-            accept="image/*"
-            className="sr-only"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) handlePhotoUpload(file, 'coverPhoto', setUploadingCover);
-              e.target.value = '';
-            }}
-          />
-        </div>
       </div>
 
       <div className="ig-profile-container">
-        {/* ── Profile hero: info overlaid on the cover ── */}
+        {/* ── Profile hero: anchored cleanly along the lower horizon of the cover ── */}
         <div className="ig-profile-hero">
-        {/* ── Instagram Header (Avatar + Stats) ── */}
-        <div className="ig-header-row">
-          <div className="ig-avatar-container">
-            <div
-              className="ig-story-ring"
-              onClick={() => setViewingPhoto('avatar')}
-              role="button"
-              tabIndex={0}
-              aria-label="View profile picture"
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setViewingPhoto('avatar'); }}
-            >
-              <img
-                src={avatarSrc}
-                alt={user.name}
-                className={`ig-avatar${uploadingAvatar ? ' uploading' : ''}`}
+          <div className="ig-hero-left">
+            <div className="ig-avatar-container">
+              <div
+                className="ig-story-ring"
+                onClick={() => setViewingPhoto('avatar')}
+                role="button"
+                tabIndex={0}
+                aria-label="View profile picture"
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setViewingPhoto('avatar'); }}
+              >
+                <img
+                  src={avatarSrc}
+                  alt={user.name}
+                  className={`ig-avatar${uploadingAvatar ? ' uploading' : ''}`}
+                />
+              </div>
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handlePhotoUpload(file, 'avatar', setUploadingAvatar);
+                  e.target.value = '';
+                }}
               />
             </div>
-            <input
-              ref={avatarInputRef}
-              type="file"
-              accept="image/*"
-              className="sr-only"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handlePhotoUpload(file, 'avatar', setUploadingAvatar);
-                e.target.value = '';
-              }}
-            />
-          </div>
-          
-          <div className="ig-stats-container">
-            <div className="ig-stat-item">
-              <span className="ig-stat-num">{totalReviews}</span>
-              <span className="ig-stat-label">Journals</span>
-            </div>
-            <div className="ig-stat-item">
-              <span className="ig-stat-num">0</span>
-              <span className="ig-stat-label">Followers</span>
-            </div>
-            <div className="ig-stat-item">
-              <span className="ig-stat-num">0</span>
-              <span className="ig-stat-label">Following</span>
+
+            <div className="ig-identity-stack">
+              <div className="ig-bio-section">
+                <h1 className="ig-display-name">{user.name}</h1>
+                <div className="ig-category">
+                  {user.role === 'host' ? 'Traveler • Certified Host' : 'Traveler • Explorer'}
+                </div>
+              </div>
+
+              <div className="ig-stats-container">
+                <div className="ig-stat-item">
+                  <span className="ig-stat-num">{totalReviews}</span>
+                  <span className="ig-stat-label">Journals</span>
+                </div>
+                <div className="ig-stat-item">
+                  <span className="ig-stat-num">0</span>
+                  <span className="ig-stat-label">Followers</span>
+                </div>
+                <div className="ig-stat-item">
+                  <span className="ig-stat-num">0</span>
+                  <span className="ig-stat-label">Following</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* ── Bio Section ── */}
-        <div className="ig-bio-section">
-          <h1 className="ig-display-name">{user.name}</h1>
-          <div className="ig-category">Traveler • Explorer</div>
-          <div className="ig-bio-text">{user.email}</div>
-        </div>
+          {uploadError && <p className="upload-error" style={{ margin: '8px 16px' }}>{uploadError}</p>}
 
-        {uploadError && <p className="upload-error" style={{ margin: '8px 16px' }}>{uploadError}</p>}
-
-        {/* ── Action Buttons Row ── */}
-        <div className="ig-action-buttons">
-          <button className="ig-action-btn" onClick={() => setIsSettingsOpen(true)}>
-            Edit profile
-          </button>
-          <button className="ig-action-btn" onClick={() => navigate('/saved')}>
-            Saved places
-          </button>
-          {user.role === 'host' ? (
-            <button className="ig-action-btn" onClick={() => navigate('/dashboard')}>
-              Host dashboard
+          {/* ── Right-aligned Action Dock along the cover horizon ── */}
+          <div className="ig-action-buttons">
+            <button className="ig-action-btn" onClick={() => setIsSettingsOpen(true)}>
+              Edit profile
             </button>
-          ) : (
-            <button className="ig-action-btn" onClick={() => navigate('/become-host')}>
-              Become a host
+            <button className="ig-action-btn" onClick={() => navigate('/saved')}>
+              Saved places
             </button>
-          )}
-        </div>
+            {user.role === 'host' ? (
+              <button className="ig-action-btn" onClick={() => navigate('/dashboard')}>
+                Host dashboard
+              </button>
+            ) : (
+              <button className="ig-action-btn" onClick={() => navigate('/become-host')}>
+                Become a host
+              </button>
+            )}
+
+            <div className="cover-upload-wrap" ref={coverMenuRef}>
+              <button
+                type="button"
+                className="ig-action-btn ig-cover-btn"
+                onClick={() => setCoverMenuOpen(v => !v)}
+                disabled={uploadingCover}
+                title="Change cover photo"
+              >
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                  <circle cx="12" cy="13" r="4" />
+                </svg>
+                <span>{uploadingCover ? 'Saving...' : 'Cover'}</span>
+              </button>
+              {coverMenuOpen && (
+                <div className="ig-upload-menu">
+                  <button
+                    className="ig-upload-menu-item"
+                    onClick={() => { setCoverMenuOpen(false); coverInputRef.current?.click(); }}
+                  >
+                    Upload new cover
+                  </button>
+                  <button
+                    className="ig-upload-menu-item"
+                    onClick={() => { setCoverMenuOpen(false); setViewingPhoto('cover'); }}
+                  >
+                    View cover photo
+                  </button>
+                </div>
+              )}
+              <input
+                ref={coverInputRef}
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handlePhotoUpload(file, 'coverPhoto', setUploadingCover);
+                  e.target.value = '';
+                }}
+              />
+            </div>
+          </div>
         </div>
 
         {/* ── Journals card: borderless wide gallery below cover ── */}

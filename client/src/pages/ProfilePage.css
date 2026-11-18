@@ -545,42 +545,29 @@
     );
   }
 
-  /* Compact translucent change-cover pill over the photo */
-  .cover-upload-wrap {
-    position: absolute;
-    top: 62px;
-    right: 12px;
-    z-index: 4;
-  }
-
-  .cover-upload-btn {
-    background: rgba(0, 0, 0, 0.4);
-    color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 999px;
-    padding: 6px 14px;
-    font-size: 0.72rem;
-    font-weight: 600;
-    cursor: pointer;
-    backdrop-filter: blur(6px);
-  }
-
   /* Header + bio + action buttons all overlap the cover bottom */
   .ig-profile-container {
-    margin-top: -238px;
+    margin-top: -225px;
     padding-top: 0;
     position: relative;
     z-index: 2;
   }
 
-  .ig-header-row {
-    margin-bottom: 10px;
-    align-items: flex-end;
+  .ig-hero-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 16px;
+    margin-bottom: 14px;
+  }
+
+  .ig-avatar-container {
+    margin-right: 0;
   }
 
   .ig-story-ring {
-    width: 98px;
-    height: 98px;
+    width: 88px;
+    height: 88px;
     padding: 3px;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
   }
@@ -667,7 +654,7 @@
   .profile-cover {
     display: block;
     width: 100%;
-    height: 500px;
+    height: clamp(460px, 56vh, 540px);
     margin: 0 auto;
     border-radius: 0;
     z-index: 2;
@@ -677,36 +664,11 @@
   .profile-cover .cover-overlay {
     background: linear-gradient(
       180deg,
-      rgba(12, 22, 16, 0.46) 0%,
-      rgba(15, 24, 19, 0.1) 36%,
-      rgba(15, 24, 19, 0.52) 70%,
-      rgba(15, 24, 19, 0.84) 100%
+      rgba(12, 22, 16, 0.44) 0%,
+      rgba(15, 24, 19, 0.04) 38%,
+      rgba(15, 24, 19, 0.36) 68%,
+      rgba(14, 24, 18, 0.86) 100%
     );
-  }
-
-  .cover-upload-wrap {
-    position: absolute;
-    top: 86px;
-    right: clamp(24px, 4vw, 56px);
-    z-index: 4;
-  }
-
-  .cover-upload-btn {
-    background: rgba(255, 255, 255, 0.16);
-    color: #fff;
-    border: none;
-    border-radius: 999px;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    padding: 9px 18px;
-    font-size: 0.84rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-  }
-
-  .cover-upload-btn:hover {
-    background: rgba(255, 255, 255, 0.26);
   }
 
   .ig-profile-container {
@@ -719,51 +681,61 @@
     position: relative;
   }
 
-  /* Keep the beloved profile cover hero layout */
+  /* ── Horizon-Anchored Profile Bar:
+     Leaves the center mountain peak completely unobstructed,
+     aligning left identity with PAKJAI/Travel Journals and right actions with navbar! ── */
   .ig-profile-hero {
-    max-width: 1140px;
-    margin: -340px auto 0;
-    padding: 0 clamp(24px, 4vw, 56px);
-    display: grid;
-    grid-template-columns: auto 1fr;
-    grid-template-areas:
-      'avatar bio'
-      'avatar stats'
-      'avatar actions';
-    align-content: center;
-    column-gap: 36px;
-    min-height: 340px;
+    width: 100%;
+    margin: -176px auto 0;
+    padding: 0 clamp(24px, 4vw, 56px) 34px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 24px;
+    min-height: 176px;
     position: relative;
     z-index: 3;
   }
 
-  .ig-header-row {
-    display: contents;
+  .ig-hero-left {
+    display: flex;
+    align-items: center;
+    gap: 28px;
   }
 
   .ig-avatar-container {
-    grid-area: avatar;
-    align-self: center;
-    margin-right: 0;
+    margin: 0;
     position: relative;
-    top: -40px;
+    top: 0;
+    flex-shrink: 0;
   }
 
   .ig-story-ring {
-    width: 168px;
-    height: 168px;
+    width: 128px;
+    height: 128px;
     padding: 0;
+    border-radius: 50%;
     background: transparent;
-    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.38);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.42);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .ig-story-ring:hover {
+    transform: scale(1.03);
   }
 
   .ig-avatar {
-    border: none;
+    border: 2.5px solid rgba(255, 255, 255, 0.85);
+  }
+
+  .ig-identity-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
 
   .ig-bio-section {
-    grid-area: bio;
-    align-self: end;
     margin: 0;
     padding: 0;
   }
@@ -771,75 +743,92 @@
   .ig-display-name {
     color: #fff;
     font-family: var(--font-heading);
-    font-size: 1.65rem;
+    font-size: clamp(1.75rem, 2.4vw, 2.2rem);
     font-weight: 700;
-    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
     margin: 0 0 4px;
   }
 
   .ig-category {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 1rem;
+    color: rgba(243, 220, 203, 0.95);
+    font-size: 0.92rem;
+    font-weight: 500;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
   }
 
-  .ig-bio-text {
-    display: none;
-  }
-
   .ig-stats-container {
-    grid-area: stats;
+    display: flex;
+    align-items: center;
     justify-content: flex-start;
-    gap: 36px;
-    margin: 12px 0 0;
+    gap: 24px;
+    margin: 2px 0 0;
   }
 
   .ig-stat-item {
     flex-direction: row;
-    gap: 7px;
+    gap: 6px;
     align-items: baseline;
   }
 
   .ig-stat-num {
     color: #fff;
-    font-size: 1.15rem;
+    font-family: var(--font-heading);
+    font-size: 1.08rem;
     font-weight: 700;
     text-shadow: 0 1px 5px rgba(0, 0, 0, 0.45);
   }
 
   .ig-stat-label {
-    color: rgba(255, 255, 255, 0.95);
-    font-size: 0.95rem;
-    font-weight: 500;
+    color: rgba(255, 255, 255, 0.86);
+    font-size: 0.88rem;
+    font-weight: 400;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
   }
 
+  /* Right-aligned Action Pills on the Horizon */
   .ig-action-buttons {
-    grid-area: actions;
-    justify-content: flex-start;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
     gap: 10px;
-    margin: 24px 0 0;
-    padding: 0;
+    margin: 0;
+    padding: 0 0 6px;
   }
 
   .ig-action-btn {
     flex: 0 1 auto;
-    padding: 10px 22px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 20px;
     background: rgba(255, 255, 255, 0.16);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border: none;
     color: #fff;
     border-radius: 999px;
-    font-size: 0.9rem;
+    font-size: 0.86rem;
     font-weight: 600;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     transition: background 0.2s ease, transform 0.2s ease;
   }
 
   .ig-action-btn:hover {
     background: rgba(255, 255, 255, 0.28);
     transform: translateY(-1px);
+  }
+
+  .cover-upload-wrap {
+    position: relative;
+  }
+
+  .ig-upload-menu {
+    top: auto;
+    bottom: calc(100% + 10px);
+    right: 0;
   }
 
   /* ── Borderless Wide Gallery Section Below Cover ── */
