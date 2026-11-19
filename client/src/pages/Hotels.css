@@ -463,3 +463,55 @@
   transform: scale(1.08);
   background: #FFFFFF;
 }
+
+
+/* ── Responsive Polish Across Tablet & Phone Sizes ── */
+@media (max-width: 960px) {
+  .hotels-hero-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .hotels-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .hotels-filter-controls {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .h-search-inline {
+    flex: 1 1 200px;
+    min-width: 0;
+  }
+
+  .h-tonal-select {
+    flex: 1 1 135px;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .hotels-page {
+    padding-top: calc(70px + env(safe-area-inset-top));
+  }
+
+  .hhh-host-pill {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .hotels-grid {
+    grid-template-columns: 1fr !important;
+    gap: 18px;
+  }
+
+  .h-search-inline,
+  .h-tonal-select {
+    flex: 1 1 100%;
+  }
+}

@@ -475,67 +475,31 @@
 }
 
 /* ---- Responsive ---- */
-@media (max-width: 900px) {
+@media (max-width: 960px) {
   .detail-content {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: 28px;
   }
 
   .detail-sidebar {
     position: static;
+    order: 2;
   }
 
   .sidebar-card {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    border-radius: 20px 20px 0 0;
-    padding: 20px 24px;
-    z-index: 100;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-
-  @media (max-width: 768px) {
-    .sidebar-card {
-      bottom: calc(65px + env(safe-area-inset-bottom));
-    }
-  }
-
-  .sidebar-host,
-  .sidebar-features {
-    display: none;
-  }
-
-  .sidebar-price {
-    margin-bottom: 0;
-    padding-bottom: 0;
-    border-bottom: none;
-    flex-shrink: 0;
-  }
-
-  .sidebar-book-btn {
-    flex: 1;
-    margin-bottom: 0;
-    min-width: 140px;
-  }
-
-  .sidebar-msg-btn {
-    flex: 1;
-    min-width: 140px;
+    position: static;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 12px 32px -18px rgba(20, 38, 29, 0.16);
   }
 
   .detail-title {
-    font-size: 1.5rem;
+    font-size: 1.55rem;
   }
 
   .gallery-main {
     aspect-ratio: 16 / 9;
-    border-radius: 12px;
+    border-radius: 14px;
   }
 
   .rules-grid {
@@ -544,14 +508,26 @@
   }
 }
 
-@media (max-width: 500px) {
+@media (max-width: 768px) {
   .hotel-detail-page {
-    padding-top: 60px;
+    padding-top: calc(70px + env(safe-area-inset-top));
   }
 
+  .detail-content {
+    padding-bottom: 32px;
+  }
+
+  .map-container {
+    height: 290px !important;
+    border-radius: 14px !important;
+  }
+}
+
+@media (max-width: 540px) {
   .detail-breadcrumb {
-    padding: 12px 0;
-    font-size: 0.82rem;
+    padding: 10px 0;
+    font-size: 0.8rem;
+    flex-wrap: wrap;
   }
 
   .detail-title-row {
@@ -560,23 +536,37 @@
   }
 
   .gallery-thumb {
-    width: 80px;
-    height: 56px;
+    width: 76px;
+    height: 54px;
   }
 
   .amenities-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .detail-content {
-    padding-bottom: 120px;
+  .practical-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .detail-traveler-reviews {
+    grid-template-columns: 1fr;
+  }
+
+  .anti-scam-card {
+    padding: 14px;
+  }
+
+  .anti-scam-row {
+    flex-direction: column;
+    gap: 2px;
   }
 }
 
-/* Solid green mobile app bar — tighten the gap under it */
-@media (max-width: 768px) {
-  .hotel-detail-page {
-    padding-top: calc(72px + env(safe-area-inset-top));
+@media (max-width: 380px) {
+  .practical-grid,
+  .amenities-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -756,4 +746,67 @@
 
 .detail-reviews-empty p {
   margin: 0;
+}
+
+
+/* ── Anti-Scam / Fake-Page Verification Card ── */
+.anti-scam-card {
+  margin-top: 18px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: rgba(44, 76, 59, 0.05);
+  border: 1px solid rgba(44, 76, 59, 0.16);
+}
+
+.anti-scam-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #2C4C3B;
+  font-size: 0.94rem;
+  margin-bottom: 12px;
+}
+
+.anti-scam-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.anti-scam-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #FFFFFF;
+  font-size: 0.86rem;
+}
+
+.anti-scam-row span {
+  color: #5C6D63;
+}
+
+.anti-scam-row strong {
+  color: #16261E;
+}
+
+.anti-scam-fb-link {
+  color: #1877F2;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.anti-scam-fb-link:hover {
+  text-decoration: underline;
+}
+
+.anti-scam-tip {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #5C6D63;
+  line-height: 1.5;
 }

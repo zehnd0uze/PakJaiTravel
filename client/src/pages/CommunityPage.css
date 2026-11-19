@@ -528,7 +528,7 @@
 /* ── 2-Column Editorial Feed on Wide Screens ── */
 .journal-feed {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
   gap: 24px;
   align-items: start;
 }
@@ -645,7 +645,7 @@
 /* ── Shimmer Skeleton ── */
 .journal-skeleton {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
   gap: 24px;
 }
 

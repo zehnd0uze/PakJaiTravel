@@ -40,7 +40,13 @@ interface Hotel {
   checkIn: string;
   checkOut: string;
   host: { name: string; since: string };
-  contact: { phone: string; email: string; line?: string };
+  contact: {
+    phone: string;
+    email: string;
+    line?: string;
+    facebookPage?: string;
+    bankAccountName?: string;
+  };
 }
 
 export const HotelDetail: React.FC = () => {
@@ -84,6 +90,8 @@ export const HotelDetail: React.FC = () => {
             phone: atlasMatch.contact?.phone || '',
             email: atlasMatch.contact?.email || '',
             line: atlasMatch.contact?.line || '',
+            facebookPage: atlasMatch.contact?.facebookPage || '',
+            bankAccountName: atlasMatch.contact?.bankAccountName || atlasMatch.host?.name || '',
           },
         });
         setLoading(false);
@@ -412,6 +420,49 @@ export const HotelDetail: React.FC = () => {
                   </div>
                 )}
               </div>
+
+              {/* Anti-Scam / Fake-Page Verification Card */}
+              {(hotel.contact.bankAccountName || hotel.contact.facebookPage || hotel.contact.phone) && (
+                <div className="anti-scam-card">
+                  <div className="anti-scam-head">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                      <polyline points="9 12 11 14 15 10" />
+                    </svg>
+                    <strong>{t('hotelDetail.antiScamTitle')}</strong>
+                  </div>
+
+                  <div className="anti-scam-rows">
+                    {hotel.contact.bankAccountName && (
+                      <div className="anti-scam-row">
+                        <span>{t('hotelDetail.verifiedAccountName')}</span>
+                        <strong>{hotel.contact.bankAccountName}</strong>
+                      </div>
+                    )}
+                    {hotel.contact.phone && (
+                      <div className="anti-scam-row">
+                        <span>{t('hotelDetail.verifiedPhone')}</span>
+                        <strong>{hotel.contact.phone}</strong>
+                      </div>
+                    )}
+                    {hotel.contact.facebookPage && /^https?:\/\//i.test(hotel.contact.facebookPage) && (
+                      <div className="anti-scam-row">
+                        <span>{t('hotelDetail.officialFacebook')}</span>
+                        <a
+                          href={hotel.contact.facebookPage}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="anti-scam-fb-link"
+                        >
+                          {t('hotelDetail.openFacebook')} ↗
+                        </a>
+                      </div>
+                    )}
+                  </div>
+
+                  <p className="anti-scam-tip">{t('hotelDetail.antiScamTip')}</p>
+                </div>
+              )}
             </div>
           )}
 
@@ -524,6 +575,17 @@ export const HotelDetail: React.FC = () => {
                 }}
               >
                 {t('hotelDetail.chatLine')} ({hotel.contact.line})
+              </Button>
+            )}
+            {hotel.contact?.facebookPage && /^https?:\/\//i.test(hotel.contact.facebookPage) && (
+              <Button
+                variant="outline"
+                size="md"
+                className="sidebar-msg-btn"
+                style={{ borderColor: '#1877F2', color: '#1877F2', fontWeight: 600, marginTop: '8px' }}
+                onClick={() => window.open(hotel.contact.facebookPage, '_blank', 'noopener,noreferrer')}
+              >
+                {t('hotelDetail.openFacebook')}
               </Button>
             )}
             <Button

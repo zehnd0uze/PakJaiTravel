@@ -48,9 +48,13 @@
 }
 
 html, body {
-  overflow-x: hidden;
+  overflow-x: clip;
   width: 100%;
   position: relative;
+}
+
+img, iframe {
+  max-width: 100%;
 }
 
 body {
@@ -120,7 +124,7 @@ button {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--spacing-md);
+  padding: 0 clamp(14px, 3.6vw, 24px);
 }
 
 .flex-center {

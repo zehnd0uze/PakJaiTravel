@@ -70,6 +70,8 @@ export interface Property {
     phone?: string;
     email?: string;
     line?: string;
+    facebookPage?: string;
+    bankAccountName?: string;
   };
   ownerId?: string;
   owner_id?: string;

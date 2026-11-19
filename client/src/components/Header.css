@@ -1067,3 +1067,53 @@
   opacity: 0.9;
 }
 
+
+
+/* ── Tablet & Compact Laptop Responsive (769px – 1140px) ── */
+@media (min-width: 769px) and (max-width: 1140px) {
+  .desktop-only-header {
+    gap: 12px;
+  }
+
+  .logo-text {
+    font-size: 1.25rem;
+  }
+
+  .search-pill-container {
+    max-width: 240px;
+    min-width: 160px;
+    flex: 1 1 180px;
+  }
+
+  .auth-actions {
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+
+  .auth-actions .nav-link {
+    margin-right: 0.75rem !important;
+    font-size: 0.76rem !important;
+    white-space: nowrap;
+  }
+}
+
+/* ── Small Phone Responsive (≤390px) ── */
+@media (max-width: 390px) {
+  .mobile-top-bar {
+    padding: 0 10px;
+    gap: 8px;
+  }
+
+  .mobile-logo-text {
+    font-size: 0.98rem;
+  }
+
+  .mobile-top-actions {
+    gap: 6px;
+  }
+
+  .mobile-signin-btn {
+    padding: 5px 10px;
+    font-size: 0.76rem;
+  }
+}

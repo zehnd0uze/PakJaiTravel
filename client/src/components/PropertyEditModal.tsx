@@ -124,6 +124,8 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
   const [phone, setPhone] = useState(property?.contact?.phone || '');
   const [email, setEmail] = useState(property?.contact?.email || user?.email || '');
   const [line, setLine] = useState(property?.contact?.line || '');
+  const [facebookPage, setFacebookPage] = useState(property?.contact?.facebookPage || '');
+  const [bankAccountName, setBankAccountName] = useState(property?.contact?.bankAccountName || '');
   const [termsAccepted, setTermsAccepted] = useState(isEditing);
   const [termsModalType, setTermsModalType] = useState<'terms' | 'privacy' | null>(null);
 
@@ -227,7 +229,7 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
     }
 
     if (!termsAccepted) {
-      setError('You must agree to the Terms of Service and Privacy Policy to list your property.');
+      setError(t('propertyEditModal.termsError'));
       setActiveTab('contact');
       return;
     }
@@ -245,6 +247,15 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
       if (!user) throw new Error('Not authenticated');
 
       const primaryImage = images[0] || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1200';
+
+      const rawFb = facebookPage.trim();
+      const safeFb = rawFb
+        ? /^https?:\/\//i.test(rawFb)
+          ? rawFb
+          : /^(facebook\.com|fb\.com|www\.facebook\.com|m\.facebook\.com)\//i.test(rawFb)
+            ? `https://${rawFb}`
+            : ''
+        : '';
 
       const dbData: any = {
         name: name.trim(),
@@ -269,7 +280,9 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
         contact: {
           phone: phone.trim(),
           email: email.trim() || user.email || '',
-          line: line.trim()
+          line: line.trim(),
+          facebookPage: safeFb || undefined,
+          bankAccountName: bankAccountName.trim() || undefined
         },
         status,
         owner_id: user.id
@@ -695,7 +708,39 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                 </div>
               </div>
 
-              <div className="form-group full-width" style={{ marginTop: '24px', padding: '16px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+              {/* Anti-Scam / Fake-Page Protection Section (No Hotel License Required) */}
+              <div style={{ marginTop: '24px', padding: '18px', background: 'rgba(44, 76, 59, 0.045)', borderRadius: '14px', border: '1px solid rgba(44, 76, 59, 0.14)' }}>
+                <h4 style={{ margin: '0 0 6px', fontSize: '0.96rem', color: '#16261E' }}>
+                  {t('propertyEditModal.antiScamTitle')}
+                </h4>
+                <p style={{ margin: '0 0 14px', fontSize: '0.84rem', color: '#516359', lineHeight: 1.5 }}>
+                  {t('propertyEditModal.antiScamHint')}
+                </p>
+                <div className="form-grid">
+                  <div className="form-group full-width">
+                    <label htmlFor="contact-facebook">{t('propertyEditModal.facebookPageLabel')}</label>
+                    <input
+                      id="contact-facebook"
+                      type="url"
+                      placeholder={t('propertyEditModal.facebookPagePlaceholder')}
+                      value={facebookPage}
+                      onChange={e => setFacebookPage(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group full-width">
+                    <label htmlFor="contact-bank-name">{t('propertyEditModal.bankAccountNameLabel')}</label>
+                    <input
+                      id="contact-bank-name"
+                      type="text"
+                      placeholder={t('propertyEditModal.bankAccountNamePlaceholder')}
+                      value={bankAccountName}
+                      onChange={e => setBankAccountName(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-group full-width" style={{ marginTop: '20px', padding: '16px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
                   <input 
                     type="checkbox" 
@@ -705,7 +750,10 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
                     style={{ marginTop: '4px', cursor: 'pointer', width: '18px', height: '18px' }}
                   />
                   <label htmlFor="property-terms" style={{ fontSize: '0.9rem', color: '#475569', lineHeight: 1.5, cursor: 'pointer', margin: 0 }}>
-                    I confirm that I am the legal owner or authorized manager of this property, and I agree to PakJai Travel's <button type="button" onClick={(e) => { e.preventDefault(); setTermsModalType('terms'); }} style={{ color: 'var(--primary-color)', background: 'none', border: 'none', padding: 0, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>Terms of Service</button> and <button type="button" onClick={(e) => { e.preventDefault(); setTermsModalType('privacy'); }} style={{ color: 'var(--primary-color)', background: 'none', border: 'none', padding: 0, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>Privacy Policy</button>. I guarantee that all provided information is accurate and true.
+                    {t('propertyEditModal.termsConfirmPrefix')}{' '}
+                    <button type="button" onClick={(e) => { e.preventDefault(); setTermsModalType('terms'); }} style={{ color: 'var(--primary-color)', background: 'none', border: 'none', padding: 0, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>{t('auth.terms')}</button>{' '}
+                    {t('auth.and')}{' '}
+                    <button type="button" onClick={(e) => { e.preventDefault(); setTermsModalType('privacy'); }} style={{ color: 'var(--primary-color)', background: 'none', border: 'none', padding: 0, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>{t('auth.privacy')}</button>
                   </label>
                 </div>
               </div>

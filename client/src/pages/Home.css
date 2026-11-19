@@ -1266,3 +1266,60 @@
   font-size: 0.65rem;
   opacity: 0.78;
 }
+
+
+/* ── Additional Responsive Polish (Tablet & Small Phone) ── */
+@media (min-width: 769px) and (max-width: 1080px) {
+  .hero-stage-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 24px;
+  }
+
+  .hero-right-dock {
+    width: 100%;
+    max-width: 560px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .atmo-widget,
+  .mh-featured-pill {
+    flex: 1 1 240px;
+  }
+}
+
+@media (max-width: 560px) {
+  .collection-controls-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .collection-sort-wrap {
+    justify-content: space-between;
+  }
+
+  .minimal-category-pills {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+
+  .minimal-category-pills::-webkit-scrollbar {
+    display: none;
+  }
+
+  .min-cat-pill {
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .destinations-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
