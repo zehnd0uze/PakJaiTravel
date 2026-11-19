@@ -296,7 +296,7 @@ const PropertyEditModal: React.FC<PropertyEditModalProps> = ({ property, onClose
 
         if (updateError) throw updateError;
       } else {
-        dbData.rating = 5.0;
+        dbData.rating = 0;
         dbData.reviews = 0;
         dbData.is_verified = true;
 

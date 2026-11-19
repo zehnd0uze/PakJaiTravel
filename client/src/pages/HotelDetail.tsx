@@ -71,8 +71,8 @@ export const HotelDetail: React.FC = () => {
           id: atlasMatch.id,
           name: atlasMatch.name,
           type: atlasMatch.type,
-          rating: atlasMatch.rating || 4.8,
-          reviews: atlasMatch.reviews || 120,
+          rating: Number(atlasMatch.rating || 0),
+          reviews: Number(atlasMatch.reviews || 0),
           pricePerNight: Number(atlasMatch.pricePerNight || 800),
           priceType: atlasMatch.price_type || 'per_night',
           currency: atlasMatch.currency || 'THB',
@@ -158,17 +158,27 @@ export const HotelDetail: React.FC = () => {
           .limit(6);
 
         if (!cancelled && data) {
-          setTravelerReviews(
-            data.map((p: any) => ({
-              id: p.id,
-              authorName: p.author_name || 'นักเดินทาง',
-              authorAvatar: p.author_avatar,
-              content: p.content || '',
-              imageUrl: p.image_url,
-              rating: p.rating ? Number(p.rating) : undefined,
-              createdAt: p.created_at,
-            }))
-          );
+          const mappedReviews = data.map((p: any) => ({
+            id: p.id,
+            authorName: p.author_name || 'นักเดินทาง',
+            authorAvatar: p.author_avatar,
+            content: p.content || '',
+            imageUrl: p.image_url,
+            rating: p.rating ? Number(p.rating) : undefined,
+            createdAt: p.created_at,
+          }));
+          setTravelerReviews(mappedReviews);
+
+          // Compute real average rating & review count from actual rated journal posts
+          const rated = mappedReviews.filter((r) => typeof r.rating === 'number' && r.rating > 0);
+          if (rated.length > 0) {
+            const avg = Number(
+              (rated.reduce((sum, r) => sum + (r.rating || 0), 0) / rated.length).toFixed(1)
+            );
+            setHotel((prev) =>
+              prev ? { ...prev, rating: avg, reviews: Math.max(prev.reviews || 0, rated.length) } : prev
+            );
+          }
         }
       } catch {
         // Ignore offline/placeholder errors

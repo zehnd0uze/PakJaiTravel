@@ -485,7 +485,10 @@ export const ChiangDaoArtMap: React.FC<ChiangDaoArtMapProps> = ({ properties }) 
         el.style.zIndex = '20';
         const tip = document.createElement('span');
         tip.className = 'cd-pin-tip';
-        tip.textContent = `${primary} · ★ ${stay.prop.rating || 4.8}`;
+        const hasRealRating = Number(stay.prop.reviews || 0) > 0 && Number(stay.prop.rating || 0) > 0;
+        tip.textContent = hasRealRating
+          ? `${primary} · ★ ${Number(stay.prop.rating).toFixed(1)}`
+          : primary;
         el.appendChild(tip);
       }
 
@@ -700,7 +703,10 @@ export const ChiangDaoArtMap: React.FC<ChiangDaoArtMapProps> = ({ properties }) 
                 <img src={selectedStay.prop.imageUrl || '/doiluangbg.jpg'} alt="" />
                 <div className="cd-preview-body">
                   <span className="cd-preview-meta">
-                    {getZoneLabel(selectedStay.zoneId)} · ★ {selectedStay.prop.rating || 4.8}
+                    {getZoneLabel(selectedStay.zoneId)}
+                    {Number(selectedStay.prop.reviews || 0) > 0 && Number(selectedStay.prop.rating || 0) > 0
+                      ? ` · ★ ${Number(selectedStay.prop.rating).toFixed(1)}`
+                      : ''}
                   </span>
                   <h3>{splitName(selectedStay.prop.name).primary}</h3>
                   <span className="cd-preview-price">
@@ -785,7 +791,10 @@ export const ChiangDaoArtMap: React.FC<ChiangDaoArtMapProps> = ({ properties }) 
                       <span className="cd-list-info">
                         <strong>{primary}</strong>
                         <span className="cd-list-meta">
-                          {getZoneLabel(stay.zoneId)} · ★ {stay.prop.rating || 4.8}
+                          {getZoneLabel(stay.zoneId)}
+                          {Number(stay.prop.reviews || 0) > 0 && Number(stay.prop.rating || 0) > 0
+                            ? ` · ★ ${Number(stay.prop.rating).toFixed(1)}`
+                            : ''}
                         </span>
                         <span className="cd-list-price">
                           {formatPrice(stay.prop)} <em>/ {getPriceUnit(stay.prop)}</em>

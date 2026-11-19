@@ -16,6 +16,7 @@ interface SavedStayItem {
   pricePerNight: number;
   priceType?: 'per_night' | 'per_person';
   rating: number;
+  reviews: number;
   imageUrl: string;
   features?: string[];
   amenities?: string[];
@@ -55,7 +56,8 @@ export const SavedStaysPage: React.FC = () => {
               district: p.district,
               pricePerNight: Number(p.price_per_night || p.price || 0),
               priceType: p.price_type || 'per_night',
-              rating: Number(p.rating || 4.8),
+              rating: Number(p.rating || 0),
+              reviews: Number(p.reviews || 0),
               imageUrl: p.image_url || (Array.isArray(p.images) && p.images[0]) || '/doiluangbg.jpg',
               features: p.features || [],
               amenities: p.amenities || [],
@@ -88,7 +90,8 @@ export const SavedStaysPage: React.FC = () => {
           district: atlas.district,
           pricePerNight: Number(atlas.pricePerNight || 0),
           priceType: atlas.price_type || 'per_night',
-          rating: Number(atlas.rating || 4.8),
+          rating: Number(atlas.rating || 0),
+          reviews: Number(atlas.reviews || 0),
           imageUrl: atlas.imageUrl || '/doiluangbg.jpg',
           features: atlas.features || [],
           amenities: atlas.amenities || [],
@@ -160,7 +163,9 @@ export const SavedStaysPage: React.FC = () => {
                   <div className="saved-card-body">
                     <div className="saved-card-top">
                       <span className="saved-card-loc">{stay.location}</span>
-                      <span className="saved-card-rating">★ {stay.rating.toFixed(1)}</span>
+                      {stay.reviews > 0 && stay.rating > 0 && (
+                        <span className="saved-card-rating">★ {stay.rating.toFixed(1)}</span>
+                      )}
                     </div>
                     <h3>{stay.name}</h3>
                     <div className="saved-card-footer">
@@ -207,7 +212,11 @@ export const SavedStaysPage: React.FC = () => {
                               <span> {stay.priceType === 'per_person' ? t('common.perPerson') : t('common.perNight')}</span>
                             </td>
                             <td>{stay.location}</td>
-                            <td>★ {stay.rating.toFixed(1)}</td>
+                            <td>
+                              {stay.reviews > 0 && stay.rating > 0
+                                ? `★ ${stay.rating.toFixed(1)} (${stay.reviews})`
+                                : t('hotelDetail.noReviewsYet')}
+                            </td>
                             <td>{t(byKey.access.valueKey)}</td>
                             <td>{t(byKey.power.valueKey)}</td>
                             <td>{t(byKey.meals.valueKey)}</td>

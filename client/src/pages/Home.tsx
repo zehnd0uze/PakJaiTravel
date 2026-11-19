@@ -292,7 +292,7 @@ export const Home: React.FC = () => {
               <div key={prop.id} className="promo-card" onClick={() => navigate(`/hotels/${prop.id}`)}>
                 <div className="promo-img-wrap">
                   <img src={prop.imageUrl} alt={prop.name} loading="lazy" />
-                  {Number(prop.rating || 0) >= 4.8 && (
+                  {Number(prop.reviews || 0) > 0 && Number(prop.rating || 0) >= 4.8 && (
                     <span className="promo-badge">{t('home.promo.badge')}</span>
                   )}
                 </div>
@@ -522,7 +522,7 @@ export const Home: React.FC = () => {
                   priceType={prop.price_type || prop.priceType as any}
                   rating={Number(prop.rating || 0)}
                   reviews={Number(prop.reviews || 0)}
-                  isGuestFavorite={Number(prop.rating || 0) >= 4.8}
+                  isGuestFavorite={Number(prop.reviews || 0) > 0 && Number(prop.rating || 0) >= 4.8}
                   onClick={() => navigate(`/hotels/${prop.id}`)}
                 />
               ))}

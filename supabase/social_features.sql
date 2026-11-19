@@ -185,3 +185,65 @@ $$;
 
 revoke all on function public.get_follow_list(uuid, text) from public;
 grant execute on function public.get_follow_list(uuid, text) to anon, authenticated;
+
+
+
+-- ── 6. REAL REVIEW RATING SYNC FROM POSTS TO PROPERTIES ─────────────
+-- Reset any legacy placeholder ratings on stays that have 0 real reviews
+update public.properties
+set
+  rating = coalesce(
+    (select round(avg(po.rating)::numeric, 1) from public.posts po where po.property_id = properties.id and po.rating is not null and po.rating > 0),
+    0
+  ),
+  reviews = coalesce(
+    (select count(*) from public.posts po where po.property_id = properties.id and po.rating is not null and po.rating > 0),
+    0
+  );
+
+create or replace function public.sync_property_rating_from_posts()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  target_id uuid;
+begin
+  target_id := coalesce(new.property_id, old.property_id);
+  if target_id is not null then
+    update public.properties
+    set
+      rating = coalesce(
+        (select round(avg(po.rating)::numeric, 1) from public.posts po where po.property_id = target_id and po.rating is not null and po.rating > 0),
+        0
+      ),
+      reviews = coalesce(
+        (select count(*) from public.posts po where po.property_id = target_id and po.rating is not null and po.rating > 0),
+        0
+      )
+    where id = target_id;
+  end if;
+
+  if tg_op = 'UPDATE' and old.property_id is not null and old.property_id is distinct from new.property_id then
+    update public.properties
+    set
+      rating = coalesce(
+        (select round(avg(po.rating)::numeric, 1) from public.posts po where po.property_id = old.property_id and po.rating is not null and po.rating > 0),
+        0
+      ),
+      reviews = coalesce(
+        (select count(*) from public.posts po where po.property_id = old.property_id and po.rating is not null and po.rating > 0),
+        0
+      )
+    where id = old.property_id;
+  end if;
+
+  return coalesce(new, old);
+end;
+$$;
+
+drop trigger if exists trg_sync_property_rating on public.posts;
+create trigger trg_sync_property_rating
+  after insert or update or delete on public.posts
+  for each row execute procedure public.sync_property_rating_from_posts();

@@ -92,8 +92,8 @@ export const Hotels: React.FC = () => {
             id: s.id,
             name: s.name,
             type: s.type,
-            rating: Number(s.rating || 4.8),
-            reviews: Number(s.reviews || 120),
+            rating: Number(s.rating || 0),
+            reviews: Number(s.reviews || 0),
             pricePerNight: Number(s.pricePerNight || 800),
             price_type: s.price_type,
             priceType: s.price_type,
@@ -378,7 +378,7 @@ export const Hotels: React.FC = () => {
                   <div className="dsc-body">
                     <div className="dsc-top-row">
                       <span className="dsc-location">{hotel.location}</span>
-                      {Number(hotel.rating || 0) > 0 && (
+                      {Number(hotel.reviews || 0) > 0 && Number(hotel.rating || 0) > 0 && (
                         <span className="dsc-rating">
                           <span className="dsc-star">★</span> {Number(hotel.rating).toFixed(1)}
                         </span>

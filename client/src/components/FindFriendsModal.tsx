@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../utils/supabase';
@@ -16,6 +16,8 @@ interface FindFriendsModalProps {
   fallbackTravelers?: PublicTraveler[];
 }
 
+const EMPTY_TRAVELERS: PublicTraveler[] = [];
+
 const fallbackAvatar = (name?: string) =>
   `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'T')}&background=2C4C3B&color=fff`;
 
@@ -24,7 +26,7 @@ export const FindFriendsModal: React.FC<FindFriendsModalProps> = ({
   onClose,
   mode = 'discover',
   targetUserId,
-  fallbackTravelers = [],
+  fallbackTravelers = EMPTY_TRAVELERS,
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -34,6 +36,8 @@ export const FindFriendsModal: React.FC<FindFriendsModalProps> = ({
   const [query, setQuery] = useState('');
   const [travelers, setTravelers] = useState<PublicTraveler[]>([]);
   const [loading, setLoading] = useState(false);
+  const fallbackRef = useRef<PublicTraveler[]>(fallbackTravelers);
+  fallbackRef.current = fallbackTravelers;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -60,8 +64,9 @@ export const FindFriendsModal: React.FC<FindFriendsModalProps> = ({
             search_query: query.trim(),
             max_results: 30,
           });
+          if (cancelled) return;
 
-          if (!cancelled && !error && Array.isArray(data)) {
+          if (!error && Array.isArray(data)) {
             const mapped: PublicTraveler[] = data
               .filter((r: any) => r.id !== user?.id)
               .map((r: any) => ({
@@ -74,18 +79,18 @@ export const FindFriendsModal: React.FC<FindFriendsModalProps> = ({
                 followersCount: Number(r.followers_count || 0),
               }));
             setTravelers(mapped);
-            setLoading(false);
             return;
           }
 
-          // Graceful fallback if search_friends RPC isn't migrated yet: derive from posts + fallbackTravelers
-          let derived = [...fallbackTravelers];
+          // Graceful fallback only if search_friends RPC returned an error (not migrated yet)
+          let derived = [...fallbackRef.current];
           if (derived.length === 0) {
             const { data: postRows } = await supabase
               .from('posts')
               .select('user_id, author_name, author_avatar')
               .order('created_at', { ascending: false })
               .limit(60);
+            if (cancelled) return;
 
             const byId = new Map<string, PublicTraveler>();
             (postRows || []).forEach((p: any) => {
@@ -115,8 +120,9 @@ export const FindFriendsModal: React.FC<FindFriendsModalProps> = ({
             target_user_id: targetUserId,
             list_mode: mode,
           });
+          if (cancelled) return;
 
-          if (!cancelled && !error && Array.isArray(data)) {
+          if (!error && Array.isArray(data)) {
             setTravelers(
               data.map((r: any) => ({
                 id: r.id,
@@ -126,7 +132,7 @@ export const FindFriendsModal: React.FC<FindFriendsModalProps> = ({
                 isVerified: Boolean(r.is_verified),
               }))
             );
-          } else if (!cancelled) {
+          } else {
             setTravelers([]);
           }
         }
@@ -137,12 +143,12 @@ export const FindFriendsModal: React.FC<FindFriendsModalProps> = ({
       }
     };
 
-    const timer = window.setTimeout(load, mode === 'discover' ? 180 : 0);
+    const timer = window.setTimeout(load, query ? 180 : 0);
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [isOpen, mode, targetUserId, query, user?.id, fallbackTravelers]);
+  }, [isOpen, mode, targetUserId, query, user?.id]);
 
   if (!isOpen) return null;
 
