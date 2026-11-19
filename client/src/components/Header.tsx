@@ -3,11 +3,13 @@ import { useNavigate, useLocation, Link, useSearchParams } from 'react-router-do
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabase';
 import { useTranslation } from 'react-i18next';
+import { useSavedStays } from '../hooks/useSavedStays';
 import './Header.css';
 import { Button } from './Button';
 
 export const Header: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const { savedCount } = useSavedStays();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);       // desktop avatar dropdown
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // hamburger slide-out
@@ -377,6 +379,11 @@ export const Header: React.FC = () => {
             <Link to="/community" className="nav-link" style={{ marginRight: '1.5rem', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.8rem' }}>
               {t('header.journal')}
             </Link>
+            {savedCount > 0 && (
+              <Link to="/saved" className="nav-link" style={{ marginRight: '1.5rem', fontSize: '0.82rem', fontWeight: 600 }}>
+                {t('saved.title')} ({savedCount})
+              </Link>
+            )}
             <Link 
               to={user?.role === 'host' ? "/dashboard?new=1" : "/become-host"} 
               className="nav-link host-link" 

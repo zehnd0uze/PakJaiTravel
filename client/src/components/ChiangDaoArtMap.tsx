@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { Map as MLMap, Marker as MLMarker, StyleSpecification } from 'maplibre-gl';
 import { type Property } from '../types';
 import { CHIANG_DAO_ATLAS_STAYS, type ChiangDaoZoneId } from '../utils/chiangDaoStays';
+import { useSavedStays } from '../hooks/useSavedStays';
 import './ChiangDaoArtMap.css';
 
 interface ChiangDaoArtMapProps {
@@ -25,15 +26,13 @@ interface ZoneMeta {
 
 const ZONES: ZoneMeta[] = [
   { id: 'all', label: 'All areas', camera: { center: [98.86, 19.37], zoom: 11.2 }, artFocus: { x: 50, y: 50, zoom: 1 } },
-  { id: 'nalao', label: 'Ban Na Lao Mai', camera: { center: [98.8672, 19.3712], zoom: 14.6 }, artLabelPos: { x: 16, y: 26 }, artFocus: { x: 22, y: 40, zoom: 2 } },
-  { id: 'muangkong', label: 'Muang Kong', camera: { center: [98.7095, 19.3832], zoom: 14 }, artLabelPos: { x: 17, y: 59 }, artFocus: { x: 18, y: 73, zoom: 2.1 } },
-  { id: 'maemae', label: 'Ban Mae Mae', camera: { center: [98.8878, 19.3228], zoom: 14.6 }, artLabelPos: { x: 66, y: 24 }, artFocus: { x: 66, y: 38, zoom: 2.1 } },
-  { id: 'tham', label: 'Ban Tham', camera: { center: [98.9272, 19.3925], zoom: 14.2 }, artLabelPos: { x: 49, y: 53 }, artFocus: { x: 48, y: 65, zoom: 2.1 } },
-  { id: 'town', label: 'Town & Riverside', camera: { center: [98.9665, 19.3642], zoom: 14 }, artLabelPos: { x: 75, y: 92 }, artFocus: { x: 74, y: 80, zoom: 2.1 } },
+  { id: 'nalao', label: 'Ban Na Lao Mai', camera: { center: [98.8672, 19.3712], zoom: 14.6 }, artLabelPos: { x: 23, y: 26 }, artFocus: { x: 23, y: 36, zoom: 2.1 } },
+  { id: 'muangkong', label: 'Muang Kong', camera: { center: [98.7095, 19.3832], zoom: 14 }, artLabelPos: { x: 14, y: 66 }, artFocus: { x: 14, y: 77, zoom: 2.2 } },
+  { id: 'maemae', label: 'Ban Mae Mae', camera: { center: [98.8878, 19.3228], zoom: 14.6 }, artLabelPos: { x: 84, y: 12 }, artFocus: { x: 84, y: 27, zoom: 2.1 } },
+  { id: 'tham', label: 'Ban Tham', camera: { center: [98.9272, 19.3925], zoom: 14.2 }, artLabelPos: { x: 55, y: 42 }, artFocus: { x: 56, y: 60, zoom: 2.1 } },
+  { id: 'town', label: 'Town & Riverside', camera: { center: [98.9665, 19.3642], zoom: 14 }, artLabelPos: { x: 74, y: 92 }, artFocus: { x: 75, y: 76, zoom: 2.1 } },
 ];
 
-/** Below this zoom (with "All areas" selected) the map shows one bubble per area instead of overlapping price pins */
-const OVERVIEW_ZOOM = 12.6;
 const PITCH_3D = 55;
 const TERRAIN = { source: 'terrainDem', exaggeration: 1.5 };
 const DEM_TILES = ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'];
@@ -43,10 +42,10 @@ const buildMapStyle = (): StyleSpecification => ({
   sources: {
     base: {
       type: 'raster',
-      tiles: ['a', 'b', 'c'].map(s => `https://${s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png`),
+      tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
       tileSize: 256,
-      maxzoom: 18,
-      attribution: '© OpenStreetMap © CARTO · Elevation © AWS Terrain Tiles',
+      maxzoom: 19,
+      attribution: '© OpenStreetMap contributors',
     },
     terrainDem: { type: 'raster-dem', tiles: DEM_TILES, encoding: 'terrarium', tileSize: 256, maxzoom: 14 },
     hillshadeDem: { type: 'raster-dem', tiles: DEM_TILES, encoding: 'terrarium', tileSize: 256, maxzoom: 14 },
@@ -57,14 +56,14 @@ const buildMapStyle = (): StyleSpecification => ({
       id: 'hillshade',
       type: 'hillshade',
       source: 'hillshadeDem',
+      layout: { visibility: 'none' },
       paint: {
         'hillshade-shadow-color': '#28463A',
         'hillshade-highlight-color': '#FFF8EE',
-        'hillshade-exaggeration': 0.32,
+        'hillshade-exaggeration': 0.28,
       },
     },
   ],
-  terrain: TERRAIN,
   sky: {
     'sky-color': '#DCE9E2',
     'horizon-color': '#F5EFE5',
@@ -119,9 +118,11 @@ interface MappedStay {
 export const ChiangDaoArtMap: React.FC<ChiangDaoArtMapProps> = ({ properties }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isSaved, toggleSaved } = useSavedStays();
   const [activeZone, setActiveZone] = useState<ZoneFilterId>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('map');
-  const [is3D, setIs3D] = useState(true);
+  const [is3D, setIs3D] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
@@ -131,20 +132,26 @@ export const ChiangDaoArtMap: React.FC<ChiangDaoArtMapProps> = ({ properties }) 
     [t]
   );
 
-  // 3D map
+  // MapLibre map
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MLMap | null>(null);
   const mlRef = useRef<MapLibreModule | null>(null);
   const markersRef = useRef<MLMarker[]>([]);
   const [mapReady, setMapReady] = useState(false);
-  const [isOverview, setIsOverview] = useState(true);
 
-  // Illustrated map pan / zoom
+  // Illustrated map pan / zoom / pinch
   const [artZoom, setArtZoom] = useState(1);
   const [artPan, setArtPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
+  const artStateRef = useRef({ zoom: 1, panX: 0, panY: 0 });
   const dragStartRef = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null);
+  const activePointersRef = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const pinchStartRef = useRef<{ dist: number; zoom: number; panX: number; panY: number; midX: number; midY: number } | null>(null);
+
+  useEffect(() => {
+    artStateRef.current = { zoom: artZoom, panX: artPan.x, panY: artPan.y };
+  }, [artZoom, artPan]);
 
   // ── Data: live Supabase stays + curated Chiang Dao directory ──
   const allStays = useMemo<MappedStay[]>(() => {
@@ -190,21 +197,19 @@ export const ChiangDaoArtMap: React.FC<ChiangDaoArtMapProps> = ({ properties }) 
     return combined;
   }, [properties]);
 
-  const visibleStays = useMemo(
-    () => (activeZone === 'all' ? allStays : allStays.filter(s => s.zoneId === activeZone)),
-    [allStays, activeZone]
-  );
-
-  const zoneClusters = useMemo(
-    () =>
-      ZONES.filter(z => z.id !== 'all').map(z => {
-        const stays = allStays.filter(s => s.zoneId === z.id);
-        const lat = stays.length ? stays.reduce((a, s) => a + s.lat, 0) / stays.length : z.camera.center[1];
-        const lng = stays.length ? stays.reduce((a, s) => a + s.lng, 0) / stays.length : z.camera.center[0];
-        return { id: z.id as ChiangDaoZoneId, label: z.label, count: stays.length, lat, lng };
-      }),
-    [allStays]
-  );
+  const visibleStays = useMemo(() => {
+    const byZone = activeZone === 'all' ? allStays : allStays.filter(s => s.zoneId === activeZone);
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return byZone;
+    return byZone.filter(s => {
+      const zoneTh = getZoneLabel(s.zoneId).toLowerCase();
+      return (
+        s.prop.name.toLowerCase().includes(q) ||
+        s.zoneLabel.toLowerCase().includes(q) ||
+        zoneTh.includes(q)
+      );
+    });
+  }, [allStays, activeZone, searchQuery, getZoneLabel]);
 
   const selectedStay = useMemo(() => allStays.find(s => s.prop.id === selectedId) || null, [allStays, selectedId]);
   const activeZoneMeta = ZONES.find(z => z.id === activeZone) || ZONES[0];
@@ -238,17 +243,96 @@ export const ChiangDaoArtMap: React.FC<ChiangDaoArtMapProps> = ({ properties }) 
     setArtPan({ x: clampPan(50 - cx * next, next), y: clampPan(50 - cy * next, next) });
   };
 
+  // Mouse-wheel & trackpad pinch zoom on the illustrated map (zooms toward cursor)
+  useEffect(() => {
+    if (viewMode !== 'illustrated') return;
+    const stage = stageRef.current;
+    if (!stage) return;
+    let wheelTimer: number | undefined;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const rect = stage.getBoundingClientRect();
+      const cursorX = ((e.clientX - rect.left) / rect.width) * 100;
+      const cursorY = ((e.clientY - rect.top) / rect.height) * 100;
+
+      const { zoom, panX, panY } = artStateRef.current;
+      const factor = e.ctrlKey ? -e.deltaY * 0.01 : -e.deltaY * 0.0022;
+      const nextZoom = Number(Math.min(MAX_ART_ZOOM, Math.max(MIN_ART_ZOOM, zoom * (1 + factor))).toFixed(3));
+      if (nextZoom === zoom) return;
+
+      const mapX = (cursorX - panX) / zoom;
+      const mapY = (cursorY - panY) / zoom;
+      const nextPanX = clampPan(cursorX - mapX * nextZoom, nextZoom);
+      const nextPanY = clampPan(cursorY - mapY * nextZoom, nextZoom);
+
+      artStateRef.current = { zoom: nextZoom, panX: nextPanX, panY: nextPanY };
+      setIsDragging(true);
+      setArtZoom(nextZoom);
+      setArtPan({ x: nextPanX, y: nextPanY });
+      window.clearTimeout(wheelTimer);
+      wheelTimer = window.setTimeout(() => setIsDragging(false), 120);
+    };
+
+    stage.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      window.clearTimeout(wheelTimer);
+      stage.removeEventListener('wheel', handleWheel);
+    };
+  }, [viewMode]);
+
   const onStagePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.button !== 0 || artZoom <= 1.01 || (e.target as HTMLElement).closest('button')) return;
+    if ((e.target as HTMLElement).closest('button')) return;
     e.currentTarget.setPointerCapture(e.pointerId);
-    setIsDragging(true);
-    dragStartRef.current = { x: e.clientX, y: e.clientY, panX: artPan.x, panY: artPan.y };
+    activePointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (activePointersRef.current.size === 2) {
+      const pts = Array.from(activePointersRef.current.values());
+      const dist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+      const rect = stageRef.current?.getBoundingClientRect();
+      if (rect && dist > 0) {
+        const midX = (((pts[0].x + pts[1].x) / 2 - rect.left) / rect.width) * 100;
+        const midY = (((pts[0].y + pts[1].y) / 2 - rect.top) / rect.height) * 100;
+        pinchStartRef.current = { dist, zoom: artZoom, panX: artPan.x, panY: artPan.y, midX, midY };
+        dragStartRef.current = null;
+        setIsDragging(true);
+      }
+      return;
+    }
+
+    if (e.button === 0 && artZoom > 1.01) {
+      setIsDragging(true);
+      dragStartRef.current = { x: e.clientX, y: e.clientY, panX: artPan.x, panY: artPan.y };
+    }
   };
 
   const onStagePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const start = dragStartRef.current;
     const stage = stageRef.current;
-    if (!start || !stage) return;
+    if (!stage) return;
+
+    if (activePointersRef.current.has(e.pointerId)) {
+      activePointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    }
+
+    // Two-finger pinch zoom
+    const pinch = pinchStartRef.current;
+    if (pinch && activePointersRef.current.size === 2) {
+      const pts = Array.from(activePointersRef.current.values());
+      const dist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+      const nextZoom = Number(Math.min(MAX_ART_ZOOM, Math.max(MIN_ART_ZOOM, pinch.zoom * (dist / pinch.dist))).toFixed(3));
+      const mapX = (pinch.midX - pinch.panX) / pinch.zoom;
+      const mapY = (pinch.midY - pinch.panY) / pinch.zoom;
+      setArtZoom(nextZoom);
+      setArtPan({
+        x: clampPan(pinch.midX - mapX * nextZoom, nextZoom),
+        y: clampPan(pinch.midY - mapY * nextZoom, nextZoom),
+      });
+      return;
+    }
+
+    // Single-finger / mouse grab-hand pan
+    const start = dragStartRef.current;
+    if (!start) return;
     const rect = stage.getBoundingClientRect();
     setArtPan({
       x: clampPan(start.panX + ((e.clientX - start.x) / rect.width) * 100, artZoom),
@@ -256,9 +340,13 @@ export const ChiangDaoArtMap: React.FC<ChiangDaoArtMapProps> = ({ properties }) 
     });
   };
 
-  const onStagePointerUp = () => {
-    dragStartRef.current = null;
-    setIsDragging(false);
+  const onStagePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    activePointersRef.current.delete(e.pointerId);
+    if (activePointersRef.current.size < 2) pinchStartRef.current = null;
+    if (activePointersRef.current.size === 0) {
+      dragStartRef.current = null;
+      setIsDragging(false);
+    }
   };
 
   const onStageDoubleClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -332,16 +420,14 @@ export const ChiangDaoArtMap: React.FC<ChiangDaoArtMapProps> = ({ properties }) 
         attributionControl: { compact: true },
       });
 
-      // Don't hijack page scrolling — users zoom with buttons, pinch, or double-click
-      map.scrollZoom.disable();
+      // Enable smooth mouse-wheel zoom, grab-hand drag pan, and touch pinch gestures
+      map.scrollZoom.enable();
+      map.dragPan.enable();
+      map.touchZoomRotate.enable();
       map.addControl(new ml.NavigationControl({ visualizePitch: true }), 'bottom-right');
 
       map.on('load', () => {
         if (!cancelled) setMapReady(true);
-      });
-      map.on('zoom', () => {
-        const ov = map!.getZoom() < OVERVIEW_ZOOM;
-        setIsOverview(prev => (prev === ov ? prev : ov));
       });
       map.on('click', () => setSelectedId(null));
 
@@ -363,18 +449,21 @@ export const ChiangDaoArtMap: React.FC<ChiangDaoArtMapProps> = ({ properties }) 
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady) return;
-    map.flyTo({ center: activeZoneMeta.camera.center, zoom: activeZoneMeta.camera.zoom, duration: 1100, essential: true });
+    map.flyTo({ center: activeZoneMeta.camera.center, zoom: activeZoneMeta.camera.zoom, duration: 900, essential: true });
   }, [activeZoneMeta, mapReady]);
 
   // 3D on/off
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady) return;
+    if (map.getLayer('hillshade')) {
+      map.setLayoutProperty('hillshade', 'visibility', is3D ? 'visible' : 'none');
+    }
     map.setTerrain(is3D ? TERRAIN : null);
-    map.easeTo({ pitch: is3D ? PITCH_3D : 0, bearing: is3D ? map.getBearing() : 0, duration: 600 });
+    map.easeTo({ pitch: is3D ? PITCH_3D : 0, bearing: is3D ? -15 : 0, duration: 600 });
   }, [is3D, mapReady]);
 
-  // Markers: area bubbles at overview zoom, price pins when zoomed in
+  // Agoda-style price pins: always visible so users can scan prices & locations immediately
   useEffect(() => {
     const map = mapRef.current;
     const ml = mlRef.current;
@@ -383,41 +472,36 @@ export const ChiangDaoArtMap: React.FC<ChiangDaoArtMapProps> = ({ properties }) 
     markersRef.current.forEach(m => m.remove());
     markersRef.current = [];
 
-    if (activeZone === 'all' && isOverview) {
-      zoneClusters.forEach(c => {
-        const el = document.createElement('button');
-        el.type = 'button';
-        el.className = 'cd-cluster';
-        const name = document.createElement('strong');
-        name.textContent = getZoneLabel(c.id);
-        const count = document.createElement('span');
-        count.textContent = t('chiangDaoMap.staysCount', { count: c.count });
-        el.append(name, count);
-        el.addEventListener('click', e => {
-          e.stopPropagation();
-          selectZone(c.id);
-        });
-        markersRef.current.push(new ml.Marker({ element: el, anchor: 'center' }).setLngLat([c.lng, c.lat]).addTo(map));
-      });
-      return;
-    }
-
     visibleStays.forEach(stay => {
       const isActive = stay.prop.id === selectedId;
       const isHovered = stay.prop.id === hoveredId;
+      const { primary } = splitName(stay.prop.name);
       const el = document.createElement('button');
       el.type = 'button';
-      el.className = `cd-pin${isActive ? ' is-active' : ''}${isHovered ? ' is-hovered' : ''}`;
-      el.textContent = formatPrice(stay.prop);
-      el.setAttribute('aria-label', `${splitName(stay.prop.name).primary}, ${formatPrice(stay.prop)}`);
-      if (isActive || isHovered) el.style.zIndex = '10';
+      el.className = `cd-pin cd-map-pin${isActive ? ' is-active' : ''}${isHovered ? ' is-hovered' : ''}`;
+      el.setAttribute('aria-label', `${primary}, ${formatPrice(stay.prop)}`);
+
+      if (isActive || isHovered) {
+        el.style.zIndex = '20';
+        const tip = document.createElement('span');
+        tip.className = 'cd-pin-tip';
+        tip.textContent = `${primary} · ★ ${stay.prop.rating || 4.8}`;
+        el.appendChild(tip);
+      }
+
+      const priceNode = document.createElement('span');
+      priceNode.textContent = formatPrice(stay.prop);
+      el.appendChild(priceNode);
+
+      el.addEventListener('mouseenter', () => setHoveredId(stay.prop.id));
+      el.addEventListener('mouseleave', () => setHoveredId(prev => (prev === stay.prop.id ? null : prev)));
       el.addEventListener('click', e => {
         e.stopPropagation();
         selectStay(stay);
       });
       markersRef.current.push(new ml.Marker({ element: el, anchor: 'bottom' }).setLngLat([stay.lng, stay.lat]).addTo(map));
     });
-  }, [mapReady, isOverview, activeZone, visibleStays, zoneClusters, selectedId, hoveredId, selectZone, selectStay, getZoneLabel, t]);
+  }, [mapReady, visibleStays, selectedId, hoveredId, selectStay]);
 
   return (
     <section className="cd-map-section" aria-label={`${t('chiangDaoMap.titlePrefix')} ${t('chiangDaoMap.titlePlace')}`}>
@@ -514,7 +598,7 @@ export const ChiangDaoArtMap: React.FC<ChiangDaoArtMapProps> = ({ properties }) 
                   {/* Peak & River geographic landmarks */}
                   <div
                     className="cd-art-landmark cd-art-landmark-peak"
-                    style={{ left: '22%', top: '12%', transform: `translate(-50%, -50%) scale(${1 / artZoom})` }}
+                    style={{ left: '20%', top: '8%', transform: `translate(-50%, -50%) scale(${1 / artZoom})` }}
                   >
                     <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
                       <path d="M2 13L8 3l6 10H2z" />
@@ -524,7 +608,7 @@ export const ChiangDaoArtMap: React.FC<ChiangDaoArtMapProps> = ({ properties }) 
 
                   <div
                     className="cd-art-landmark cd-art-landmark-river"
-                    style={{ left: '84.5%', top: '57%', transform: `translate(-50%, -50%) scale(${1 / artZoom})` }}
+                    style={{ left: '89%', top: '69%', transform: `translate(-50%, -50%) scale(${1 / artZoom})` }}
                   >
                     <span>{t('chiangDaoMap.maePingRiver')}</span>
                   </div>
@@ -634,13 +718,25 @@ export const ChiangDaoArtMap: React.FC<ChiangDaoArtMapProps> = ({ properties }) 
                     >
                       {t('chiangDaoMap.directions')}
                     </a>
+                    <button
+                      type="button"
+                      className="cd-btn-secondary"
+                      onClick={() => toggleSaved(selectedStay.prop.id)}
+                      aria-label={t('airbnbCard.saveFavorite')}
+                      aria-pressed={isSaved(selectedStay.prop.id)}
+                      style={{ flex: '0 0 auto', padding: '8px 10px', color: isSaved(selectedStay.prop.id) ? '#C2704E' : '#2C4C3B' }}
+                    >
+                      <svg viewBox="0 0 24 24" width="15" height="15" fill={isSaved(selectedStay.prop.id) ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
               </div>
             )}
           </div>
 
-          {/* ── Right: stay list ── */}
+          {/* ── Right: Agoda-style stay list with search ── */}
           <aside className="cd-list" aria-label={t('chiangDaoMap.areasLabel')}>
             <div className="cd-list-head">
               <span>
@@ -649,6 +745,25 @@ export const ChiangDaoArtMap: React.FC<ChiangDaoArtMapProps> = ({ properties }) 
               <button type="button" onClick={() => navigate('/hotels?q=Chiang%20Dao')}>
                 {t('chiangDaoMap.seeAll')}
               </button>
+            </div>
+
+            <div className="cd-list-search">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+                <circle cx="11" cy="11" r="7.5" />
+                <path d="M20 20l-3.5-3.5" strokeLinecap="round" />
+              </svg>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder={t('chiangDaoMap.searchPlaceholder')}
+                aria-label={t('chiangDaoMap.searchPlaceholder')}
+              />
+              {searchQuery && (
+                <button type="button" onClick={() => setSearchQuery('')} aria-label={t('chiangDaoMap.close')}>
+                  ×
+                </button>
+              )}
             </div>
 
             <ul className="cd-list-items">

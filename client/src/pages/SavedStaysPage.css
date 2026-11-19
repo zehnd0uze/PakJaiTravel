@@ -1,0 +1,276 @@
+.saved-page {
+  min-height: 72vh;
+  padding: 112px 0 80px;
+  background: var(--bg-color, #FAFCFA);
+}
+
+.saved-shell {
+  max-width: 1200px;
+}
+
+.saved-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+.saved-header h1 {
+  margin: 0 0 6px;
+  font-size: clamp(1.8rem, 3vw, 2.3rem);
+  color: #16261E;
+}
+
+.saved-header p {
+  margin: 0;
+  color: #5C6D63;
+  font-size: 0.96rem;
+}
+
+.saved-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.saved-count-pill {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(44, 76, 59, 0.08);
+  color: #2C4C3B;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.saved-clear-btn {
+  border: none;
+  background: transparent;
+  color: #8A5A44;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.saved-empty {
+  text-align: center;
+  padding: 72px 24px;
+  border-radius: 24px;
+  background: #FFFFFF;
+  box-shadow: 0 12px 32px -20px rgba(20, 38, 29, 0.12);
+  color: #5C6D63;
+}
+
+.saved-empty svg {
+  color: #C2704E;
+  margin-bottom: 12px;
+}
+
+.saved-empty h2 {
+  margin: 0 0 8px;
+  color: #16261E;
+  font-size: 1.35rem;
+}
+
+.saved-empty p {
+  margin: 0 auto 24px;
+  max-width: 440px;
+  line-height: 1.6;
+}
+
+.saved-explore-btn {
+  padding: 12px 24px;
+  border-radius: 999px;
+  border: none;
+  background: #2C4C3B;
+  color: #FFFFFF;
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.saved-explore-btn:hover {
+  background: #20392C;
+}
+
+.saved-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 22px;
+  margin-bottom: 48px;
+}
+
+.saved-card {
+  background: #FFFFFF;
+  border-radius: 20px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 12px 28px -20px rgba(20, 38, 29, 0.16);
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.saved-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 36px -18px rgba(20, 38, 29, 0.22);
+}
+
+.saved-card-media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #E8EFE9;
+}
+
+.saved-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.saved-card-heart {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.92);
+  color: #C2704E;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
+}
+
+.saved-card-body {
+  padding: 16px;
+}
+
+.saved-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: #6B7A71;
+  margin-bottom: 4px;
+}
+
+.saved-card-rating {
+  color: #16261E;
+  font-weight: 600;
+}
+
+.saved-card-body h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  color: #16261E;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.saved-card-footer {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.saved-card-price strong {
+  font-size: 1.02rem;
+  color: #16261E;
+}
+
+.saved-card-price span {
+  font-size: 0.78rem;
+  color: #6B7A71;
+}
+
+.saved-card-link {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #2C4C3B;
+}
+
+/* ── Side-by-side comparison ── */
+.saved-compare-section h2 {
+  margin: 0 0 16px;
+  font-size: 1.35rem;
+  color: #16261E;
+}
+
+.saved-compare-wrap {
+  background: #FFFFFF;
+  border-radius: 22px;
+  overflow-x: auto;
+  box-shadow: 0 12px 32px -20px rgba(20, 38, 29, 0.14);
+}
+
+.saved-compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+.saved-compare-table th {
+  text-align: left;
+  padding: 14px 16px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #5C6D63;
+  background: rgba(44, 76, 59, 0.04);
+  border-bottom: 1px solid rgba(44, 76, 59, 0.08);
+  white-space: nowrap;
+}
+
+.saved-compare-table td {
+  padding: 14px 16px;
+  font-size: 0.86rem;
+  color: #1F3228;
+  border-bottom: 1px solid rgba(44, 76, 59, 0.06);
+  vertical-align: middle;
+}
+
+.saved-compare-table tbody tr {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.saved-compare-table tbody tr:hover {
+  background: rgba(44, 76, 59, 0.03);
+}
+
+.saved-compare-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.cmp-stay-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cmp-stay-cell img {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.cmp-price-cell {
+  white-space: nowrap;
+}
+
+.cmp-price-cell span {
+  font-size: 0.76rem;
+  color: #6B7A71;
+}

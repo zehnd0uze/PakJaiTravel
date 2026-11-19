@@ -1231,3 +1231,38 @@
     cursor: pointer;
   }
 }
+
+
+/* ── Live Chiang Dao 3-day Weather & Mist Forecast strip ── */
+.atmo-forecast-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 8px 0 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.atmo-forecast-day {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 5px 7px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+
+.afd-label {
+  font-size: 0.68rem;
+  opacity: 0.8;
+}
+
+.afd-temps {
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.afd-rain {
+  font-size: 0.65rem;
+  opacity: 0.78;
+}

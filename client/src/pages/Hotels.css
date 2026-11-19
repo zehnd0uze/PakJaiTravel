@@ -437,3 +437,29 @@
     gap: 24px 16px;
   }
 }
+
+
+/* ── Save heart button on directory cards ── */
+.dsc-heart-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 4;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(16, 32, 23, 0.16);
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.dsc-heart-btn:hover {
+  transform: scale(1.08);
+  background: #FFFFFF;
+}

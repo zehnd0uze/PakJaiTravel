@@ -1,8 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSavedStays } from '../hooks/useSavedStays';
 import './AirbnbCard.css';
 
 interface HeritageCardProps {
+  stayId?: string;
   image: string;
   title: string;
   subtitle: string;
@@ -15,6 +17,7 @@ interface HeritageCardProps {
 }
 
 export const AirbnbCard: React.FC<HeritageCardProps> = ({
+  stayId,
   image,
   title,
   subtitle,
@@ -26,6 +29,8 @@ export const AirbnbCard: React.FC<HeritageCardProps> = ({
   onClick
 }) => {
   const { t } = useTranslation();
+  const { isSaved, toggleSaved } = useSavedStays();
+  const saved = stayId ? isSaved(stayId) : false;
 
   return (
     <div className="heritage-card" onClick={onClick}>
@@ -33,13 +38,24 @@ export const AirbnbCard: React.FC<HeritageCardProps> = ({
         <img src={image} alt={title} className="heritage-card-image" loading="lazy" />
         
         {/* Heart Icon (Favourite) */}
-        <button className="heritage-card-heart" aria-label={t('airbnbCard.saveFavorite')}>
+        <button
+          type="button"
+          className={`heritage-card-heart${saved ? ' is-saved' : ''}`}
+          aria-label={t('airbnbCard.saveFavorite')}
+          aria-pressed={saved}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (stayId) toggleSaved(stayId);
+          }}
+          style={saved ? { color: '#C2704E' } : undefined}
+        >
           <svg 
             viewBox="0 0 32 32" 
             xmlns="http://www.w3.org/2000/svg" 
             aria-hidden="true" 
             role="presentation" 
             focusable="false" 
+            style={saved ? { fill: '#C2704E', stroke: '#FFFFFF', strokeWidth: 2 } : undefined}
           >
             <path d="M16 28c7-4.73 14-10 14-17a6.98 6.98 0 0 0-7-7c-1.81 0-3.52.68-4.82 1.84L16 7.41l-2.18-1.57A6.98 6.98 0 0 0 9 4a6.98 6.98 0 0 0-7 7c0 7 7 12.27 14 17z" />
           </svg>

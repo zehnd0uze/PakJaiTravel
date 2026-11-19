@@ -7,7 +7,19 @@ import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { ClaimPropertyModal } from '../components/ClaimPropertyModal';
 import { CHIANG_DAO_ATLAS_STAYS } from '../utils/chiangDaoStays';
+import { useSavedStays } from '../hooks/useSavedStays';
+import { getStayPracticalInfo } from '../utils/stayPracticalInfo';
 import './HotelDetail.css';
+
+interface TravelerReview {
+  id: string;
+  authorName: string;
+  authorAvatar?: string;
+  content: string;
+  imageUrl?: string;
+  rating?: number;
+  createdAt?: string;
+}
 
 interface Hotel {
   id: string;
@@ -36,10 +48,12 @@ export const HotelDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isSaved, toggleSaved } = useSavedStays();
   const [selectedImage, setSelectedImage] = useState(0);
   const [hotel, setHotel] = useState<Hotel | null>(null);
   const [loading, setLoading] = useState(true);
   const [showClaimModal, setShowClaimModal] = useState(false);
+  const [travelerReviews, setTravelerReviews] = useState<TravelerReview[]>([]);
 
   // Fetch from API
   useEffect(() => {
@@ -119,6 +133,44 @@ export const HotelDetail: React.FC = () => {
     
     fetchHotel();
   }, [id]);
+
+  // Fetch matching Traveler Journal reviews & photos for this stay
+  useEffect(() => {
+    if (!hotel) return;
+    let cancelled = false;
+    const primaryName = hotel.name.split('(')[0].trim();
+
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from('posts')
+          .select('id, author_name, author_avatar, content, image_url, rating, created_at, property_id, location_tag')
+          .or(`property_id.eq.${hotel.id},location_tag.ilike.%${primaryName}%`)
+          .order('created_at', { ascending: false })
+          .limit(6);
+
+        if (!cancelled && data) {
+          setTravelerReviews(
+            data.map((p: any) => ({
+              id: p.id,
+              authorName: p.author_name || 'นักเดินทาง',
+              authorAvatar: p.author_avatar,
+              content: p.content || '',
+              imageUrl: p.image_url,
+              rating: p.rating ? Number(p.rating) : undefined,
+              createdAt: p.created_at,
+            }))
+          );
+        }
+      } catch {
+        // Ignore offline/placeholder errors
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [hotel]);
 
   if (loading) {
     return (
@@ -232,6 +284,33 @@ export const HotelDetail: React.FC = () => {
                 <span>{t('hotelDetail.verifiedBanner')}</span>
               </div>
             )}
+
+            <div className="detail-quick-actions">
+              <button
+                type="button"
+                className={`detail-save-btn${isSaved(hotel.id) ? ' is-saved' : ''}`}
+                onClick={() => toggleSaved(hotel.id)}
+                aria-pressed={isSaved(hotel.id)}
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" fill={isSaved(hotel.id) ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </svg>
+                <span>{isSaved(hotel.id) ? t('hotelDetail.savedStay') : t('hotelDetail.saveStay')}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Chiang Dao Know Before You Go — Practical Info */}
+          <div className="detail-section">
+            <h2>{t('hotelDetail.practicalTitle')}</h2>
+            <div className="practical-grid">
+              {getStayPracticalInfo(hotel).map((item) => (
+                <div key={item.key} className={`practical-card tone-${item.tone}`}>
+                  <span className="practical-label">{t(item.labelKey)}</span>
+                  <strong className="practical-value">{t(item.valueKey)}</strong>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Description */}
@@ -335,6 +414,50 @@ export const HotelDetail: React.FC = () => {
               </div>
             </div>
           )}
+
+          {/* Traveler Reviews & Photos from Community Journal */}
+          <div className="detail-section">
+            <div className="detail-reviews-head">
+              <h2>{t('hotelDetail.travelerReviewsTitle')}</h2>
+              <button
+                type="button"
+                className="detail-write-review-btn"
+                onClick={() => navigate('/community')}
+              >
+                {t('hotelDetail.writeReview')}
+              </button>
+            </div>
+
+            {travelerReviews.length > 0 ? (
+              <div className="detail-traveler-reviews">
+                {travelerReviews.map((rev) => (
+                  <article key={rev.id} className="dtr-card">
+                    <div className="dtr-author">
+                      <span className="dtr-avatar">
+                        {rev.authorAvatar ? (
+                          <img src={rev.authorAvatar} alt={rev.authorName} />
+                        ) : (
+                          rev.authorName.charAt(0).toUpperCase()
+                        )}
+                      </span>
+                      <div className="dtr-author-meta">
+                        <strong>{rev.authorName}</strong>
+                        {rev.rating && <span className="dtr-stars">★ {rev.rating.toFixed(1)}</span>}
+                      </div>
+                    </div>
+                    {rev.content && <p className="dtr-text">{rev.content}</p>}
+                    {rev.imageUrl && (
+                      <img src={rev.imageUrl} alt={rev.authorName} className="dtr-photo" loading="lazy" />
+                    )}
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="detail-reviews-empty">
+                <p>{t('hotelDetail.travelerReviewsEmpty')}</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Right column — booking sidebar */}

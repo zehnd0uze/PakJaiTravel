@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../utils/supabase';
 import { VerifiedBadge } from '../components/VerifiedBadge';
+import { useSavedStays } from '../hooks/useSavedStays';
+import { CHIANG_DAO_ATLAS_STAYS } from '../utils/chiangDaoStays';
 import './Hotels.css';
 
 interface Hotel {
@@ -30,6 +32,7 @@ interface Hotel {
 export const Hotels: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isSaved, toggleSaved } = useSavedStays();
   const [searchParams, setSearchParams] = useSearchParams();
   const qParam = searchParams.get('q') || '';
   const typeParam = searchParams.get('type') || '';
@@ -62,23 +65,52 @@ export const Hotels: React.FC = () => {
           .eq('status', 'published')
           .order('created_at', { ascending: false });
 
+        const formatted: Hotel[] = !error && data
+          ? data.map(p => ({
+              ...p,
+              pricePerNight: Number(p.price_per_night || p.price || 0),
+              imageUrl: p.image_url || (Array.isArray(p.images) && p.images[0]) || '/doiluangbg.jpg',
+              images: p.images && p.images.length > 0 ? p.images : (p.image_url ? [p.image_url] : []),
+              features: p.features || [],
+              amenities: p.amenities || [],
+              isVerified: Boolean(p.is_verified),
+              province: p.province || 'Chiang Mai',
+              district: p.district || 'Chiang Dao',
+              location: p.location || `${p.district || 'Chiang Dao'}, ${p.province || 'Chiang Mai'}`,
+            }))
+          : [];
+
         if (error) {
           console.error('Failed to fetch properties:', error);
-        } else {
-          const formatted: Hotel[] = (data || []).map(p => ({
-            ...p,
-            pricePerNight: Number(p.price_per_night || p.price || 0),
-            imageUrl: p.image_url || (Array.isArray(p.images) && p.images[0]) || '/doiluangbg.jpg',
-            images: p.images && p.images.length > 0 ? p.images : (p.image_url ? [p.image_url] : []),
-            features: p.features || [],
-            amenities: p.amenities || [],
-            isVerified: Boolean(p.is_verified),
-            province: p.province || 'Chiang Mai',
-            district: p.district || 'Chiang Dao',
-            location: p.location || `${p.district || 'Chiang Dao'}, ${p.province || 'Chiang Mai'}`,
-          }));
-          setAllHotels(formatted);
         }
+
+        // Merge curated Chiang Dao stays (deduplicated) so /hotels always matches the valley map
+        const seen = new Set(formatted.map(h => h.name.trim().toLowerCase()));
+        const atlasFormatted: Hotel[] = CHIANG_DAO_ATLAS_STAYS
+          .filter(s => !seen.has(s.name.trim().toLowerCase()))
+          .map(s => ({
+            id: s.id,
+            name: s.name,
+            type: s.type,
+            rating: Number(s.rating || 4.8),
+            reviews: Number(s.reviews || 120),
+            pricePerNight: Number(s.pricePerNight || 800),
+            price_type: s.price_type,
+            priceType: s.price_type,
+            currency: s.currency || 'THB',
+            imageUrl: s.imageUrl || '/doiluangbg.jpg',
+            images: s.images || [s.imageUrl || '/doiluangbg.jpg'],
+            features: s.features || [],
+            amenities: s.amenities || [],
+            description: s.description,
+            isVerified: Boolean(s.isVerified),
+            location: s.location || `${s.zoneLabel}, Chiang Dao`,
+            province: s.province || 'Chiang Mai',
+            district: s.district || 'Chiang Dao',
+            status: 'published',
+          }));
+
+        setAllHotels([...formatted, ...atlasFormatted]);
       } finally {
         setLoading(false);
       }
@@ -312,6 +344,7 @@ export const Hotels: React.FC = () => {
           <div className="hotels-grid">
             {filteredHotels.map((hotel) => {
               const isPerPerson = hotel.price_type === 'per_person' || hotel.priceType === 'per_person';
+              const saved = isSaved(hotel.id);
               return (
                 <article
                   key={hotel.id}
@@ -321,6 +354,20 @@ export const Hotels: React.FC = () => {
                   <div className="dsc-media">
                     <img src={hotel.imageUrl} alt={hotel.name} loading="lazy" />
                     <span className="dsc-type-pill">{hotel.type || 'Stay'}</span>
+                    <button
+                      type="button"
+                      className={`dsc-heart-btn${saved ? ' is-saved' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleSaved(hotel.id);
+                      }}
+                      aria-label={t('airbnbCard.saveFavorite')}
+                      aria-pressed={saved}
+                    >
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill={saved ? '#C2704E' : 'rgba(22,38,30,0.45)'} stroke="#FFFFFF" strokeWidth="1.8">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                      </svg>
+                    </button>
                     {hotel.isVerified && (
                       <div className="dsc-verified-wrap">
                         <VerifiedBadge />

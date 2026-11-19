@@ -25,6 +25,7 @@ import { CookieConsent } from './components/CookieConsent';
 import { SessionTimeout } from './components/SessionTimeout';
 import { TermsPage } from './pages/TermsPage';
 import { PrivacyPage } from './pages/PrivacyPage';
+import { SavedStaysPage } from './pages/SavedStaysPage';
 
 function App() {
   return (
@@ -69,6 +70,7 @@ function App() {
                       <Route path="/privacy" element={<PrivacyPage />} />
                       <Route path="/hotels" element={<Hotels />} />
                       <Route path="/hotels/:id" element={<HotelDetail />} />
+                      <Route path="/saved" element={<SavedStaysPage />} />
                     </Routes>
                   </main>
                   <Footer />

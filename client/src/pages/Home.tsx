@@ -6,6 +6,7 @@ import './Home.css';
 import { AirbnbCard } from '../components/AirbnbCard';
 import { VerifiedBadge } from '../components/VerifiedBadge';
 import { ChiangDaoArtMap } from '../components/ChiangDaoArtMap';
+import { useChiangDaoWeather, weatherCodeToKey } from '../hooks/useChiangDaoWeather';
 
 interface Property {
   id: string;
@@ -65,6 +66,7 @@ const MARQUEE_MOMENTS = [
 export const Home: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const liveWeather = useChiangDaoWeather();
   const [properties, setProperties] = useState<Property[]>([]);
   const [journalPosts, setJournalPosts] = useState<JournalPreview[]>([]);
   const [loading, setLoading] = useState(true);
@@ -363,12 +365,34 @@ export const Home: React.FC = () => {
 
             {/* Right Interactive Stack: Atmosphere Switcher + Floating Stay Pill */}
             <div className="hero-right-dock">
-              {/* Interactive Time-of-Day Atmosphere Switcher */}
+              {/* Live Chiang Dao Weather & Atmosphere Switcher */}
               <div className="atmo-widget" role="group" aria-label={t('home.atmosphere.place')}>
                 <div className="atmo-status-line">
-                  <span className="atmo-temp">{activeAtmoObj.temp}</span>
-                  <span className="atmo-cond">{t('home.atmosphere.place')} · {t(activeAtmoObj.condKey)}</span>
+                  <span className="atmo-temp">
+                    {liveWeather ? `${liveWeather.temp}°C` : activeAtmoObj.temp}
+                  </span>
+                  <span className="atmo-cond">
+                    {t('home.atmosphere.place')} ·{' '}
+                    {liveWeather
+                      ? `${t(weatherCodeToKey(liveWeather.weatherCode))} · ${t(`weather.mist${liveWeather.mistChance.charAt(0).toUpperCase() + liveWeather.mistChance.slice(1)}`)}`
+                      : t(activeAtmoObj.condKey)}
+                  </span>
                 </div>
+
+                {liveWeather && liveWeather.daily.length > 0 && (
+                  <div className="atmo-forecast-row" aria-label={t('weather.liveLabel')}>
+                    {liveWeather.daily.map((day, idx) => (
+                      <div key={day.date} className="atmo-forecast-day">
+                        <span className="afd-label">
+                          {idx === 0 ? t('weather.today') : idx === 1 ? t('weather.tomorrow') : t('weather.dayAfter')}
+                        </span>
+                        <span className="afd-temps">{day.tempMin}°–{day.tempMax}°</span>
+                        <span className="afd-rain">{t('weather.rainChance', { value: day.rainProb })}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 <div className="atmo-Segmented">
                   {ATMOSPHERE_MODES.map((m) => (
                     <button
@@ -490,6 +514,7 @@ export const Home: React.FC = () => {
               {filteredProperties.slice(0, 8).map(prop => (
                 <AirbnbCard
                   key={prop.id}
+                  stayId={prop.id}
                   title={prop.name}
                   subtitle={`${prop.type} • ${(prop.features || []).slice(0, 2).join(' • ') || prop.location || 'Local Stay'}`}
                   image={prop.imageUrl || '/assets/placeholder-hotel.jpg'}
