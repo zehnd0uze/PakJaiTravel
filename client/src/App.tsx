@@ -63,6 +63,7 @@ function App() {
                       <Route path="/" element={<Home />} />
                       <Route path="/community" element={<CommunityPage />} />
                       <Route path="/profile" element={<ProfilePage />} />
+                      <Route path="/profile/:userId" element={<ProfilePage />} />
                       <Route path="/dashboard" element={<HostDashboard />} />
                       <Route path="/become-host" element={<BecomeHostPage />} />
 

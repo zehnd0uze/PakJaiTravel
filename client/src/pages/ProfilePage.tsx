@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useFollows } from '../hooks/useFollows';
+import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
 import { uploadToCloudinary } from '../utils/cloudinary';
 import PostCard from '../components/PostCard';
 import CreatePostModal from '../components/CreatePostModal';
 import ProfileSettingsModal from '../components/ProfileSettingsModal';
 import JournalModal from '../components/JournalModal';
-import { type Post } from '../types';
+import FindFriendsModal from '../components/FindFriendsModal';
+import { type Post, type PublicTraveler } from '../types';
 import './ProfilePage.css';
 
 
@@ -16,8 +18,19 @@ import './ProfilePage.css';
 
 const ProfilePage: React.FC = () => {
   const { t } = useTranslation();
+  const { userId: routeUserId } = useParams<{ userId?: string }>();
   const { user, loading: authLoading, logout, updateProfile, openAuthModal } = useAuth();
+  const { followingCount: myFollowingCount, isFollowing, toggleFollow, busyId } = useFollows();
   const navigate = useNavigate();
+
+  const isOwnProfile = !routeUserId || (Boolean(user) && routeUserId === user?.id);
+  const targetUserId = isOwnProfile ? user?.id : routeUserId;
+
+  const [publicProfile, setPublicProfile] = useState<PublicTraveler | null>(null);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [friendsModalMode, setFriendsModalMode] = useState<'discover' | 'followers' | 'following' | null>(null);
+
   const [userPosts, setUserPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -45,28 +58,27 @@ const ProfilePage: React.FC = () => {
     return () => document.removeEventListener('mousedown', onDocClick);
   }, [coverMenuOpen]);
 
-  // Redirect if not logged in — but only after the session restore finished,
-  // otherwise a refresh fires this while `user` is still null and pops the
-  // sign-in modal even though the user is signed in.
+  // Only redirect guests on /profile (not when browsing a friend's public /profile/:userId)
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!routeUserId && !authLoading && !user) {
       navigate('/');
       openAuthModal('login');
     }
-  }, [authLoading, user, navigate, openAuthModal]);
+  }, [routeUserId, authLoading, user, navigate, openAuthModal]);
 
   const fetchUserPosts = async () => {
-    if (!user) return;
+    if (!targetUserId) return;
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('posts')
         .select('*, comments(*)')
-        .eq('user_id', user.id)
+        .eq('user_id', targetUserId)
         .order('created_at', { ascending: false });
-        
+
       if (error) throw error;
-      
-      const formatted = (data || []).map(p => ({
+
+      const formatted: Post[] = (data || []).map(p => ({
         ...p,
         userId: p.user_id,
         authorName: p.author_name,
@@ -78,17 +90,48 @@ const ProfilePage: React.FC = () => {
         createdAt: p.created_at,
         updatedAt: p.updated_at,
         comments: (p.comments || [])
-          .map((c: { id: string; user_id: string; author_name: string; author_avatar: string; text: string; created_at: string }) => ({
+          .map((c: { id: string; user_id: string; author_name: string; author_avatar: string; text: string; parent_id?: string | null; likes?: string[]; created_at: string }) => ({
             id: c.id,
             userId: c.user_id,
             authorName: c.author_name,
             authorAvatar: c.author_avatar,
             text: c.text,
+            parentId: c.parent_id || null,
+            likes: c.likes || [],
             createdAt: c.created_at,
           }))
           .sort((a: { createdAt: string }, b: { createdAt: string }) => (a.createdAt || '').localeCompare(b.createdAt || '')),
       }));
       setUserPosts(formatted);
+
+      // Load public profile & real follower/following counts
+      const { data: pubData, error: pubErr } = await supabase.rpc('get_public_profile', {
+        target_user_id: targetUserId,
+      });
+
+      if (!pubErr && Array.isArray(pubData) && pubData[0]) {
+        const row = pubData[0];
+        setPublicProfile({
+          id: row.id,
+          name: row.name,
+          avatar: row.avatar,
+          coverPhoto: row.cover_photo,
+          role: row.role,
+          isVerified: Boolean(row.is_verified),
+          followersCount: Number(row.followers_count || 0),
+          followingCount: Number(row.following_count || 0),
+        });
+        setFollowersCount(Number(row.followers_count || 0));
+        setFollowingCount(Number(row.following_count || 0));
+      } else if (!isOwnProfile && formatted[0]) {
+        // Fallback from posts if get_public_profile RPC hasn't been run yet
+        setPublicProfile({
+          id: targetUserId,
+          name: formatted[0].authorName || 'Traveler',
+          avatar: formatted[0].authorAvatar,
+          role: 'user',
+        });
+      }
     } catch (err) {
       console.error('Failed to fetch user posts', err);
     } finally {
@@ -97,9 +140,9 @@ const ProfilePage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (user) fetchUserPosts();
+    if (targetUserId) fetchUserPosts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+  }, [targetUserId]);
 
   const handlePostUpdate = (updatedPost: Post) => {
     setUserPosts((prev) => prev.map((p) => (p.id === updatedPost.id ? updatedPost : p)));
@@ -111,7 +154,7 @@ const ProfilePage: React.FC = () => {
     field: 'avatar' | 'coverPhoto',
     setUploading: (v: boolean) => void
   ) => {
-    if (!user) return;
+    if (!user || !isOwnProfile) return;
     setUploading(true);
     setUploadError(null);
     try {
@@ -130,16 +173,32 @@ const ProfilePage: React.FC = () => {
     navigate('/');
   };
 
-  if (!user) return null;
+  const handleToggleFollowProfile = async () => {
+    if (!targetUserId || isOwnProfile) return;
+    const nowFollowing = await toggleFollow(targetUserId);
+    if (user) {
+      setFollowersCount(prev => Math.max(0, prev + (nowFollowing ? 1 : -1)));
+    }
+  };
+
+  if (isOwnProfile && !user) return null;
+
+  const displayName = isOwnProfile ? user!.name : (publicProfile?.name || userPosts[0]?.authorName || 'Traveler');
+  const displayRole = isOwnProfile ? user!.role : (publicProfile?.role || 'user');
+  const displayVerified = isOwnProfile ? user!.isVerified : Boolean(publicProfile?.isVerified);
+  const displayAvatar = isOwnProfile ? user!.avatar : publicProfile?.avatar;
+  const displayCover = isOwnProfile ? user!.coverPhoto : publicProfile?.coverPhoto;
+  const effectiveFollowingCount = isOwnProfile ? Math.max(followingCount, myFollowingCount) : followingCount;
+  const followingThisUser = Boolean(!isOwnProfile && targetUserId && isFollowing(targetUserId));
 
   const totalReviews = userPosts.length;
 
   const avatarSrc =
-    user.avatar ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=2C4C3B&color=fff&size=200`;
+    displayAvatar ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=2C4C3B&color=fff&size=200`;
 
   const coverSrc =
-    user.coverPhoto ||
+    displayCover ||
     'https://images.unsplash.com/photo-1540932239986-30128078f3ea?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80';
 
   return (
@@ -147,29 +206,31 @@ const ProfilePage: React.FC = () => {
       {/* ── Instagram-Style Mobile Top Bar ── */}
       <div className="ig-top-bar">
         <div className="ig-username">
-          {user.name || user.email?.split('@')[0]}
-          {user.isVerified && (
+          {displayName}
+          {displayVerified && (
             <svg viewBox="0 0 24 24" width="14" height="14" fill="#3897f0" style={{ marginLeft: '4px' }}>
               <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-1.9 14.7L6 12.6l1.5-1.5 2.6 2.6 6.4-6.4 1.5 1.5-7.9 7.9z"/>
             </svg>
           )}
         </div>
-        <div className="ig-top-actions">
-          <button onClick={() => setIsModalOpen(true)} aria-label="Create Post">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="4" ry="4" fill="none"></rect>
-              <line x1="12" y1="8" x2="12" y2="16"></line>
-              <line x1="8" y1="12" x2="16" y2="12"></line>
-            </svg>
-          </button>
-          <button onClick={() => setIsBottomSheetOpen(true)} aria-label="Menu">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-          </button>
-        </div>
+        {isOwnProfile && (
+          <div className="ig-top-actions">
+            <button onClick={() => setIsModalOpen(true)} aria-label={t('profile.newJournal')}>
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="4" ry="4" fill="none"></rect>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+              </svg>
+            </button>
+            <button onClick={() => setIsBottomSheetOpen(true)} aria-label="Menu">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ── Cover Photo (full-bleed cinematic panorama) ── */}
@@ -196,28 +257,30 @@ const ProfilePage: React.FC = () => {
             >
               <img
                 src={avatarSrc}
-                alt={user.name}
+                alt={displayName}
                 className={`ig-avatar${uploadingAvatar ? ' uploading' : ''}`}
               />
             </div>
-            <input
-              ref={avatarInputRef}
-              type="file"
-              accept="image/*"
-              className="sr-only"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handlePhotoUpload(file, 'avatar', setUploadingAvatar);
-                e.target.value = '';
-              }}
-            />
+            {isOwnProfile && (
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handlePhotoUpload(file, 'avatar', setUploadingAvatar);
+                  e.target.value = '';
+                }}
+              />
+            )}
           </div>
 
           <div className="ig-identity-stack">
             <div className="ig-bio-section">
-              <h1 className="ig-display-name">{user.name}</h1>
+              <h1 className="ig-display-name">{displayName}</h1>
               <div className="ig-category">
-                {user.role === 'host' ? t('profile.roleHost') : t('profile.roleTraveler')}
+                {displayRole === 'host' ? t('profile.roleHost') : t('profile.roleTraveler')}
               </div>
             </div>
 
@@ -226,78 +289,107 @@ const ProfilePage: React.FC = () => {
                 <span className="ig-stat-num">{totalReviews}</span>
                 <span className="ig-stat-label">{t('profile.statsJournals')}</span>
               </div>
-              <div className="ig-stat-item">
-                <span className="ig-stat-num">0</span>
+              <button
+                type="button"
+                className="ig-stat-item ig-stat-btn"
+                onClick={() => setFriendsModalMode('followers')}
+              >
+                <span className="ig-stat-num">{followersCount}</span>
                 <span className="ig-stat-label">{t('profile.statsFollowers')}</span>
-              </div>
-              <div className="ig-stat-item">
-                <span className="ig-stat-num">0</span>
+              </button>
+              <button
+                type="button"
+                className="ig-stat-item ig-stat-btn"
+                onClick={() => setFriendsModalMode('following')}
+              >
+                <span className="ig-stat-num">{effectiveFollowingCount}</span>
                 <span className="ig-stat-label">{t('profile.statsFollowing')}</span>
-              </div>
+              </button>
             </div>
 
             {uploadError && <p className="upload-error" style={{ margin: '4px 0' }}>{uploadError}</p>}
 
             {/* ── Action Buttons right under the profile details in the center ── */}
             <div className="ig-action-buttons">
-              <button className="ig-action-btn" onClick={() => setIsSettingsOpen(true)}>
-                {t('profile.editProfile')}
-              </button>
-              <button className="ig-action-btn" onClick={() => navigate('/saved')}>
-                {t('profile.savedPlaces')}
-              </button>
-              {user.role === 'host' ? (
-                <button className="ig-action-btn" onClick={() => navigate('/dashboard')}>
-                  {t('profile.hostDashboard')}
-                </button>
-              ) : (
-                <button className="ig-action-btn" onClick={() => navigate('/become-host')}>
-                  {t('profile.becomeHost')}
-                </button>
-              )}
+              {isOwnProfile ? (
+                <>
+                  <button className="ig-action-btn" onClick={() => setIsSettingsOpen(true)}>
+                    {t('profile.editProfile')}
+                  </button>
+                  <button className="ig-action-btn" onClick={() => setFriendsModalMode('discover')}>
+                    {t('social.findFriends')}
+                  </button>
+                  <button className="ig-action-btn" onClick={() => navigate('/saved')}>
+                    {t('profile.savedPlaces')}
+                  </button>
+                  {displayRole === 'host' ? (
+                    <button className="ig-action-btn" onClick={() => navigate('/dashboard')}>
+                      {t('profile.hostDashboard')}
+                    </button>
+                  ) : (
+                    <button className="ig-action-btn" onClick={() => navigate('/become-host')}>
+                      {t('profile.becomeHost')}
+                    </button>
+                  )}
 
-              <div className="cover-upload-wrap" ref={coverMenuRef}>
-                <button
-                  type="button"
-                  className="ig-action-btn ig-cover-btn"
-                  onClick={() => setCoverMenuOpen(v => !v)}
-                  disabled={uploadingCover}
-                  title={t('profile.changeCover')}
-                >
-                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                    <circle cx="12" cy="13" r="4" />
-                  </svg>
-                  <span>{uploadingCover ? t('profile.saving') : t('profile.cover')}</span>
-                </button>
-                {coverMenuOpen && (
-                  <div className="ig-upload-menu">
+                  <div className="cover-upload-wrap" ref={coverMenuRef}>
                     <button
-                      className="ig-upload-menu-item"
-                      onClick={() => { setCoverMenuOpen(false); coverInputRef.current?.click(); }}
+                      type="button"
+                      className="ig-action-btn ig-cover-btn"
+                      onClick={() => setCoverMenuOpen(v => !v)}
+                      disabled={uploadingCover}
+                      title={t('profile.changeCover')}
                     >
-                      {t('profile.uploadCover')}
+                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                        <circle cx="12" cy="13" r="4" />
+                      </svg>
+                      <span>{uploadingCover ? t('profile.saving') : t('profile.cover')}</span>
                     </button>
-                    <button
-                      className="ig-upload-menu-item"
-                      onClick={() => { setCoverMenuOpen(false); setViewingPhoto('cover'); }}
-                    >
-                      {t('profile.viewCover')}
-                    </button>
+                    {coverMenuOpen && (
+                      <div className="ig-upload-menu">
+                        <button
+                          className="ig-upload-menu-item"
+                          onClick={() => { setCoverMenuOpen(false); coverInputRef.current?.click(); }}
+                        >
+                          {t('profile.uploadCover')}
+                        </button>
+                        <button
+                          className="ig-upload-menu-item"
+                          onClick={() => { setCoverMenuOpen(false); setViewingPhoto('cover'); }}
+                        >
+                          {t('profile.viewCover')}
+                        </button>
+                      </div>
+                    )}
+                    <input
+                      ref={coverInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handlePhotoUpload(file, 'coverPhoto', setUploadingCover);
+                        e.target.value = '';
+                      }}
+                    />
                   </div>
-                )}
-                <input
-                  ref={coverInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="sr-only"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handlePhotoUpload(file, 'coverPhoto', setUploadingCover);
-                    e.target.value = '';
-                  }}
-                />
-              </div>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    className={`ig-action-btn${followingThisUser ? '' : ' ig-action-btn-primary'}`}
+                    onClick={handleToggleFollowProfile}
+                    disabled={busyId === targetUserId}
+                  >
+                    {followingThisUser ? t('social.following') : `+ ${t('social.follow')}`}
+                  </button>
+                  <button type="button" className="ig-action-btn" onClick={() => navigate('/community')}>
+                    {t('social.backToCommunity')}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -311,17 +403,19 @@ const ProfilePage: React.FC = () => {
             </div>
 
             <div className="ig-gallery-controls">
-              <button
-                type="button"
-                className="ig-share-moment-btn"
-                onClick={() => setIsModalOpen(true)}
-              >
-                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                <span>{t('profile.newJournal')}</span>
-              </button>
+              {isOwnProfile && (
+                <button
+                  type="button"
+                  className="ig-share-moment-btn"
+                  onClick={() => setIsModalOpen(true)}
+                >
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  <span>{t('profile.newJournal')}</span>
+                </button>
+              )}
 
               <div className="ig-tabs-row" role="tablist">
                 <button
@@ -455,19 +549,29 @@ const ProfilePage: React.FC = () => {
               alt={viewingPhoto === 'avatar' ? t('profile.changeAvatar') : t('profile.changeCover')}
               className={viewingPhoto === 'avatar' ? 'ig-viewer-avatar' : undefined}
             />
-            <button
-              className="ig-viewer-change"
-              onClick={() => {
-                const ref = viewingPhoto === 'avatar' ? avatarInputRef : coverInputRef;
-                setViewingPhoto(null);
-                ref.current?.click();
-              }}
-            >
-              {viewingPhoto === 'avatar' ? t('profile.changeAvatar') : t('profile.changeCover')}
-            </button>
+            {isOwnProfile && (
+              <button
+                className="ig-viewer-change"
+                onClick={() => {
+                  const ref = viewingPhoto === 'avatar' ? avatarInputRef : coverInputRef;
+                  setViewingPhoto(null);
+                  ref.current?.click();
+                }}
+              >
+                {viewingPhoto === 'avatar' ? t('profile.changeAvatar') : t('profile.changeCover')}
+              </button>
+            )}
           </div>
         </div>
       )}
+
+      {/* ── Find Friends / Followers / Following Modal ── */}
+      <FindFriendsModal
+        isOpen={friendsModalMode !== null}
+        onClose={() => setFriendsModalMode(null)}
+        mode={friendsModalMode || 'discover'}
+        targetUserId={targetUserId}
+      />
 
       {/* ── Journal post viewer (Instagram-style) ── */}
       {activeJournal !== null && userPosts[activeJournal] && (

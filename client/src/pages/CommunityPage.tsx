@@ -3,13 +3,15 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../utils/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useFollows } from '../hooks/useFollows';
 import PostCard from '../components/PostCard';
 import CreatePostModal from '../components/CreatePostModal';
 import JournalModal from '../components/JournalModal';
-import { type Post } from '../types';
+import FindFriendsModal from '../components/FindFriendsModal';
+import { type Post, type PublicTraveler } from '../types';
 import './CommunityPage.css';
 
-type FeedTab = 'latest' | 'top' | 'reviews';
+type FeedTab = 'latest' | 'following' | 'top' | 'reviews';
 type ViewMode = 'feed' | 'grid';
 
 interface Place {
@@ -18,11 +20,13 @@ interface Place {
 }
 
 const CommunityPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, openAuthModal } = useAuth();
+  const { followingIds, isFollowing, toggleFollow, busyId } = useFollows();
   const { t } = useTranslation();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFriendsOpen, setIsFriendsOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const [viewerPhoto, setViewerPhoto] = useState(0);
   const [viewMode, setViewMode] = useState<ViewMode>('feed');
@@ -30,7 +34,8 @@ const CommunityPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const locationFilter = searchParams.get('location');
-  const tab: FeedTab = (['latest', 'top', 'reviews'] as const).includes(searchParams.get('tab') as FeedTab)
+  const sharedPostId = searchParams.get('post');
+  const tab: FeedTab = (['latest', 'following', 'top', 'reviews'] as const).includes(searchParams.get('tab') as FeedTab)
     ? (searchParams.get('tab') as FeedTab)
     : 'latest';
 
@@ -56,12 +61,14 @@ const CommunityPage: React.FC = () => {
         createdAt: p.created_at,
         updatedAt: p.updated_at,
         comments: (p.comments || [])
-          .map((c: { id: string; user_id: string; author_name: string; author_avatar: string; text: string; created_at: string }) => ({
+          .map((c: { id: string; user_id: string; author_name: string; author_avatar: string; text: string; parent_id?: string | null; likes?: string[]; created_at: string }) => ({
             id: c.id,
             userId: c.user_id,
             authorName: c.author_name,
             authorAvatar: c.author_avatar,
             text: c.text,
+            parentId: c.parent_id || null,
+            likes: c.likes || [],
             createdAt: c.created_at,
           }))
           .sort((a: { createdAt: string }, b: { createdAt: string }) => a.createdAt.localeCompare(b.createdAt)),
@@ -78,6 +85,16 @@ const CommunityPage: React.FC = () => {
     fetchPosts();
   }, []);
 
+  // Auto-open a shared post when arriving via /community?post=<id>
+  useEffect(() => {
+    if (!sharedPostId || posts.length === 0) return;
+    const idx = posts.findIndex(p => p.id === sharedPostId);
+    if (idx >= 0) {
+      setViewerPhoto(0);
+      setViewerIndex(idx);
+    }
+  }, [sharedPostId, posts]);
+
   const handlePostUpdate = (updatedPost: Post) => {
     setPosts(prev => prev.map(p => (p.id === updatedPost.id ? updatedPost : p)));
   };
@@ -88,7 +105,7 @@ const CommunityPage: React.FC = () => {
 
   const handleCreateClick = () => {
     if (!user) {
-      alert(t('journal.loginToPost'));
+      openAuthModal('login');
       return;
     }
     setIsModalOpen(true);
@@ -113,6 +130,26 @@ const CommunityPage: React.FC = () => {
     return [...map.values()].sort((a, b) => b.count - a.count);
   }, [posts]);
 
+  // Active travelers extracted from posts for suggested friends & modal fallback
+  const suggestedTravelers: PublicTraveler[] = useMemo(() => {
+    const byId = new Map<string, PublicTraveler>();
+    for (const p of posts) {
+      if (!p.userId || p.userId === user?.id) continue;
+      const existing = byId.get(p.userId);
+      if (existing) {
+        existing.postsCount = (existing.postsCount || 0) + 1;
+      } else {
+        byId.set(p.userId, {
+          id: p.userId,
+          name: p.authorName || 'Traveler',
+          avatar: p.authorAvatar,
+          postsCount: 1,
+        });
+      }
+    }
+    return [...byId.values()].sort((a, b) => (b.postsCount || 0) - (a.postsCount || 0));
+  }, [posts, user?.id]);
+
   const feed = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     let list = posts.filter(p => !locationFilter || p.locationTag === locationFilter);
@@ -124,10 +161,11 @@ const CommunityPage: React.FC = () => {
           (p.locationTag || '').toLowerCase().includes(q)
       );
     }
+    if (tab === 'following') list = list.filter(p => p.userId && followingIds.includes(p.userId));
     if (tab === 'reviews') list = list.filter(p => p.rating || p.priceRating);
     if (tab === 'top') list = [...list].sort((a, b) => (b.likes || []).length - (a.likes || []).length);
     return list;
-  }, [posts, locationFilter, tab, searchQuery]);
+  }, [posts, locationFilter, tab, searchQuery, followingIds]);
 
   // Featured photo stories: prioritize Picture of the Week entries, fallback to top liked photo posts
   const spotlightPosts = useMemo(() => {
@@ -175,6 +213,7 @@ const CommunityPage: React.FC = () => {
 
   const tabs: { id: FeedTab; label: string }[] = [
     { id: 'latest', label: t('journal.tabs.latest') },
+    { id: 'following', label: t('journal.tabs.following') },
     { id: 'top', label: t('journal.tabs.top') },
     { id: 'reviews', label: t('journal.tabs.reviews') },
   ];
@@ -239,6 +278,15 @@ const CommunityPage: React.FC = () => {
                   <circle cx="12" cy="9.5" r="2.5" />
                 </svg>
                 {t('journal.place')}
+              </button>
+              <button type="button" onClick={() => setIsFriendsOpen(true)}>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2C4C3B" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <line x1="19" y1="8" x2="19" y2="14" />
+                  <line x1="16" y1="11" x2="22" y2="11" />
+                </svg>
+                {t('social.findFriends')}
               </button>
             </div>
           </section>
@@ -502,18 +550,28 @@ const CommunityPage: React.FC = () => {
             ) : (
               <div className="journal-empty">
                 <h2>
-                  {locationFilter || tab !== 'latest' || searchQuery
-                    ? t('journal.emptyFilteredTitle')
-                    : t('journal.emptyTitle')}
+                  {tab === 'following'
+                    ? t('social.followingEmptyTitle')
+                    : locationFilter || tab !== 'latest' || searchQuery
+                      ? t('journal.emptyFilteredTitle')
+                      : t('journal.emptyTitle')}
                 </h2>
                 <p>
-                  {locationFilter || tab !== 'latest' || searchQuery
-                    ? t('journal.emptyFilteredBody')
-                    : t('journal.emptyBody')}
+                  {tab === 'following'
+                    ? t('social.followingEmptyBody')
+                    : locationFilter || tab !== 'latest' || searchQuery
+                      ? t('journal.emptyFilteredBody')
+                      : t('journal.emptyBody')}
                 </p>
-                <button className="journal-primary-btn" onClick={handleCreateClick}>
-                  {t('journal.sharePost')}
-                </button>
+                {tab === 'following' ? (
+                  <button className="journal-primary-btn" onClick={() => setIsFriendsOpen(true)}>
+                    {t('social.findFriends')}
+                  </button>
+                ) : (
+                  <button className="journal-primary-btn" onClick={handleCreateClick}>
+                    {t('journal.sharePost')}
+                  </button>
+                )}
               </div>
             )}
           </main>
@@ -526,18 +584,18 @@ const CommunityPage: React.FC = () => {
                   <img src={userAvatar} alt={user.name} />
                   <div className="rail-passport-id">
                     <strong>{user.name}</strong>
-                    <span>Community Contributor</span>
+                    <span>{t('social.contributor')}</span>
                   </div>
                 </div>
 
                 <div className="rail-passport-stats">
                   <div>
                     <strong>{myPostsCount}</strong>
-                    <span>Journals</span>
+                    <span>{t('social.journalsLabel')}</span>
                   </div>
                   <div>
                     <strong>{myLikesCount}</strong>
-                    <span>Appreciations</span>
+                    <span>{t('social.likesLabel')}</span>
                   </div>
                 </div>
 
@@ -546,11 +604,54 @@ const CommunityPage: React.FC = () => {
                     {t('journal.sharePost')}
                   </button>
                   <Link to="/profile" className="rail-profile-link">
-                    View Profile
+                    {t('social.viewProfile')}
                   </Link>
                 </div>
               </div>
             )}
+
+            {/* Find Friends & Suggested Travelers */}
+            <section className="rail-block rail-friends-block">
+              <div className="rail-friends-head">
+                <h2>{t('social.suggestedTitle')}</h2>
+                <button type="button" className="rail-find-all" onClick={() => setIsFriendsOpen(true)}>
+                  {t('social.findFriends')}
+                </button>
+              </div>
+              {suggestedTravelers.length > 0 ? (
+                <ul className="rail-friends-list">
+                  {suggestedTravelers.slice(0, 4).map(person => {
+                    const following = isFollowing(person.id);
+                    const avatar =
+                      person.avatar ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(person.name)}&background=2C4C3B&color=fff`;
+                    return (
+                      <li key={person.id} className="rail-friend-row">
+                        <Link to={`/profile/${person.id}`} className="rail-friend-link">
+                          <img src={avatar} alt="" loading="lazy" />
+                          <div className="rail-friend-meta">
+                            <strong>{person.name}</strong>
+                            <span>{t('social.journalsCount', { count: person.postsCount || 0 })}</span>
+                          </div>
+                        </Link>
+                        <button
+                          type="button"
+                          className={`pc-follow-pill${following ? ' is-following' : ''}`}
+                          onClick={() => toggleFollow(person.id)}
+                          disabled={busyId === person.id}
+                        >
+                          {following ? t('social.following') : `+ ${t('social.follow')}`}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <button type="button" className="rail-find-cta" onClick={() => setIsFriendsOpen(true)}>
+                  {t('social.findFriendsTitle')}
+                </button>
+              )}
+            </section>
 
             {spotlightPosts.length > 0 && (
               <section className="rail-block">
@@ -607,12 +708,10 @@ const CommunityPage: React.FC = () => {
             )}
 
             <div className="rail-stays-card">
-              <h3>Looking for a quiet retreat?</h3>
-              <p>
-                Browse verified homestays and mountain sanctuaries across Chiang Mai and Chiang Dao.
-              </p>
+              <h3>{t('social.quietRetreatTitle')}</h3>
+              <p>{t('social.quietRetreatBody')}</p>
               <Link to="/hotels" className="rail-stays-link">
-                <span>Explore Verified Stays</span>
+                <span>{t('social.exploreStays')}</span>
                 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="5" y1="12" x2="19" y2="12" />
                   <polyline points="12 5 19 12 12 19" />
@@ -622,6 +721,13 @@ const CommunityPage: React.FC = () => {
           </aside>
         </div>
       </div>
+
+      <FindFriendsModal
+        isOpen={isFriendsOpen}
+        onClose={() => setIsFriendsOpen(false)}
+        mode="discover"
+        fallbackTravelers={suggestedTravelers}
+      />
 
       {isModalOpen && (
         <CreatePostModal

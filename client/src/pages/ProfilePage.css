@@ -1003,3 +1003,29 @@
     padding: 0;
   }
 }
+
+
+/* ── Interactive Follow Stats & Primary Follow CTA on Public Profile ── */
+.ig-stat-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+  padding: 2px 6px;
+  border-radius: 10px;
+  transition: background-color 0.15s ease;
+}
+
+.ig-stat-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.ig-action-btn-primary {
+  background: #2C4C3B !important;
+  color: #FFFFFF !important;
+  border-color: #2C4C3B !important;
+}
+
+.ig-action-btn-primary:hover {
+  background: #20392C !important;
+}

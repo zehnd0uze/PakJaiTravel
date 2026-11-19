@@ -1038,3 +1038,97 @@
     display: none;
   }
 }
+
+
+/* ── Find Friends Rail Block ── */
+.rail-friends-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.rail-friends-head h2 {
+  margin: 0 !important;
+}
+
+.rail-find-all {
+  border: none;
+  background: none;
+  color: #2C4C3B;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.rail-friends-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rail-friend-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.rail-friend-link {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.rail-friend-link img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.rail-friend-meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.rail-friend-meta strong {
+  font-size: 0.86rem;
+  color: #16261E;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rail-friend-meta span {
+  font-size: 0.74rem;
+  color: #6B7A71;
+}
+
+.rail-find-cta {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(44, 76, 59, 0.2);
+  background: rgba(44, 76, 59, 0.04);
+  color: #2C4C3B;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rail-find-cta:hover {
+  background: rgba(44, 76, 59, 0.1);
+}

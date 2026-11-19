@@ -2,9 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
+import { useFollows } from '../hooks/useFollows';
 import CreatePostModal from './CreatePostModal';
 import { supabase } from '../utils/supabase';
-import { type Post } from '../types';
+import { type Post, type Comment } from '../types';
 import { getPostPhotos } from '../utils/postPhotos';
 import './PostCard.css';
 
@@ -45,11 +46,14 @@ const formatTimeAgo = (dateString: string) => {
 };
 
 const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClick, onOpen }) => {
-  const { user } = useAuth();
+  const { user, openAuthModal } = useAuth();
+  const { isFollowing, toggleFollow, busyId } = useFollows();
   const { t } = useTranslation();
   const [commentText, setCommentText] = useState('');
+  const [replyingTo, setReplyingTo] = useState<{ id: string; authorName: string } | null>(null);
   const [showComments, setShowComments] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
   const [isCommenting, setIsCommenting] = useState(false);
@@ -58,8 +62,10 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClic
   const [copied, setCopied] = useState(false);
 
   const menuRef = useRef<HTMLDivElement>(null);
+  const shareRef = useRef<HTMLDivElement>(null);
   const commentInputRef = useRef<HTMLInputElement>(null);
-  const isOwner = user && post.userId === user.id;
+  const isOwner = Boolean(user && post.userId === user.id);
+  const followingAuthor = Boolean(post.userId && isFollowing(post.userId));
   const hasLiked = Boolean(user && (post.likes || []).includes(user.id));
   const likeCount = (post.likes || []).length;
   const comments = post.comments || [];
@@ -68,11 +74,14 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClic
   const photoAlt = post.content ? post.content.slice(0, 120) : `${post.authorName} — ${post.locationTag || ''}`;
   const isLongCaption = (post.content || '').length > (photos.length > 0 ? 180 : 420);
 
-  // Close menu when clicking outside
+  // Close menus when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setShowMenu(false);
+      }
+      if (shareRef.current && !shareRef.current.contains(event.target as Node)) {
+        setShowShareMenu(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -81,17 +90,14 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClic
 
   const setLiked = async (like: boolean) => {
     if (!user) {
-      alert(t('post.loginToLike'));
+      openAuthModal('login');
       return;
     }
     if (like === hasLiked || isLiking) return;
     setIsLiking(true);
     try {
-      // Server-side toggle: only ever adds/removes the caller's own id
       const { data, error } = await supabase.rpc('toggle_like', { target_post_id: post.id });
-
       if (error) throw error;
-
       onUpdate({ ...post, likes: (data as string[]) || [] });
     } catch (err) {
       console.error('Failed to like post', err);
@@ -100,42 +106,97 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClic
     }
   };
 
+  const handleToggleCommentLike = async (comment: Comment) => {
+    if (!user) {
+      openAuthModal('login');
+      return;
+    }
+    const existingLikes = comment.likes || [];
+    const alreadyLiked = existingLikes.includes(user.id);
+    const optimisticLikes = alreadyLiked
+      ? existingLikes.filter((id) => id !== user.id)
+      : [...existingLikes, user.id];
+
+    // Optimistic update
+    onUpdate({
+      ...post,
+      comments: comments.map((c) => (c.id === comment.id ? { ...c, likes: optimisticLikes } : c)),
+    });
+
+    try {
+      const { data, error } = await supabase.rpc('toggle_comment_like', { target_comment_id: comment.id });
+      if (!error && Array.isArray(data)) {
+        onUpdate({
+          ...post,
+          comments: comments.map((c) => (c.id === comment.id ? { ...c, likes: data as string[] } : c)),
+        });
+      }
+    } catch {
+      // Keep optimistic state if RPC not migrated yet
+    }
+  };
+
+  const startReply = (comment: Comment) => {
+    if (!user) {
+      openAuthModal('login');
+      return;
+    }
+    setShowComments(true);
+    setReplyingTo({ id: comment.parentId || comment.id, authorName: comment.authorName });
+    setTimeout(() => commentInputRef.current?.focus(), 40);
+  };
 
   const handleComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-      alert(t('post.loginToComment'));
+      openAuthModal('login');
       return;
     }
     if (!commentText.trim()) return;
 
     setIsCommenting(true);
     try {
-      const { data, error } = await supabase
-        .from('comments')
-        .insert({
-          post_id: post.id,
-          user_id: user.id,
-          author_name: user.name,
-          author_avatar: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=2C4C3B&color=fff`,
-          text: commentText.trim()
-        })
-        .select()
-        .single();
+      const avatarUrl =
+        user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=2C4C3B&color=fff`;
+      const trimmed = commentText.trim();
+      const payload: Record<string, any> = {
+        post_id: post.id,
+        user_id: user.id,
+        author_name: user.name,
+        author_avatar: avatarUrl,
+        text: trimmed,
+      };
+      if (replyingTo) {
+        payload.parent_id = replyingTo.id;
+      }
+
+      let { data, error } = await supabase.from('comments').insert(payload).select().single();
+
+      // Fallback if parent_id column hasn't been added via social_features.sql yet
+      if (error && replyingTo) {
+        delete payload.parent_id;
+        payload.text = `@${replyingTo.authorName} ${trimmed}`;
+        const retry = await supabase.from('comments').insert(payload).select().single();
+        data = retry.data;
+        error = retry.error;
+      }
 
       if (error) throw error;
 
       if (data) {
-        const newComment = {
+        const newComment: Comment = {
           id: data.id,
           userId: data.user_id,
           authorName: data.author_name,
           authorAvatar: data.author_avatar,
           text: data.text,
-          createdAt: data.created_at
+          parentId: data.parent_id || null,
+          likes: data.likes || [],
+          createdAt: data.created_at,
         };
         onUpdate({ ...post, comments: [...comments, newComment] });
         setCommentText('');
+        setReplyingTo(null);
       }
     } catch (err) {
       console.error('Failed to comment', err);
@@ -166,20 +227,47 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClic
     }
   };
 
-  const handleShare = async () => {
-    const url = `${window.location.origin}/community${post.locationTag ? `?location=${encodeURIComponent(post.locationTag)}` : ''}`;
-    const text = post.content ? post.content.slice(0, 120) : post.authorName;
+  const shareUrl = `${window.location.origin}/community?post=${encodeURIComponent(post.id)}`;
+  const shareText = post.content ? post.content.slice(0, 120) : `${post.authorName} · PakJaiTravel`;
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setShowShareMenu(false);
+      setTimeout(() => setCopied(false), 2200);
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleNativeShare = async () => {
+    setShowShareMenu(false);
     try {
       if (navigator.share) {
-        await navigator.share({ title: 'PakJai Travel', text, url });
-        return;
+        await navigator.share({ title: 'PakJaiTravel', text: shareText, url: shareUrl });
       }
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Share sheet dismissed: nothing to do
+      // dismissed
     }
+  };
+
+  const handleShareLine = () => {
+    setShowShareMenu(false);
+    window.open(
+      `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`,
+      '_blank',
+      'noopener,noreferrer'
+    );
+  };
+
+  const handleShareFacebook = () => {
+    setShowShareMenu(false);
+    window.open(
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+      '_blank',
+      'noopener,noreferrer'
+    );
   };
 
   const handleCommentsClick = () => {
@@ -199,8 +287,18 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClic
     </span>
   ) : null;
 
-  // Inline: the latest two comments (Facebook shows a preview, the rest live in the viewer)
-  const previewComments = showComments ? comments : comments.slice(-2);
+  // Organize top-level comments and nested replies
+  const topLevelComments = comments.filter(c => !c.parentId);
+  const repliesByParent = new Map<string, Comment[]>();
+  comments.forEach(c => {
+    if (!c.parentId) return;
+    const list = repliesByParent.get(c.parentId) || [];
+    list.push(c);
+    repliesByParent.set(c.parentId, list);
+  });
+  const visibleTopComments = showComments ? topLevelComments : topLevelComments.slice(-2);
+
+  const authorProfilePath = isOwner ? '/profile' : `/profile/${post.userId}`;
   const myAvatar = user
     ? user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=2C4C3B&color=fff`
     : '';
@@ -212,9 +310,23 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClic
   return (
     <article className={`pc-post ${isDeleting ? 'deleting' : ''}`}>
       <header className="pc-post-head">
-        <img src={displayAuthorAvatar} alt="" className="pc-avatar" />
+        <Link to={authorProfilePath} className="pc-avatar-link">
+          <img src={displayAuthorAvatar} alt="" className="pc-avatar" />
+        </Link>
         <div className="pc-post-who">
-          <span className="pc-author">{post.authorName}</span>
+          <div className="pc-author-row">
+            <Link to={authorProfilePath} className="pc-author pc-author-link">{post.authorName}</Link>
+            {!isOwner && post.userId && (
+              <button
+                type="button"
+                className={`pc-follow-pill${followingAuthor ? ' is-following' : ''}`}
+                onClick={() => toggleFollow(post.userId)}
+                disabled={busyId === post.userId}
+              >
+                {followingAuthor ? t('social.following') : `+ ${t('social.follow')}`}
+              </button>
+            )}
+          </div>
           <div className="pc-post-line">
             <time className="pc-time" dateTime={post.createdAt}>{formatTimeAgo(post.createdAt)}</time>
             {post.locationTag && (
@@ -339,52 +451,149 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, onDelete, onTagClic
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" aria-hidden="true"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.3 7.5L3.5 20.5l1.4-4.6A8.4 8.4 0 1 1 20.5 11.6z"/></svg>
           <span>{comments.length > 0 ? `${comments.length} · ${t('post.comment')}` : t('post.comment')}</span>
         </button>
-        <button className="pc-action" onClick={handleShare}>
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" aria-hidden="true"><path d="M21.5 3 10 14.5M21.5 3l-7 18-4.5-6.5L3 10z"/></svg>
-          <span>{copied ? t('post.linkCopied') : t('post.share')}</span>
-        </button>
+        <div className="pc-share-wrap" ref={shareRef}>
+          <button className="pc-action" type="button" onClick={() => setShowShareMenu(v => !v)} aria-expanded={showShareMenu}>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" aria-hidden="true"><path d="M21.5 3 10 14.5M21.5 3l-7 18-4.5-6.5L3 10z"/></svg>
+            <span>{copied ? t('post.linkCopied') : t('post.share')}</span>
+          </button>
+          {showShareMenu && (
+            <div className="pc-share-popover" role="menu">
+              <button type="button" role="menuitem" onClick={handleCopyLink}>{t('post.copyLink')}</button>
+              <button type="button" role="menuitem" onClick={handleShareLine}>{t('post.shareLine')}</button>
+              <button type="button" role="menuitem" onClick={handleShareFacebook}>{t('post.shareFacebook')}</button>
+              {typeof navigator !== 'undefined' && 'share' in navigator && (
+                <button type="button" role="menuitem" onClick={handleNativeShare}>{t('post.shareMore')}</button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
-      {(previewComments.length > 0 || user) && (
+      {(visibleTopComments.length > 0 || user) && (
         <div className="pc-comments-area">
-          {comments.length > 2 && !showComments && (
+          {topLevelComments.length > 2 && !showComments && (
             <button className="pc-view-all" onClick={handleCommentsClick}>
               {t('post.viewAll', { count: comments.length })}
             </button>
           )}
 
-          {previewComments.length > 0 && (
+          {visibleTopComments.length > 0 && (
             <ul className="pc-comments">
-              {previewComments.map(c => (
-                <li key={c.id}>
-                  <img src={c.authorAvatar} alt="" className="pc-comment-avatar" />
-                  <div className="pc-bubble">
-                    <span className="pc-author">{c.authorName}</span>
-                    <p>{c.text}</p>
-                  </div>
-                </li>
-              ))}
+              {visibleTopComments.map(c => {
+                const cLikes = c.likes || [];
+                const cLiked = Boolean(user && cLikes.includes(user.id));
+                const replies = repliesByParent.get(c.id) || [];
+                return (
+                  <li key={c.id} className="pc-comment-thread">
+                    <div className="pc-comment-row">
+                      <Link to={user?.id === c.userId ? '/profile' : `/profile/${c.userId}`}>
+                        <img src={c.authorAvatar} alt="" className="pc-comment-avatar" />
+                      </Link>
+                      <div className="pc-comment-col">
+                        <div className="pc-bubble">
+                          <Link to={user?.id === c.userId ? '/profile' : `/profile/${c.userId}`} className="pc-author pc-author-link">
+                            {c.authorName}
+                          </Link>
+                          <p>{c.text}</p>
+                        </div>
+                        <div className="pc-comment-meta">
+                          <span>{formatTimeAgo(c.createdAt)}</span>
+                          <button
+                            type="button"
+                            className={`pc-comment-action${cLiked ? ' is-liked' : ''}`}
+                            onClick={() => handleToggleCommentLike(c)}
+                          >
+                            {t('post.like')}{cLikes.length > 0 ? ` (${cLikes.length})` : ''}
+                          </button>
+                          <button
+                            type="button"
+                            className="pc-comment-action"
+                            onClick={() => startReply(c)}
+                          >
+                            {t('post.reply')}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {replies.length > 0 && (
+                      <ul className="pc-replies">
+                        {replies.map(r => {
+                          const rLikes = r.likes || [];
+                          const rLiked = Boolean(user && rLikes.includes(user.id));
+                          return (
+                            <li key={r.id} className="pc-comment-row">
+                              <Link to={user?.id === r.userId ? '/profile' : `/profile/${r.userId}`}>
+                                <img src={r.authorAvatar} alt="" className="pc-comment-avatar pc-reply-avatar" />
+                              </Link>
+                              <div className="pc-comment-col">
+                                <div className="pc-bubble">
+                                  <Link to={user?.id === r.userId ? '/profile' : `/profile/${r.userId}`} className="pc-author pc-author-link">
+                                    {r.authorName}
+                                  </Link>
+                                  <p>{r.text}</p>
+                                </div>
+                                <div className="pc-comment-meta">
+                                  <span>{formatTimeAgo(r.createdAt)}</span>
+                                  <button
+                                    type="button"
+                                    className={`pc-comment-action${rLiked ? ' is-liked' : ''}`}
+                                    onClick={() => handleToggleCommentLike(r)}
+                                  >
+                                    {t('post.like')}{rLikes.length > 0 ? ` (${rLikes.length})` : ''}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="pc-comment-action"
+                                    onClick={() => startReply(r)}
+                                  >
+                                    {t('post.reply')}
+                                  </button>
+                                </div>
+                              </div>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           )}
 
           {user && (
-            <form className="pc-comment-form" onSubmit={handleComment}>
-              <img src={myAvatar} alt="" className="pc-comment-avatar" />
-              <div className="pc-comment-field">
-                <input
-                  ref={commentInputRef}
-                  type="text"
-                  placeholder={t('post.addComment')}
-                  aria-label={t('post.addComment')}
-                  value={commentText}
-                  onChange={e => setCommentText(e.target.value)}
-                  disabled={isCommenting}
-                />
-                {commentText.trim() && (
-                  <button type="submit" disabled={isCommenting}>{t('post.post')}</button>
-                )}
-              </div>
-            </form>
+            <div className="pc-comment-composer">
+              {replyingTo && (
+                <div className="pc-replying-banner">
+                  <span>{t('post.replyingTo', { name: replyingTo.authorName })}</span>
+                  <button type="button" onClick={() => setReplyingTo(null)}>
+                    {t('post.cancelReply')}
+                  </button>
+                </div>
+              )}
+              <form className="pc-comment-form" onSubmit={handleComment}>
+                <img src={myAvatar} alt="" className="pc-comment-avatar" />
+                <div className="pc-comment-field">
+                  <input
+                    ref={commentInputRef}
+                    type="text"
+                    placeholder={
+                      replyingTo
+                        ? t('post.replyPlaceholder', { name: replyingTo.authorName })
+                        : t('post.addComment')
+                    }
+                    aria-label={t('post.addComment')}
+                    value={commentText}
+                    onChange={e => setCommentText(e.target.value)}
+                    disabled={isCommenting}
+                  />
+                  {commentText.trim() && (
+                    <button type="submit" disabled={isCommenting}>{t('post.post')}</button>
+                  )}
+                </div>
+              </form>
+            </div>
           )}
         </div>
       )}

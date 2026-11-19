@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useFollows } from '../hooks/useFollows';
 import { supabase } from '../utils/supabase';
 import { useTranslation } from 'react-i18next';
 import { type Post } from '../types';
@@ -25,6 +27,9 @@ type RawComment = {
   authorAvatar?: string;
   author_avatar?: string;
   text: string;
+  parentId?: string | null;
+  parent_id?: string | null;
+  likes?: string[];
   createdAt?: string;
   created_at?: string;
 };
@@ -66,10 +71,12 @@ const JournalModal: React.FC<JournalModalProps> = ({
   onNavigate,
   onUpdate,
 }) => {
-  const { user } = useAuth();
+  const { user, openAuthModal } = useAuth();
+  const { isFollowing, toggleFollow, busyId } = useFollows();
   const { t } = useTranslation();
   const post = posts[index];
   const [commentText, setCommentText] = useState('');
+  const [replyingTo, setReplyingTo] = useState<{ id: string; authorName: string } | null>(null);
   const [isLiking, setIsLiking] = useState(false);
   const [isCommenting, setIsCommenting] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -114,12 +121,11 @@ const JournalModal: React.FC<JournalModalProps> = ({
 
   const handleLike = async () => {
     if (!user) {
-      alert('Please login to like this post.');
+      openAuthModal('login');
       return;
     }
     setIsLiking(true);
     try {
-      // Server-side toggle: only ever adds/removes the caller's own id
       const { data, error } = await supabase.rpc('toggle_like', { target_post_id: post.id });
       if (error) throw error;
 
@@ -131,13 +137,41 @@ const JournalModal: React.FC<JournalModalProps> = ({
     }
   };
 
+  const handleToggleCommentLike = async (commentId: string, existingLikes: string[]) => {
+    if (!user) {
+      openAuthModal('login');
+      return;
+    }
+    const alreadyLiked = existingLikes.includes(user.id);
+    const optimistic = alreadyLiked
+      ? existingLikes.filter(id => id !== user.id)
+      : [...existingLikes, user.id];
+
+    onUpdate({
+      ...post,
+      comments: (post.comments || []).map(c => (c.id === commentId ? { ...c, likes: optimistic } : c)),
+    });
+
+    try {
+      const { data, error } = await supabase.rpc('toggle_comment_like', { target_comment_id: commentId });
+      if (!error && Array.isArray(data)) {
+        onUpdate({
+          ...post,
+          comments: (post.comments || []).map(c => (c.id === commentId ? { ...c, likes: data as string[] } : c)),
+        });
+      }
+    } catch {
+      // Keep optimistic update
+    }
+  };
+
   const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/community`;
+    const shareUrl = `${window.location.origin}/community?post=${encodeURIComponent(post.id)}`;
     try {
       if (navigator.share) {
         await navigator.share({
-          title: `${displayPostAuthorName}'s Travel Journal on PakJai`,
-          text: post.content || 'Check out this travel story on PakJai',
+          title: `${displayPostAuthorName} · PakJaiTravel`,
+          text: post.content || 'PakJaiTravel',
           url: shareUrl,
         });
       } else {
@@ -153,7 +187,7 @@ const JournalModal: React.FC<JournalModalProps> = ({
   const handleComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-      alert('Please login to comment.');
+      openAuthModal('login');
       return;
     }
     if (!commentText.trim()) return;
@@ -161,17 +195,25 @@ const JournalModal: React.FC<JournalModalProps> = ({
     setIsCommenting(true);
     try {
       const avatarUrl = user.avatar || fallbackAvatar(user.name);
-      const { data, error } = await supabase
-        .from('comments')
-        .insert({
-          post_id: post.id,
-          user_id: user.id,
-          author_name: user.name,
-          author_avatar: avatarUrl,
-          text: commentText.trim(),
-        })
-        .select()
-        .single();
+      const trimmed = commentText.trim();
+      const payload: Record<string, any> = {
+        post_id: post.id,
+        user_id: user.id,
+        author_name: user.name,
+        author_avatar: avatarUrl,
+        text: trimmed,
+      };
+      if (replyingTo) payload.parent_id = replyingTo.id;
+
+      let { data, error } = await supabase.from('comments').insert(payload).select().single();
+
+      if (error && replyingTo) {
+        delete payload.parent_id;
+        payload.text = `@${replyingTo.authorName} ${trimmed}`;
+        const retry = await supabase.from('comments').insert(payload).select().single();
+        data = retry.data;
+        error = retry.error;
+      }
 
       if (error) throw error;
 
@@ -186,15 +228,18 @@ const JournalModal: React.FC<JournalModalProps> = ({
               authorName: data.author_name,
               authorAvatar: data.author_avatar,
               text: data.text,
+              parentId: data.parent_id || null,
+              likes: data.likes || [],
               createdAt: data.created_at,
             },
           ],
         });
         setCommentText('');
+        setReplyingTo(null);
       }
     } catch (err) {
       console.error('Failed to comment', err);
-      alert('Failed to add comment.');
+      alert(t('post.commentFailed'));
     } finally {
       setIsCommenting(false);
     }
@@ -216,10 +261,22 @@ const JournalModal: React.FC<JournalModalProps> = ({
       authorName: cName,
       authorAvatar: cAvatar,
       text: c.text,
+      parentId: c.parentId ?? c.parent_id ?? null,
+      likes: c.likes || [],
       createdAt: cCreatedAt,
     };
   });
 
+  const topComments = normalizedComments.filter(c => !c.parentId);
+  const repliesByParent = new Map<string, typeof normalizedComments>();
+  normalizedComments.forEach(c => {
+    if (!c.parentId) return;
+    const list = repliesByParent.get(c.parentId) || [];
+    list.push(c);
+    repliesByParent.set(c.parentId, list);
+  });
+
+  const followingAuthor = Boolean(post.userId && isFollowing(post.userId));
   const likesCount = (post.likes || []).length;
   const commentsCount = normalizedComments.length;
 
@@ -351,12 +408,24 @@ const JournalModal: React.FC<JournalModalProps> = ({
               </div>
             </div>
 
-            <button className="jm-close-btn" onClick={onClose} aria-label="Close modal">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {!isPostByCurrentUser && post.userId && (
+                <button
+                  type="button"
+                  className={`pc-follow-pill${followingAuthor ? ' is-following' : ''}`}
+                  onClick={() => toggleFollow(post.userId)}
+                  disabled={busyId === post.userId}
+                >
+                  {followingAuthor ? t('social.following') : `+ ${t('social.follow')}`}
+                </button>
+              )}
+              <button className="jm-close-btn" onClick={onClose} aria-label={t('createPost.close')}>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
           </header>
 
           {/* Scrollable Story + Traveler Notes */}
@@ -385,35 +454,122 @@ const JournalModal: React.FC<JournalModalProps> = ({
 
             <div className="jm-comments-section">
               <div className="jm-comments-heading">
-                <span>Traveler Notes</span>
+                <span>{t('post.comment')}</span>
                 <span className="jm-comments-badge">{commentsCount}</span>
               </div>
 
-              {normalizedComments.length > 0 ? (
+              {topComments.length > 0 ? (
                 <div className="jm-comments-list">
-                  {normalizedComments.map(c => (
-                    <div key={c.id} className="jm-comment-card">
-                      <img
-                        src={c.authorAvatar}
-                        alt={c.authorName}
-                        className="jm-comment-avatar"
-                        onError={e => {
-                          (e.currentTarget as HTMLImageElement).src = fallbackAvatar(c.authorName);
-                        }}
-                      />
-                      <div className="jm-comment-body">
-                        <div className="jm-comment-top">
-                          <strong className="jm-comment-author">{c.authorName}</strong>
-                          <span className="jm-time">{formatTimeAgo(c.createdAt)}</span>
+                  {topComments.map(c => {
+                    const cLiked = Boolean(user && c.likes.includes(user.id));
+                    const replies = repliesByParent.get(c.id) || [];
+                    return (
+                      <div key={c.id} className="jm-comment-thread">
+                        <div className="jm-comment-card">
+                          <Link to={user?.id === c.userId ? '/profile' : `/profile/${c.userId}`} onClick={onClose}>
+                            <img
+                              src={c.authorAvatar}
+                              alt={c.authorName}
+                              className="jm-comment-avatar"
+                              onError={e => {
+                                (e.currentTarget as HTMLImageElement).src = fallbackAvatar(c.authorName);
+                              }}
+                            />
+                          </Link>
+                          <div className="jm-comment-body">
+                            <div className="jm-comment-top">
+                              <Link to={user?.id === c.userId ? '/profile' : `/profile/${c.userId}`} onClick={onClose} className="jm-comment-author">
+                                {c.authorName}
+                              </Link>
+                              <span className="jm-time">{formatTimeAgo(c.createdAt)}</span>
+                            </div>
+                            <p className="jm-comment-text">{c.text}</p>
+                            <div className="jm-comment-actions">
+                              <button
+                                type="button"
+                                className={`pc-comment-action${cLiked ? ' is-liked' : ''}`}
+                                onClick={() => handleToggleCommentLike(c.id, c.likes)}
+                              >
+                                {t('post.like')}{c.likes.length > 0 ? ` (${c.likes.length})` : ''}
+                              </button>
+                              <button
+                                type="button"
+                                className="pc-comment-action"
+                                onClick={() => {
+                                  if (!user) {
+                                    openAuthModal('login');
+                                    return;
+                                  }
+                                  setReplyingTo({ id: c.id, authorName: c.authorName });
+                                  setTimeout(() => commentInputRef.current?.focus(), 40);
+                                }}
+                              >
+                                {t('post.reply')}
+                              </button>
+                            </div>
+                          </div>
                         </div>
-                        <p className="jm-comment-text">{c.text}</p>
+
+                        {replies.length > 0 && (
+                          <div className="jm-replies-list">
+                            {replies.map(r => {
+                              const rLiked = Boolean(user && r.likes.includes(user.id));
+                              return (
+                                <div key={r.id} className="jm-comment-card jm-reply-card">
+                                  <Link to={user?.id === r.userId ? '/profile' : `/profile/${r.userId}`} onClick={onClose}>
+                                    <img
+                                      src={r.authorAvatar}
+                                      alt={r.authorName}
+                                      className="jm-comment-avatar jm-reply-avatar"
+                                      onError={e => {
+                                        (e.currentTarget as HTMLImageElement).src = fallbackAvatar(r.authorName);
+                                      }}
+                                    />
+                                  </Link>
+                                  <div className="jm-comment-body">
+                                    <div className="jm-comment-top">
+                                      <Link to={user?.id === r.userId ? '/profile' : `/profile/${r.userId}`} onClick={onClose} className="jm-comment-author">
+                                        {r.authorName}
+                                      </Link>
+                                      <span className="jm-time">{formatTimeAgo(r.createdAt)}</span>
+                                    </div>
+                                    <p className="jm-comment-text">{r.text}</p>
+                                    <div className="jm-comment-actions">
+                                      <button
+                                        type="button"
+                                        className={`pc-comment-action${rLiked ? ' is-liked' : ''}`}
+                                        onClick={() => handleToggleCommentLike(r.id, r.likes)}
+                                      >
+                                        {t('post.like')}{r.likes.length > 0 ? ` (${r.likes.length})` : ''}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="pc-comment-action"
+                                        onClick={() => {
+                                          if (!user) {
+                                            openAuthModal('login');
+                                            return;
+                                          }
+                                          setReplyingTo({ id: c.id, authorName: r.authorName });
+                                          setTimeout(() => commentInputRef.current?.focus(), 40);
+                                        }}
+                                      >
+                                        {t('post.reply')}
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="jm-empty">
-                  <p>No notes yet — share your thoughts or ask {displayPostAuthorName} about this place.</p>
+                  <p>{t('post.addComment')}</p>
                 </div>
               )}
             </div>
@@ -427,7 +583,7 @@ const JournalModal: React.FC<JournalModalProps> = ({
                   className={`jm-action-pill ${hasLiked ? 'liked' : ''}`}
                   onClick={handleLike}
                   disabled={isLiking}
-                  aria-label="Like story"
+                  aria-label={t('post.like')}
                 >
                   <svg
                     viewBox="0 0 24 24"
@@ -442,13 +598,13 @@ const JournalModal: React.FC<JournalModalProps> = ({
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                   </svg>
                   <span>
-                    {likesCount} {likesCount === 1 ? 'Like' : 'Likes'}
+                    {likesCount} · {t('post.like')}
                   </span>
                 </button>
 
                 <button
                   className="jm-action-pill"
-                  aria-label="Add comment"
+                  aria-label={t('post.comment')}
                   onClick={() => commentInputRef.current?.focus()}
                 >
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -458,31 +614,45 @@ const JournalModal: React.FC<JournalModalProps> = ({
                 </button>
               </div>
 
-              <button className="jm-action-pill" onClick={handleShare} aria-label="Share story">
+              <button className="jm-action-pill" onClick={handleShare} aria-label={t('post.share')}>
                 <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="22" y1="2" x2="11" y2="13" />
                   <polygon points="22 2 15 22 11 13 2 9 22 2" />
                 </svg>
-                <span>{copied ? 'Copied!' : 'Share'}</span>
+                <span>{copied ? t('post.linkCopied') : t('post.share')}</span>
               </button>
             </div>
 
             {user ? (
-              <form className="jm-comment-form" onSubmit={handleComment}>
-                <input
-                  ref={commentInputRef}
-                  type="text"
-                  placeholder="Write a note..."
-                  value={commentText}
-                  onChange={e => setCommentText(e.target.value)}
-                  disabled={isCommenting}
-                />
-                <button type="submit" disabled={isCommenting || !commentText.trim()}>
-                  {isCommenting ? 'Posting...' : 'Post'}
-                </button>
-              </form>
+              <>
+                {replyingTo && (
+                  <div className="pc-replying-banner" style={{ marginBottom: '6px' }}>
+                    <span>{t('post.replyingTo', { name: replyingTo.authorName })}</span>
+                    <button type="button" onClick={() => setReplyingTo(null)}>
+                      {t('post.cancelReply')}
+                    </button>
+                  </div>
+                )}
+                <form className="jm-comment-form" onSubmit={handleComment}>
+                  <input
+                    ref={commentInputRef}
+                    type="text"
+                    placeholder={
+                      replyingTo
+                        ? t('post.replyPlaceholder', { name: replyingTo.authorName })
+                        : t('post.addComment')
+                    }
+                    value={commentText}
+                    onChange={e => setCommentText(e.target.value)}
+                    disabled={isCommenting}
+                  />
+                  <button type="submit" disabled={isCommenting || !commentText.trim()}>
+                    {isCommenting ? '...' : t('post.post')}
+                  </button>
+                </form>
+              </>
             ) : (
-              <div className="jm-login-hint">Log in to leave a note on this journal.</div>
+              <div className="jm-login-hint">{t('post.loginToComment')}</div>
             )}
           </footer>
         </div>

@@ -4,7 +4,21 @@ export interface Comment {
   authorName: string;
   authorAvatar: string;
   text: string;
+  parentId?: string | null;
+  likes?: string[];
   createdAt: string;
+}
+
+export interface PublicTraveler {
+  id: string;
+  name: string;
+  avatar?: string | null;
+  coverPhoto?: string | null;
+  role?: string;
+  isVerified?: boolean;
+  postsCount?: number;
+  followersCount?: number;
+  followingCount?: number;
 }
 
 export interface Post {
