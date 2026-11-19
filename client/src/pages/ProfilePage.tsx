@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
@@ -14,6 +15,7 @@ import './ProfilePage.css';
 
 
 const ProfilePage: React.FC = () => {
+  const { t } = useTranslation();
   const { user, loading: authLoading, logout, updateProfile, openAuthModal } = useAuth();
   const navigate = useNavigate();
   const [userPosts, setUserPosts] = useState<Post[]>([]);
@@ -117,7 +119,7 @@ const ProfilePage: React.FC = () => {
       await updateProfile({ [field]: url });
     } catch (err) {
       console.error(`Failed to upload ${field}:`, err);
-      setUploadError(`Could not update photo. Please try again.`);
+      setUploadError(t('profile.uploadError'));
     } finally {
       setUploading(false);
     }
@@ -215,22 +217,22 @@ const ProfilePage: React.FC = () => {
             <div className="ig-bio-section">
               <h1 className="ig-display-name">{user.name}</h1>
               <div className="ig-category">
-                {user.role === 'host' ? 'Traveler • Certified Host' : 'Traveler • Explorer'}
+                {user.role === 'host' ? t('profile.roleHost') : t('profile.roleTraveler')}
               </div>
             </div>
 
             <div className="ig-stats-container">
               <div className="ig-stat-item">
                 <span className="ig-stat-num">{totalReviews}</span>
-                <span className="ig-stat-label">Journals</span>
+                <span className="ig-stat-label">{t('profile.statsJournals')}</span>
               </div>
               <div className="ig-stat-item">
                 <span className="ig-stat-num">0</span>
-                <span className="ig-stat-label">Followers</span>
+                <span className="ig-stat-label">{t('profile.statsFollowers')}</span>
               </div>
               <div className="ig-stat-item">
                 <span className="ig-stat-num">0</span>
-                <span className="ig-stat-label">Following</span>
+                <span className="ig-stat-label">{t('profile.statsFollowing')}</span>
               </div>
             </div>
 
@@ -239,18 +241,18 @@ const ProfilePage: React.FC = () => {
             {/* ── Action Buttons right under the profile details in the center ── */}
             <div className="ig-action-buttons">
               <button className="ig-action-btn" onClick={() => setIsSettingsOpen(true)}>
-                Edit profile
+                {t('profile.editProfile')}
               </button>
               <button className="ig-action-btn" onClick={() => navigate('/saved')}>
-                Saved places
+                {t('profile.savedPlaces')}
               </button>
               {user.role === 'host' ? (
                 <button className="ig-action-btn" onClick={() => navigate('/dashboard')}>
-                  Host dashboard
+                  {t('profile.hostDashboard')}
                 </button>
               ) : (
                 <button className="ig-action-btn" onClick={() => navigate('/become-host')}>
-                  Become a host
+                  {t('profile.becomeHost')}
                 </button>
               )}
 
@@ -260,13 +262,13 @@ const ProfilePage: React.FC = () => {
                   className="ig-action-btn ig-cover-btn"
                   onClick={() => setCoverMenuOpen(v => !v)}
                   disabled={uploadingCover}
-                  title="Change cover photo"
+                  title={t('profile.changeCover')}
                 >
                   <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
                     <circle cx="12" cy="13" r="4" />
                   </svg>
-                  <span>{uploadingCover ? 'Saving...' : 'Cover'}</span>
+                  <span>{uploadingCover ? t('profile.saving') : t('profile.cover')}</span>
                 </button>
                 {coverMenuOpen && (
                   <div className="ig-upload-menu">
@@ -274,13 +276,13 @@ const ProfilePage: React.FC = () => {
                       className="ig-upload-menu-item"
                       onClick={() => { setCoverMenuOpen(false); coverInputRef.current?.click(); }}
                     >
-                      Upload new cover
+                      {t('profile.uploadCover')}
                     </button>
                     <button
                       className="ig-upload-menu-item"
                       onClick={() => { setCoverMenuOpen(false); setViewingPhoto('cover'); }}
                     >
-                      View cover photo
+                      {t('profile.viewCover')}
                     </button>
                   </div>
                 )}
@@ -304,7 +306,7 @@ const ProfilePage: React.FC = () => {
         <div className="ig-content-card">
           <div className="ig-gallery-toolbar">
             <div className="ig-gallery-title-group">
-              <h2 className="ig-gallery-heading">Travel Journals</h2>
+              <h2 className="ig-gallery-heading">{t('profile.journalsTitle')}</h2>
               <span className="ig-gallery-count">{totalReviews}</span>
             </div>
 
@@ -318,7 +320,7 @@ const ProfilePage: React.FC = () => {
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
-                <span>New Journal</span>
+                <span>{t('profile.newJournal')}</span>
               </button>
 
               <div className="ig-tabs-row" role="tablist">
@@ -328,12 +330,12 @@ const ProfilePage: React.FC = () => {
                   aria-selected={viewMode === 'grid'}
                   className={`ig-tab ${viewMode === 'grid' ? 'active' : ''}`}
                   onClick={() => setViewMode('grid')}
-                  title="Grid view"
+                  title={t('profile.viewGrid')}
                 >
                   <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor">
                     <path d="M3 3h7v7H3V3zm11 0h7v7h-7V3zm0 11h7v7h-7v-7zM3 14h7v7H3v-7z" />
                   </svg>
-                  <span>Grid</span>
+                  <span>{t('profile.viewGrid')}</span>
                 </button>
                 <button
                   type="button"
@@ -341,12 +343,12 @@ const ProfilePage: React.FC = () => {
                   aria-selected={viewMode === 'feed'}
                   className={`ig-tab ${viewMode === 'feed' ? 'active' : ''}`}
                   onClick={() => setViewMode('feed')}
-                  title="Feed view"
+                  title={t('profile.viewFeed')}
                 >
                   <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor">
                     <path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z" />
                   </svg>
-                  <span>Feed</span>
+                  <span>{t('profile.viewFeed')}</span>
                 </button>
               </div>
             </div>
@@ -355,7 +357,7 @@ const ProfilePage: React.FC = () => {
           {/* ── Post Feed / Grid Content ── */}
           <div className="ig-content-area">
             {loading ? (
-              <div className="profile-loading">Loading journals…</div>
+              <div className="profile-loading">{t('profile.loadingJournals')}</div>
             ) : userPosts.length > 0 ? (
               viewMode === 'grid' ? (
                 <div className="ig-photo-grid">
@@ -397,15 +399,15 @@ const ProfilePage: React.FC = () => {
                     <polyline points="21 15 16 10 5 21"></polyline>
                   </svg>
                 </div>
-                <h2>No journals yet</h2>
-                <p>Share your travel experiences from Chiang Mai & Chiang Dao.</p>
+                <h2>{t('profile.emptyTitle')}</h2>
+                <p>{t('profile.emptyBody')}</p>
                 <button
                   type="button"
                   className="ig-share-moment-btn"
                   style={{ marginTop: '14px' }}
                   onClick={() => setIsModalOpen(true)}
                 >
-                  + Share your first photo
+                  {t('profile.shareFirstPhoto')}
                 </button>
               </div>
             )}
@@ -422,19 +424,19 @@ const ProfilePage: React.FC = () => {
             <div className="ig-bottom-sheet-menu">
               <button className="ig-bs-item" onClick={() => { setIsBottomSheetOpen(false); setIsSettingsOpen(true); }}>
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.488.488 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.61 3.61 0 018.4 12c0-1.98 1.62-3.6 3.6-3.6s3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-                Settings & Privacy
+                {t('profile.settingsPrivacy')}
               </button>
               <button className="ig-bs-item" onClick={() => { setIsBottomSheetOpen(false); navigate('/saved'); }}>
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>
-                Saved
+                {t('profile.saved')}
               </button>
               <button className="ig-bs-item" onClick={() => { setIsBottomSheetOpen(false); navigate('/community'); }}>
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-                Community Journal
+                {t('profile.communityJournal')}
               </button>
               <div className="ig-bs-divider" />
               <button className="ig-bs-item ig-bs-danger" onClick={handleLogout}>
-                Log Out
+                {t('profile.logout')}
               </button>
             </div>
           </div>
@@ -450,7 +452,7 @@ const ProfilePage: React.FC = () => {
           <div className="ig-viewer-body" onClick={(e) => e.stopPropagation()}>
             <img
               src={viewingPhoto === 'avatar' ? avatarSrc : coverSrc}
-              alt={viewingPhoto === 'avatar' ? 'Profile picture' : 'Cover photo'}
+              alt={viewingPhoto === 'avatar' ? t('profile.changeAvatar') : t('profile.changeCover')}
               className={viewingPhoto === 'avatar' ? 'ig-viewer-avatar' : undefined}
             />
             <button
@@ -461,7 +463,7 @@ const ProfilePage: React.FC = () => {
                 ref.current?.click();
               }}
             >
-              {viewingPhoto === 'avatar' ? 'Change profile photo' : 'Change cover photo'}
+              {viewingPhoto === 'avatar' ? t('profile.changeAvatar') : t('profile.changeCover')}
             </button>
           </div>
         </div>

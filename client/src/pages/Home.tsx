@@ -45,21 +45,21 @@ type AtmosphereMode = 'dawn' | 'daylight' | 'starlight';
 
 const ATMOSPHERE_MODES: {
   id: AtmosphereMode;
-  label: string;
+  labelKey: string;
   temp: string;
-  condition: string;
+  condKey: string;
 }[] = [
-    { id: 'dawn', label: 'Dawn Mist', temp: '16°C', condition: 'Golden Sunrise' },
-    { id: 'daylight', label: 'Forest Noon', temp: '23°C', condition: 'Clear Ridge' },
-    { id: 'starlight', label: 'Starlight', temp: '13°C', condition: 'Night Sanctuary' },
+    { id: 'dawn', labelKey: 'home.atmosphere.dawnLabel', temp: '16°C', condKey: 'home.atmosphere.dawnCond' },
+    { id: 'daylight', labelKey: 'home.atmosphere.daylightLabel', temp: '23°C', condKey: 'home.atmosphere.daylightCond' },
+    { id: 'starlight', labelKey: 'home.atmosphere.starlightLabel', temp: '13°C', condKey: 'home.atmosphere.starlightCond' },
   ];
 
 const MARQUEE_MOMENTS = [
-  { title: 'Doi Luang Sunrise', tag: 'Chiang Dao', query: 'Chiang Dao', img: '/doiluangbg.jpg' },
-  { title: 'Misty Valley Homestays', tag: 'Local Stays', query: 'Homestay', img: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80' },
-  { title: 'Forest Canopy Retreats', tag: 'Mae Rim', query: 'Mae Rim', img: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=600&q=80' },
-  { title: 'Artisan Mountain Cafes', tag: 'Slow Living', query: 'Chiang Dao', img: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=600&q=80' },
-  { title: 'Stargazing Cabins', tag: 'Highlands', query: 'Cabin', img: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=80' },
+  { titleKey: 'home.moments.doiLuangTitle', tagKey: 'home.moments.doiLuangTag', query: 'Chiang Dao', img: '/doiluangbg.jpg' },
+  { titleKey: 'home.moments.mistyTitle', tagKey: 'home.moments.mistyTag', query: 'Homestay', img: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80' },
+  { titleKey: 'home.moments.forestTitle', tagKey: 'home.moments.forestTag', query: 'Mae Rim', img: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=600&q=80' },
+  { titleKey: 'home.moments.cafeTitle', tagKey: 'home.moments.cafeTag', query: 'Chiang Dao', img: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=600&q=80' },
+  { titleKey: 'home.moments.stargazingTitle', tagKey: 'home.moments.stargazingTag', query: 'Cabin', img: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=80' },
 ];
 
 export const Home: React.FC = () => {
@@ -155,10 +155,10 @@ export const Home: React.FC = () => {
 
   const categories = [
     { id: 'all', label: t('home.moods.all') },
-    { id: 'homestay', label: 'Homestays' },
+    { id: 'homestay', label: t('home.moods.homestay') },
     { id: 'forest', label: t('home.moods.forest') },
     { id: 'boutique', label: t('home.moods.boutique') },
-    { id: 'verified', label: 'Verified Stays' },
+    { id: 'verified', label: t('home.moods.verified') },
   ];
 
   const filteredProperties = useMemo(() => {
@@ -202,18 +202,18 @@ export const Home: React.FC = () => {
   const filmstripItems = useMemo(() => {
     const stayItems = properties.map(p => ({
       title: p.name,
-      tag: `${formatPrice(p)} / night`,
+      tag: `${formatPrice(p)} ${t('common.perNight')}`,
       href: `/hotels/${p.id}`,
       img: p.imageUrl || '/doiluangbg.jpg'
     }));
     const staticItems = MARQUEE_MOMENTS.map(m => ({
-      title: m.title,
-      tag: m.tag,
+      title: t(m.titleKey),
+      tag: t(m.tagKey),
       href: `/hotels?q=${encodeURIComponent(m.query)}`,
       img: m.img
     }));
     return [...stayItems, ...staticItems].slice(0, 5);
-  }, [properties]);
+  }, [properties, t]);
 
   return (
     <div className="home-page animate-fade-in">
@@ -364,10 +364,10 @@ export const Home: React.FC = () => {
             {/* Right Interactive Stack: Atmosphere Switcher + Floating Stay Pill */}
             <div className="hero-right-dock">
               {/* Interactive Time-of-Day Atmosphere Switcher */}
-              <div className="atmo-widget" role="group" aria-label="Mountain atmosphere">
+              <div className="atmo-widget" role="group" aria-label={t('home.atmosphere.place')}>
                 <div className="atmo-status-line">
                   <span className="atmo-temp">{activeAtmoObj.temp}</span>
-                  <span className="atmo-cond">Chiang Dao · {activeAtmoObj.condition}</span>
+                  <span className="atmo-cond">{t('home.atmosphere.place')} · {t(activeAtmoObj.condKey)}</span>
                 </div>
                 <div className="atmo-Segmented">
                   {ATMOSPHERE_MODES.map((m) => (
@@ -377,7 +377,7 @@ export const Home: React.FC = () => {
                       className={`atmo-btn ${atmosphere === m.id ? 'active' : ''}`}
                       onClick={() => setAtmosphere(m.id)}
                     >
-                      {m.label}
+                      {t(m.labelKey)}
                     </button>
                   ))}
                 </div>
@@ -390,7 +390,7 @@ export const Home: React.FC = () => {
                 >
                   <img src={featuredStay.imageUrl} alt={featuredStay.name} />
                   <div className="mh-pill-text">
-                    <span className="mh-pill-kicker">{featuredStay.type || 'Featured Stay'}</span>
+                    <span className="mh-pill-kicker">{featuredStay.type || t('home.hero.featuredStay')}</span>
                     <strong>{featuredStay.name}</strong>
                     <span>{formatPrice(featuredStay)} {t('common.perNight')}</span>
                   </div>
@@ -466,15 +466,15 @@ export const Home: React.FC = () => {
             </div>
 
             <div className="collection-sort-wrap">
-              <label htmlFor="home-sort-select">Sort by</label>
+              <label htmlFor="home-sort-select">{t('home.sort.label')}</label>
               <select
                 id="home-sort-select"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
               >
-                <option value="recommended">Recommended</option>
-                <option value="price_asc">Price: Low to High</option>
-                <option value="rating">Highest Rated</option>
+                <option value="recommended">{t('home.sort.recommended')}</option>
+                <option value="price_asc">{t('home.sort.priceAsc')}</option>
+                <option value="rating">{t('home.sort.rating')}</option>
               </select>
             </div>
           </div>
@@ -534,13 +534,13 @@ export const Home: React.FC = () => {
 
                   <h2 className="csc-title">{featuredStay.name}</h2>
                   <p className="csc-location">
-                    {featuredStay.type || 'Homestay'} in {featuredStay.location}
+                    {featuredStay.type || t('home.moods.homestay')} · {featuredStay.location}
                   </p>
 
                   <p className="csc-description">
                     {featuredStay.description && featuredStay.description.trim().length > 0
                       ? featuredStay.description
-                      : 'Handpicked for its authentic Northern Thai character, serene mountain setting, and direct connection with local hosts.'}
+                      : t('home.curatorsEdit.fallbackDesc')}
                   </p>
 
                   {featuredStay.features && featuredStay.features.length > 0 && (
@@ -582,7 +582,7 @@ export const Home: React.FC = () => {
               <div>
                 <h2 className="section-heading">{t('home.community.title')}</h2>
                 <p className="section-subheading">
-                  Real moments, mountain views, and stories shared by our community.
+                  {t('home.community.subtitle')}
                 </p>
               </div>
               <button
@@ -613,11 +613,11 @@ export const Home: React.FC = () => {
                   </div>
                   <div className="hjc-body">
                     <p className="hjc-caption">
-                      {post.content || `Captured in ${post.locationTag}`}
+                      {post.content || t('home.community.capturedIn', { place: post.locationTag })}
                     </p>
                     <div className="hjc-author-row">
                       <span className="hjc-author-name">{post.authorName}</span>
-                      <span className="hjc-likes">{post.likesCount} likes</span>
+                      <span className="hjc-likes">{t('home.community.likesCount', { count: post.likesCount })}</span>
                     </div>
                   </div>
                 </article>

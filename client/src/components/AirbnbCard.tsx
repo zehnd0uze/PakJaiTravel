@@ -33,7 +33,7 @@ export const AirbnbCard: React.FC<HeritageCardProps> = ({
         <img src={image} alt={title} className="heritage-card-image" loading="lazy" />
         
         {/* Heart Icon (Favourite) */}
-        <button className="heritage-card-heart" aria-label="Save to favorites">
+        <button className="heritage-card-heart" aria-label={t('airbnbCard.saveFavorite')}>
           <svg 
             viewBox="0 0 32 32" 
             xmlns="http://www.w3.org/2000/svg" 
@@ -48,7 +48,7 @@ export const AirbnbCard: React.FC<HeritageCardProps> = ({
         {/* Guest Favourite Badge (Luxury styled) */}
         {isGuestFavorite && (
           <div className="heritage-card-badge">
-            Curator's Pick
+            {t('airbnbCard.curatorsPick')}
           </div>
         )}
       </div>
@@ -64,13 +64,13 @@ export const AirbnbCard: React.FC<HeritageCardProps> = ({
             </div>
           ) : (
             <div className="heritage-card-rating new-badge">
-              <span style={{ fontSize: '0.8rem', padding: '2px 6px', background: 'var(--primary-color)', color: 'white', borderRadius: '4px', fontWeight: 'bold' }}>New</span>
+              <span style={{ fontSize: '0.8rem', padding: '2px 6px', background: 'var(--primary-color)', color: 'white', borderRadius: '4px', fontWeight: 'bold' }}>{t('airbnbCard.new')}</span>
             </div>
           )}
         </div>
         
         <p className="heritage-card-subtitle">{subtitle}</p>
-        <p className="heritage-card-distance">Chiang Dao, Thailand</p>
+        <p className="heritage-card-distance">{t('airbnbCard.defaultLocation')}</p>
         
         <div className="heritage-card-price">
           <span>{price}</span> <span className="price-suffix">{priceType === 'per_person' ? t('common.perPerson') : t('common.perNight')}</span>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { type Property } from '../types';
 import { supabase } from '../utils/supabase';
@@ -11,14 +12,15 @@ interface HostPostCreationProps {
   initialPropertyId?: string;
 }
 
-const PROMPT_SUGGESTIONS = [
-  { label: 'Morning Mist & Weather', prefix: 'Morning update from our stay: ' },
-  { label: 'Room Availability', prefix: 'Availability update for upcoming dates: ' },
-  { label: 'Seasonal Highlight', prefix: 'Special experience at our property right now: ' }
-];
-
 const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated, initialPropertyId }) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
+
+  const promptSuggestions = [
+    { label: t('hostPost.promptMist'), prefix: t('hostPost.promptMistPrefix') },
+    { label: t('hostPost.promptAvail'), prefix: t('hostPost.promptAvailPrefix') },
+    { label: t('hostPost.promptSeason'), prefix: t('hostPost.promptSeasonPrefix') },
+  ];
   const [content, setContent] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [propertyId, setPropertyId] = useState(initialPropertyId || '');
@@ -98,7 +100,7 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated, init
         setImageUrl(url);
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to upload photo');
+      setError(err.message || t('hostPost.errUpload'));
     } finally {
       setIsUploading(false);
       e.target.value = '';
@@ -116,7 +118,7 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated, init
 
   const handlePublish = async () => {
     if (!content.trim() && !imageUrl) {
-      setError('Please add some content or an image to your post');
+      setError(t('hostPost.errEmpty'));
       return;
     }
 
@@ -145,7 +147,7 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated, init
       setImageUrl('');
       if (onPostCreated) onPostCreated();
     } catch (err: any) {
-      setError(err.message || 'Failed to publish post');
+      setError(err.message || t('hostPost.errPublish'));
     } finally {
       setIsSubmitting(false);
     }
@@ -157,20 +159,20 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated, init
     <div className="host-post-box animate-fade-in">
       {selectedProperty && (
         <div className="composer-linked-stay">
-          <span>Posting update linked to <strong>{selectedProperty.name}</strong></span>
+          <span>{t('hostPost.linkedTo')} <strong>{selectedProperty.name}</strong></span>
         </div>
       )}
 
       <div className="post-box-header">
-        <img 
-          src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Host')}&background=2C4C3B&color=fff`} 
-          alt="Avatar" 
+        <img
+          src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Host')}&background=2C4C3B&color=fff`}
+          alt="Avatar"
           className="user-mini-avatar"
         />
         <div className="post-textarea-wrapper">
           <textarea
             ref={textareaRef}
-            placeholder={`Share today's atmosphere, mountain view, or room availability at ${selectedProperty?.name || 'your property'}, ${user?.name?.split(' ')[0]}...`}
+            placeholder={t('hostPost.placeholder')}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             disabled={isSubmitting}
@@ -179,8 +181,7 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated, init
       </div>
 
       <div className="composer-prompt-chips">
-        <span className="prompt-chips-label">Quick topics:</span>
-        {PROMPT_SUGGESTIONS.map((item) => (
+        {promptSuggestions.map((item) => (
           <button
             key={item.label}
             type="button"
@@ -203,39 +204,39 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated, init
 
       <div className="post-box-actions">
         <div className="left-actions">
-          <input 
+          <input
             type="file"
             ref={fileInputRef}
             accept="image/*"
             style={{ display: 'none' }}
             onChange={handleImageFile}
           />
-          <button 
+          <button
             type="button"
-            className="action-tool-btn" 
-            onClick={() => fileInputRef.current?.click()} 
+            className="action-tool-btn"
+            onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
-            title="Upload Photo"
+            title={t('hostPost.addPhoto')}
           >
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
               <circle cx="8.5" cy="8.5" r="1.5" />
               <polyline points="21 15 16 10 5 21" />
             </svg>
-            <span>{isUploading ? 'Uploading...' : 'Add Photo'}</span>
+            <span>{isUploading ? t('hostPost.uploading') : t('hostPost.addPhoto')}</span>
           </button>
-          
+
           <div className="property-tag-selector">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="tag-icon">
               <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
               <line x1="7" y1="7" x2="7.01" y2="7" />
             </svg>
-            <select 
-              value={propertyId} 
+            <select
+              value={propertyId}
               onChange={(e) => setPropertyId(e.target.value)}
               className="tag-dropdown"
             >
-              <option value="">Tag an accommodation...</option>
+              <option value="">{t('hostPost.selectStay')}</option>
               {myProperties.map(prop => (
                 <option key={prop.id} value={prop.id}>{prop.name}</option>
               ))}
@@ -243,12 +244,12 @@ const HostPostCreation: React.FC<HostPostCreationProps> = ({ onPostCreated, init
           </div>
         </div>
 
-        <button 
-          className="publish-btn" 
-          onClick={handlePublish} 
+        <button
+          className="publish-btn"
+          onClick={handlePublish}
           disabled={isSubmitting || (!content.trim() && !imageUrl)}
         >
-          {isSubmitting ? 'Publishing...' : 'Publish Update'}
+          {isSubmitting ? t('hostPost.publishing') : t('hostPost.publish')}
         </button>
       </div>
     </div>

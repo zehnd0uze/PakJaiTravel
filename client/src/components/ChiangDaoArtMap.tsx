@@ -1,5 +1,7 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import type { Map as MLMap, Marker as MLMarker, StyleSpecification } from 'maplibre-gl';
 import { type Property } from '../types';
 import { CHIANG_DAO_ATLAS_STAYS, type ChiangDaoZoneId } from '../utils/chiangDaoStays';
 import './ChiangDaoArtMap.css';
@@ -10,615 +12,676 @@ interface ChiangDaoArtMapProps {
 }
 
 type ZoneFilterId = 'all' | ChiangDaoZoneId;
+type ViewMode = 'map' | 'illustrated';
+type MapLibreModule = typeof import('maplibre-gl');
 
 interface ZoneMeta {
   id: ZoneFilterId;
   label: string;
-  labelTh: string;
-  elevation: string;
-  subtitle: string;
-  anchor: { x: number; y: number };
-  radius: number;
+  camera: { center: [number, number]; zoom: number };
+  artLabelPos?: { x: number; y: number };
+  artFocus: { x: number; y: number; zoom: number };
 }
 
 const ZONES: ZoneMeta[] = [
-  {
-    id: 'all',
-    label: 'All Chiang Dao',
-    labelTh: 'ทั้งอำเภอเชียงดาว',
-    elevation: '405 – 2,175 m',
-    subtitle: 'Click any homestay pin on the map to preview its view, host, and nightly rate',
-    anchor: { x: 50, y: 50 },
-    radius: 0,
-  },
-  {
-    id: 'nalao',
-    label: 'Ban Na Lao Mai',
-    labelTh: 'บ้านนาเลาใหม่',
-    elevation: '1,150 m · High Ridge',
-    subtitle: 'Iconic wooden balcony homestays looking directly at Doi Luang’s limestone peak',
-    anchor: { x: 27, y: 31 },
-    radius: 135,
-  },
-  {
-    id: 'muangkong',
-    label: 'Muang Kong',
-    labelTh: 'เมืองคอง',
-    elevation: '680 m · Hidden Valley',
-    subtitle: 'Quiet back-valley behind Doi Luang with riverside cabins, rice paddies & morning fog',
-    anchor: { x: 22, y: 66 },
-    radius: 105,
-  },
-  {
-    id: 'maemae',
-    label: 'Ban Mae Mae',
-    labelTh: 'บ้านแม่แมะ',
-    elevation: '790 m · Forest Canopy',
-    subtitle: 'Evergreen rainforest village famous for treehouses and cool mountain streams',
-    anchor: { x: 63, y: 26 },
-    radius: 115,
-  },
-  {
-    id: 'tham',
-    label: 'Ban Tham',
-    labelTh: 'บ้านถ้ำ',
-    elevation: '465 m · Foothills',
-    subtitle: 'Garden bungalows, earthen domes & forest stays near Wat Tham Chiang Dao',
-    anchor: { x: 46, y: 52 },
-    radius: 110,
-  },
-  {
-    id: 'town',
-    label: 'Town & Riverside',
-    labelTh: 'ตัวเมือง & ริมปิง',
-    elevation: '410 m · Mae Ping Basin',
-    subtitle: 'Boutique resorts, riverside villas & artisan cafes along the upper Mae Ping River',
-    anchor: { x: 74, y: 66 },
-    radius: 110,
-  },
+  { id: 'all', label: 'All areas', camera: { center: [98.86, 19.37], zoom: 11.2 }, artFocus: { x: 50, y: 50, zoom: 1 } },
+  { id: 'nalao', label: 'Ban Na Lao Mai', camera: { center: [98.8672, 19.3712], zoom: 14.6 }, artLabelPos: { x: 16, y: 26 }, artFocus: { x: 22, y: 40, zoom: 2 } },
+  { id: 'muangkong', label: 'Muang Kong', camera: { center: [98.7095, 19.3832], zoom: 14 }, artLabelPos: { x: 17, y: 59 }, artFocus: { x: 18, y: 73, zoom: 2.1 } },
+  { id: 'maemae', label: 'Ban Mae Mae', camera: { center: [98.8878, 19.3228], zoom: 14.6 }, artLabelPos: { x: 66, y: 24 }, artFocus: { x: 66, y: 38, zoom: 2.1 } },
+  { id: 'tham', label: 'Ban Tham', camera: { center: [98.9272, 19.3925], zoom: 14.2 }, artLabelPos: { x: 49, y: 53 }, artFocus: { x: 48, y: 65, zoom: 2.1 } },
+  { id: 'town', label: 'Town & Riverside', camera: { center: [98.9665, 19.3642], zoom: 14 }, artLabelPos: { x: 75, y: 92 }, artFocus: { x: 74, y: 80, zoom: 2.1 } },
 ];
+
+/** Below this zoom (with "All areas" selected) the map shows one bubble per area instead of overlapping price pins */
+const OVERVIEW_ZOOM = 12.6;
+const PITCH_3D = 55;
+const TERRAIN = { source: 'terrainDem', exaggeration: 1.5 };
+const DEM_TILES = ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'];
+
+const buildMapStyle = (): StyleSpecification => ({
+  version: 8,
+  sources: {
+    base: {
+      type: 'raster',
+      tiles: ['a', 'b', 'c'].map(s => `https://${s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png`),
+      tileSize: 256,
+      maxzoom: 18,
+      attribution: '© OpenStreetMap © CARTO · Elevation © AWS Terrain Tiles',
+    },
+    terrainDem: { type: 'raster-dem', tiles: DEM_TILES, encoding: 'terrarium', tileSize: 256, maxzoom: 14 },
+    hillshadeDem: { type: 'raster-dem', tiles: DEM_TILES, encoding: 'terrarium', tileSize: 256, maxzoom: 14 },
+  },
+  layers: [
+    { id: 'base', type: 'raster', source: 'base' },
+    {
+      id: 'hillshade',
+      type: 'hillshade',
+      source: 'hillshadeDem',
+      paint: {
+        'hillshade-shadow-color': '#28463A',
+        'hillshade-highlight-color': '#FFF8EE',
+        'hillshade-exaggeration': 0.32,
+      },
+    },
+  ],
+  terrain: TERRAIN,
+  sky: {
+    'sky-color': '#DCE9E2',
+    'horizon-color': '#F5EFE5',
+    'fog-color': '#EEF4EE',
+    'sky-horizon-blend': 0.5,
+    'horizon-fog-blend': 0.6,
+    'fog-ground-blend': 0.2,
+  },
+});
+
+const MIN_ART_ZOOM = 1;
+const MAX_ART_ZOOM = 2.8;
+const clampPan = (val: number, zoom: number) => Math.min(0, Math.max(100 - 100 * zoom, val));
+
+const ZONE_ART_DEFAULTS: Record<ChiangDaoZoneId, { x: number; y: number }> = {
+  nalao: { x: 24, y: 44 },
+  muangkong: { x: 18, y: 74 },
+  maemae: { x: 64, y: 48 },
+  tham: { x: 52, y: 72 },
+  town: { x: 84, y: 82 },
+};
 
 const inferZone = (prop: Property, index: number): ChiangDaoZoneId => {
   const hay = `${prop.name || ''} ${prop.location || ''} ${prop.district || ''} ${prop.description || ''}`.toLowerCase();
-  if (hay.includes('na lao') || hay.includes('นาเลา') || hay.includes('ระเบียงดาว') || hay.includes('สายหมอก')) return 'nalao';
+  if (hay.includes('na lao') || hay.includes('นาเลา')) return 'nalao';
   if (hay.includes('muang kong') || hay.includes('เมืองคอง')) return 'muangkong';
-  if (hay.includes('mae mae') || hay.includes('แม่แมะ') || hay.includes('ต้นไม้')) return 'maemae';
-  if (hay.includes('tham') || hay.includes('ถ้ำ') || hay.includes('nest') || hay.includes('roundhouse')) return 'tham';
+  if (hay.includes('mae mae') || hay.includes('แม่แมะ')) return 'maemae';
+  if (hay.includes('tham') || hay.includes('ถ้ำ')) return 'tham';
   if (hay.includes('town') || hay.includes('ping') || hay.includes('ปิง')) return 'town';
   const cycle: ChiangDaoZoneId[] = ['tham', 'nalao', 'town', 'maemae', 'muangkong'];
   return cycle[index % cycle.length];
 };
 
-const shortDisplayName = (fullName: string) => {
-  // If formatted like "บ้านระเบียงดาว (Baan Rabiang Dao)", keep the primary title clean
+const splitName = (fullName: string) => {
   const match = fullName.match(/^([^(]+)\(([^)]+)\)/);
-  if (match) {
-    return { primary: match[1].trim(), secondary: match[2].trim() };
-  }
-  return { primary: fullName, secondary: '' };
+  return match ? { primary: match[1].trim(), secondary: match[2].trim() } : { primary: fullName, secondary: '' };
 };
 
-const formatPrice = (prop: Property) => {
-  const raw = Number(prop.pricePerNight ?? prop.price_per_night ?? prop.price ?? 0);
-  return `฿${raw.toLocaleString()}`;
-};
+const formatPrice = (prop: Property) =>
+  `฿${Number(prop.pricePerNight ?? prop.price_per_night ?? prop.price ?? 0).toLocaleString()}`;
+
+interface MappedStay {
+  prop: Property;
+  zoneId: ChiangDaoZoneId;
+  zoneLabel: string;
+  lat: number;
+  lng: number;
+  artX: number;
+  artY: number;
+}
 
 export const ChiangDaoArtMap: React.FC<ChiangDaoArtMapProps> = ({ properties }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [activeZone, setActiveZone] = useState<ZoneFilterId>('all');
+  const [viewMode, setViewMode] = useState<ViewMode>('map');
+  const [is3D, setIs3D] = useState(true);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  // Combine live Supabase stays with the curated Chiang Dao Valley Atlas directory
-  const allMappedStays = useMemo(() => {
-    const liveChiangDao = properties.filter(p => {
+  const getZoneLabel = useCallback((id: ZoneFilterId) => t(`chiangDaoMap.zones.${id}`), [t]);
+  const getPriceUnit = useCallback(
+    (prop: Property) => (prop.price_type === 'per_person' ? t('chiangDaoMap.perPerson') : t('chiangDaoMap.perNight')),
+    [t]
+  );
+
+  // 3D map
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<MLMap | null>(null);
+  const mlRef = useRef<MapLibreModule | null>(null);
+  const markersRef = useRef<MLMarker[]>([]);
+  const [mapReady, setMapReady] = useState(false);
+  const [isOverview, setIsOverview] = useState(true);
+
+  // Illustrated map pan / zoom
+  const [artZoom, setArtZoom] = useState(1);
+  const [artPan, setArtPan] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const dragStartRef = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null);
+
+  // ── Data: live Supabase stays + curated Chiang Dao directory ──
+  const allStays = useMemo<MappedStay[]>(() => {
+    const live = properties.filter(p => {
       const text = `${p.district || ''} ${p.location || ''} ${p.province || ''} ${p.name || ''}`.toLowerCase();
       return text.includes('chiang dao') || text.includes('เชียงดาว') || properties.length <= 6;
     });
 
-    const seenNames = new Set<string>();
-    const combined: {
-      prop: Property;
-      zoneId: ChiangDaoZoneId;
-      zoneLabel: string;
-      x: number;
-      y: number;
-    }[] = [];
+    const seen = new Set<string>();
+    const combined: MappedStay[] = [];
 
-    // 1. Place live Supabase properties first
-    liveChiangDao.forEach((p, idx) => {
-      const normName = (p.name || '').trim().toLowerCase();
-      seenNames.add(normName);
-      const zId = inferZone(p, idx);
-      const zMeta = ZONES.find(z => z.id === zId) || ZONES[4];
+    live.forEach((p, idx) => {
+      seen.add((p.name || '').trim().toLowerCase());
+      const zoneId = inferZone(p, idx);
+      const zone = ZONES.find(z => z.id === zoneId)!;
+      const art = ZONE_ART_DEFAULTS[zoneId];
       combined.push({
         prop: p,
-        zoneId: zId,
-        zoneLabel: zMeta.label,
-        x: zMeta.anchor.x + ((idx % 3) - 1) * 5,
-        y: zMeta.anchor.y + (Math.floor(idx / 3) - 0.5) * 6,
+        zoneId,
+        zoneLabel: zone.label,
+        lat: Number((p as any).lat) || zone.camera.center[1] + ((idx % 3) - 1) * 0.004,
+        lng: Number((p as any).lng) || zone.camera.center[0] + (Math.floor(idx / 3) - 0.5) * 0.004,
+        artX: Math.min(88, Math.max(14, art.x + ((idx % 3) - 1) * 4)),
+        artY: Math.min(86, Math.max(22, art.y + (Math.floor(idx / 3) - 0.5) * 4)),
       });
     });
 
-    // 2. Include all curated Chiang Dao Atlas accommodations not already duplicated
     CHIANG_DAO_ATLAS_STAYS.forEach(stay => {
-      const normName = stay.name.trim().toLowerCase();
-      if (seenNames.has(normName)) return;
-      seenNames.add(normName);
+      const key = stay.name.trim().toLowerCase();
+      if (seen.has(key)) return;
+      seen.add(key);
       combined.push({
         prop: stay,
         zoneId: stay.zoneId,
         zoneLabel: stay.zoneLabel,
-        x: stay.mapX,
-        y: stay.mapY,
+        lat: stay.lat,
+        lng: stay.lng,
+        artX: stay.artX,
+        artY: stay.artY,
       });
     });
 
     return combined;
   }, [properties]);
 
-  const visiblePins = useMemo(
-    () => (activeZone === 'all' ? allMappedStays : allMappedStays.filter(p => p.zoneId === activeZone)),
-    [allMappedStays, activeZone]
+  const visibleStays = useMemo(
+    () => (activeZone === 'all' ? allStays : allStays.filter(s => s.zoneId === activeZone)),
+    [allStays, activeZone]
   );
 
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (visiblePins.length > 0 && !visiblePins.some(p => p.prop.id === selectedId)) {
-      setSelectedId(visiblePins[0].prop.id);
-    }
-  }, [visiblePins, selectedId]);
-
-  const selectedPin = useMemo(
-    () => visiblePins.find(p => p.prop.id === selectedId) || visiblePins[0] || null,
-    [visiblePins, selectedId]
+  const zoneClusters = useMemo(
+    () =>
+      ZONES.filter(z => z.id !== 'all').map(z => {
+        const stays = allStays.filter(s => s.zoneId === z.id);
+        const lat = stays.length ? stays.reduce((a, s) => a + s.lat, 0) / stays.length : z.camera.center[1];
+        const lng = stays.length ? stays.reduce((a, s) => a + s.lng, 0) / stays.length : z.camera.center[0];
+        return { id: z.id as ChiangDaoZoneId, label: z.label, count: stays.length, lat, lng };
+      }),
+    [allStays]
   );
 
+  const selectedStay = useMemo(() => allStays.find(s => s.prop.id === selectedId) || null, [allStays, selectedId]);
   const activeZoneMeta = ZONES.find(z => z.id === activeZone) || ZONES[0];
 
-  const zoneCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: allMappedStays.length };
-    ZONES.forEach(z => {
-      if (z.id !== 'all') {
-        counts[z.id] = allMappedStays.filter(p => p.zoneId === z.id).length;
-      }
+  // Close the preview if its stay is filtered out
+  useEffect(() => {
+    if (selectedId && !visibleStays.some(s => s.prop.id === selectedId)) setSelectedId(null);
+  }, [visibleStays, selectedId]);
+
+  // Esc closes the preview
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSelectedId(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  // ── Illustrated map helpers ──
+  const focusArtPoint = useCallback((x: number, y: number, zoom: number) => {
+    const z = Math.min(MAX_ART_ZOOM, Math.max(MIN_ART_ZOOM, zoom));
+    setArtZoom(z);
+    setArtPan({ x: clampPan(50 - x * z, z), y: clampPan(50 - y * z, z) });
+  }, []);
+
+  const stepArtZoom = (delta: number) => {
+    const next = Number(Math.min(MAX_ART_ZOOM, Math.max(MIN_ART_ZOOM, artZoom + delta)).toFixed(2));
+    const cx = (50 - artPan.x) / artZoom;
+    const cy = (50 - artPan.y) / artZoom;
+    setArtZoom(next);
+    setArtPan({ x: clampPan(50 - cx * next, next), y: clampPan(50 - cy * next, next) });
+  };
+
+  const onStagePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0 || artZoom <= 1.01 || (e.target as HTMLElement).closest('button')) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setIsDragging(true);
+    dragStartRef.current = { x: e.clientX, y: e.clientY, panX: artPan.x, panY: artPan.y };
+  };
+
+  const onStagePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const start = dragStartRef.current;
+    const stage = stageRef.current;
+    if (!start || !stage) return;
+    const rect = stage.getBoundingClientRect();
+    setArtPan({
+      x: clampPan(start.panX + ((e.clientX - start.x) / rect.width) * 100, artZoom),
+      y: clampPan(start.panY + ((e.clientY - start.y) / rect.height) * 100, artZoom),
     });
-    return counts;
-  }, [allMappedStays]);
+  };
+
+  const onStagePointerUp = () => {
+    dragStartRef.current = null;
+    setIsDragging(false);
+  };
+
+  const onStageDoubleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest('button')) return;
+    const stage = stageRef.current;
+    if (!stage) return;
+    const rect = stage.getBoundingClientRect();
+    const clickX = ((e.clientX - rect.left) / rect.width) * 100;
+    const clickY = ((e.clientY - rect.top) / rect.height) * 100;
+    const mapX = (clickX - artPan.x) / artZoom;
+    const mapY = (clickY - artPan.y) / artZoom;
+    const nextZoom = artZoom < 1.9 ? 2.1 : MIN_ART_ZOOM;
+    focusArtPoint(mapX, mapY, nextZoom);
+  };
+
+  const resetArtView = () => {
+    setActiveZone('all');
+    setSelectedId(null);
+    focusArtPoint(50, 50, MIN_ART_ZOOM);
+  };
+
+  // ── Selection actions (shared by list, pins, clusters) ──
+  const selectZone = useCallback(
+    (zoneId: ZoneFilterId) => {
+      setActiveZone(zoneId);
+      const meta = ZONES.find(z => z.id === zoneId) || ZONES[0];
+      focusArtPoint(meta.artFocus.x, meta.artFocus.y, meta.artFocus.zoom);
+    },
+    [focusArtPoint]
+  );
+
+  const selectStay = useCallback(
+    (stay: MappedStay) => {
+      setSelectedId(stay.prop.id);
+      if (viewMode === 'illustrated') {
+        focusArtPoint(stay.artX, stay.artY, Math.max(artZoom, 2.1));
+      } else if (mapRef.current) {
+        mapRef.current.easeTo({
+          center: [stay.lng, stay.lat],
+          zoom: Math.max(mapRef.current.getZoom(), 14.2),
+          duration: 800,
+        });
+      }
+    },
+    [viewMode, artZoom, focusArtPoint]
+  );
+
+  // ── 3D map: lazy-load MapLibre only when the map view is shown ──
+  useEffect(() => {
+    if (viewMode !== 'map') return;
+    let cancelled = false;
+    let map: MLMap | null = null;
+
+    (async () => {
+      const ml = await import('maplibre-gl');
+      await import('maplibre-gl/dist/maplibre-gl.css');
+      if (cancelled || !mapContainerRef.current) return;
+
+      mlRef.current = ml;
+      const zone = ZONES.find(z => z.id === activeZone) || ZONES[0];
+      map = new ml.Map({
+        container: mapContainerRef.current,
+        style: buildMapStyle(),
+        center: zone.camera.center,
+        zoom: zone.camera.zoom,
+        pitch: is3D ? PITCH_3D : 0,
+        bearing: is3D ? -15 : 0,
+        maxPitch: 70,
+        minZoom: 9.5,
+        maxZoom: 17,
+        attributionControl: { compact: true },
+      });
+
+      // Don't hijack page scrolling — users zoom with buttons, pinch, or double-click
+      map.scrollZoom.disable();
+      map.addControl(new ml.NavigationControl({ visualizePitch: true }), 'bottom-right');
+
+      map.on('load', () => {
+        if (!cancelled) setMapReady(true);
+      });
+      map.on('zoom', () => {
+        const ov = map!.getZoom() < OVERVIEW_ZOOM;
+        setIsOverview(prev => (prev === ov ? prev : ov));
+      });
+      map.on('click', () => setSelectedId(null));
+
+      mapRef.current = map;
+    })();
+
+    return () => {
+      cancelled = true;
+      markersRef.current.forEach(m => m.remove());
+      markersRef.current = [];
+      map?.remove();
+      mapRef.current = null;
+      setMapReady(false);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewMode]);
+
+  // Fly to the chosen area
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+    map.flyTo({ center: activeZoneMeta.camera.center, zoom: activeZoneMeta.camera.zoom, duration: 1100, essential: true });
+  }, [activeZoneMeta, mapReady]);
+
+  // 3D on/off
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+    map.setTerrain(is3D ? TERRAIN : null);
+    map.easeTo({ pitch: is3D ? PITCH_3D : 0, bearing: is3D ? map.getBearing() : 0, duration: 600 });
+  }, [is3D, mapReady]);
+
+  // Markers: area bubbles at overview zoom, price pins when zoomed in
+  useEffect(() => {
+    const map = mapRef.current;
+    const ml = mlRef.current;
+    if (!map || !ml || !mapReady) return;
+
+    markersRef.current.forEach(m => m.remove());
+    markersRef.current = [];
+
+    if (activeZone === 'all' && isOverview) {
+      zoneClusters.forEach(c => {
+        const el = document.createElement('button');
+        el.type = 'button';
+        el.className = 'cd-cluster';
+        const name = document.createElement('strong');
+        name.textContent = getZoneLabel(c.id);
+        const count = document.createElement('span');
+        count.textContent = t('chiangDaoMap.staysCount', { count: c.count });
+        el.append(name, count);
+        el.addEventListener('click', e => {
+          e.stopPropagation();
+          selectZone(c.id);
+        });
+        markersRef.current.push(new ml.Marker({ element: el, anchor: 'center' }).setLngLat([c.lng, c.lat]).addTo(map));
+      });
+      return;
+    }
+
+    visibleStays.forEach(stay => {
+      const isActive = stay.prop.id === selectedId;
+      const isHovered = stay.prop.id === hoveredId;
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = `cd-pin${isActive ? ' is-active' : ''}${isHovered ? ' is-hovered' : ''}`;
+      el.textContent = formatPrice(stay.prop);
+      el.setAttribute('aria-label', `${splitName(stay.prop.name).primary}, ${formatPrice(stay.prop)}`);
+      if (isActive || isHovered) el.style.zIndex = '10';
+      el.addEventListener('click', e => {
+        e.stopPropagation();
+        selectStay(stay);
+      });
+      markersRef.current.push(new ml.Marker({ element: el, anchor: 'bottom' }).setLngLat([stay.lng, stay.lat]).addTo(map));
+    });
+  }, [mapReady, isOverview, activeZone, visibleStays, zoneClusters, selectedId, hoveredId, selectZone, selectStay, getZoneLabel, t]);
 
   return (
-    <section className="cd-map-section" aria-label="Chiang Dao Valley Homestay Map">
+    <section className="cd-map-section" aria-label={`${t('chiangDaoMap.titlePrefix')} ${t('chiangDaoMap.titlePlace')}`}>
       <div className="container">
-        {/* ── Section Header & Zone Filter Pills ── */}
         <div className="cd-map-header">
-          <div>
-            <h2 className="section-heading">
-              Chiang Dao <em>Valley Atlas</em>
-            </h2>
-            <p className="section-subheading">
-              Interactive illustrated map of {allMappedStays.length} verified homestays, treehouses & mountain retreats across all 5 Chiang Dao valleys.
-            </p>
-          </div>
-
-          <div className="cd-zone-pills" role="tablist" aria-label="Chiang Dao Areas">
-            {ZONES.map(zone => (
-              <button
-                key={zone.id}
-                type="button"
-                role="tab"
-                aria-selected={activeZone === zone.id}
-                className={`cd-zone-pill ${activeZone === zone.id ? 'active' : ''}`}
-                onClick={() => setActiveZone(zone.id)}
-              >
-                <span>{zone.label}</span>
-                <small className="cd-zone-count">{zoneCounts[zone.id] ?? 0}</small>
-              </button>
-            ))}
-          </div>
+          <h2 className="section-heading">
+            {t('chiangDaoMap.titlePrefix')} <em>{t('chiangDaoMap.titlePlace')}</em>
+          </h2>
+          <p className="section-subheading">{t('chiangDaoMap.subtitle')}</p>
         </div>
 
-        {/* ── Split Art Map + Selected Homestay Inspector ── */}
-        <div className="cd-map-layout">
-          {/* Left: Hand-Crafted Botanical & Topographic Illustrated Map */}
-          <div className="cd-art-canvas">
-            <svg
-              className="cd-topo-svg"
-              viewBox="0 0 1000 640"
-              preserveAspectRatio="xMidYMid slice"
-              aria-hidden="true"
+        <div className="cd-zone-chips" role="tablist" aria-label={t('chiangDaoMap.areasLabel')}>
+          {ZONES.map(zone => (
+            <button
+              key={zone.id}
+              type="button"
+              role="tab"
+              aria-selected={activeZone === zone.id}
+              className={`cd-zone-chip ${activeZone === zone.id ? 'active' : ''}`}
+              onClick={() => selectZone(zone.id)}
             >
-              <defs>
-                <linearGradient id="cdSkyPaper" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#E6EFE8" />
-                  <stop offset="45%" stopColor="#EFF4EE" />
-                  <stop offset="100%" stopColor="#F5ECE2" />
-                </linearGradient>
+              {getZoneLabel(zone.id)}
+            </button>
+          ))}
+        </div>
 
-                <radialGradient id="cdSunriseAura" cx="28%" cy="24%" r="42%">
-                  <stop offset="0%" stopColor="#F4C095" stopOpacity="0.55" />
-                  <stop offset="55%" stopColor="#F3DCCB" stopOpacity="0.22" />
-                  <stop offset="100%" stopColor="#F3DCCB" stopOpacity="0" />
-                </radialGradient>
-
-                <linearGradient id="cdDistantRange" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#5D7B6B" stopOpacity="0.24" />
-                  <stop offset="100%" stopColor="#5D7B6B" stopOpacity="0.03" />
-                </linearGradient>
-
-                <linearGradient id="cdDoiLuangLit" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#2C4C3B" stopOpacity="0.42" />
-                  <stop offset="65%" stopColor="#3B624E" stopOpacity="0.22" />
-                  <stop offset="100%" stopColor="#2C4C3B" stopOpacity="0.06" />
-                </linearGradient>
-
-                <linearGradient id="cdDoiLuangShadow" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#1B3326" stopOpacity="0.52" />
-                  <stop offset="100%" stopColor="#2C4C3B" stopOpacity="0.12" />
-                </linearGradient>
-
-                <linearGradient id="cdForestCanopy" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#3D6B52" stopOpacity="0.18" />
-                  <stop offset="100%" stopColor="#3D6B52" stopOpacity="0.04" />
-                </linearGradient>
-
-                <pattern id="cdCartoGrid" width="80" height="80" patternUnits="userSpaceOnUse">
-                  <path
-                    d="M 80 0 L 0 0 0 80"
-                    fill="none"
-                    stroke="#2C4C3B"
-                    strokeWidth="0.6"
-                    strokeOpacity="0.05"
-                  />
-                </pattern>
-              </defs>
-
-              {/* 1. Botanical Parchment Base + Subtle Cartographic Grid */}
-              <rect width="1000" height="640" fill="url(#cdSkyPaper)" />
-              <rect width="1000" height="640" fill="url(#cdCartoGrid)" />
-
-              {/* 2. Golden Sunrise Glow Behind Doi Luang */}
-              <rect width="1000" height="640" fill="url(#cdSunriseAura)" />
-              <circle cx="295" cy="128" r="38" fill="#E8996E" fillOpacity="0.28" />
-
-              {/* 3. Distant Northern Horizon Mountain Range */}
-              <path
-                d="M-20,175 L75,110 L155,148 L245,78 L345,135 L445,88 L560,145 L675,72 L795,128 L915,82 L1020,140 L1020,260 L-20,260 Z"
-                fill="url(#cdDistantRange)"
-              />
-
-              {/* 4. Shaded Forest Valleys (Ban Mae Mae & Muang Kong) */}
-              <path
-                d="M490,90 C590,50 740,65 820,145 C890,215 830,335 720,350 C610,365 495,310 475,215 C455,120 440,110 490,90 Z"
-                fill="url(#cdForestCanopy)"
-              />
-              <path
-                d="M45,355 C120,320 265,330 335,405 C405,480 365,585 245,600 C125,615 35,545 25,455 C15,365 5,375 45,355 Z"
-                fill="url(#cdForestCanopy)"
-              />
-
-              {/* 5. Topographic Elevation Contours */}
-              <g fill="none" stroke="#2C4C3B" strokeOpacity="0.13" strokeWidth="1.2">
-                <path d="M-30,285 C65,230 120,95 265,80 C410,65 470,190 440,300 C410,410 250,450 110,425 C20,408 -15,345 -30,285 Z" />
-                <path d="M15,270 C95,220 148,115 265,102 C382,89 428,195 402,285 C376,375 242,408 130,388 C48,372 22,320 15,270 Z" />
-                <path d="M68,255 C132,212 175,138 266,128 C357,118 388,200 368,270 C348,340 236,366 155,350 C92,338 62,295 68,255 Z" />
-                <path d="M525,65 C625,45 735,62 795,132 C855,202 825,295 732,312 C639,329 535,282 512,202 C489,122 475,75 525,65 Z" />
-              </g>
-
-              {/* 6. Illustrated Doi Luang Chiang Dao Limestone Massif (3D Faceted Peaks) */}
-              <g>
-                {/* Left Peak (Doi Sam Phi Nong) */}
-                <polygon points="55,265 162,126 232,205 155,265" fill="url(#cdDoiLuangShadow)" />
-                <polygon points="162,126 248,205 292,265 155,265" fill="url(#cdDoiLuangLit)" />
-
-                {/* Main Summit (Doi Luang 2,175m) */}
-                <polygon points="185,265 295,92 318,265" fill="url(#cdDoiLuangShadow)" />
-                <polygon points="295,92 435,265 318,265" fill="url(#cdDoiLuangLit)" />
-
-                {/* Right Foothill Peak (Doi Nang) */}
-                <polygon points="335,265 398,154 468,265" fill="url(#cdDoiLuangLit)" />
-
-                {/* Crisp Ridge Outlines & Limestone Crags */}
-                <path
-                  d="M55,265 L162,126 L218,188 L295,92 L372,184 L398,154 L468,265"
-                  fill="none"
-                  stroke="#1E382A"
-                  strokeOpacity="0.68"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M162,126 L155,265 M295,92 L318,265 M295,92 L262,178 M398,154 L382,225"
-                  fill="none"
-                  stroke="#1E382A"
-                  strokeOpacity="0.28"
-                  strokeWidth="1.4"
-                  strokeLinecap="round"
-                />
-
-                {/* Drifting Valley Cloud Bands Across Base of Doi Luang */}
-                <path
-                  d="M42,252 Q145,238 248,252 T455,248"
-                  fill="none"
-                  stroke="#FFFFFF"
-                  strokeOpacity="0.75"
-                  strokeWidth="8"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M88,268 Q210,256 332,268 T485,264"
-                  fill="none"
-                  stroke="#FFFFFF"
-                  strokeOpacity="0.55"
-                  strokeWidth="5"
-                  strokeLinecap="round"
-                />
-              </g>
-
-              {/* 7. Illustrated Botanical Pine & Teak Tree Clusters */}
-              <g stroke="#2C4C3B" strokeOpacity="0.38" strokeWidth="1.4" fill="#3B624E" fillOpacity="0.22" strokeLinecap="round" strokeLinejoin="round">
-                {/* Ban Mae Mae Forest */}
-                <path d="M545,175 L553,155 L561,175 Z M565,182 L575,158 L585,182 Z M588,174 L595,156 L602,174 Z" />
-                <path d="M685,165 L694,142 L703,165 Z M708,172 L716,152 L724,172 Z" />
-                {/* Ban Tham Forest */}
-                <path d="M368,318 L376,298 L384,318 Z M388,324 L396,304 L404,324 Z" />
-                {/* Muang Kong Valley Trees */}
-                <path d="M125,455 L133,435 L141,455 Z M146,462 L154,442 L162,462 Z" />
-              </g>
-
-              {/* 8. Winding Mae Ping River & Kong River Tributaries */}
-              <g fill="none" strokeLinecap="round">
-                {/* Main Mae Ping River */}
-                <path
-                  d="M845,-15 C820,95 760,145 782,250 C804,355 728,435 765,535 C785,585 815,615 835,650"
-                  stroke="#6CA092"
-                  strokeOpacity="0.38"
-                  strokeWidth="16"
-                />
-                <path
-                  d="M845,-15 C820,95 760,145 782,250 C804,355 728,435 765,535 C785,585 815,615 835,650"
-                  stroke="#2C4C3B"
-                  strokeOpacity="0.35"
-                  strokeWidth="2"
-                />
-                {/* Mae Mae Mountain Stream joining Mae Ping */}
-                <path
-                  d="M585,145 C635,195 695,220 780,245"
-                  stroke="#6CA092"
-                  strokeOpacity="0.32"
-                  strokeWidth="6"
-                />
-                {/* Kong River in Muang Kong Valley */}
-                <path
-                  d="M85,595 C145,515 215,475 265,395 C305,335 295,285 280,255"
-                  stroke="#6CA092"
-                  strokeOpacity="0.32"
-                  strokeWidth="8"
-                />
-              </g>
-
-              {/* 9. Active Zone Highlight Ring */}
-              {activeZone !== 'all' && (
-                <circle
-                  cx={activeZoneMeta.anchor.x * 10}
-                  cy={activeZoneMeta.anchor.y * 6.4}
-                  r={activeZoneMeta.radius}
-                  fill="#C2704E"
-                  fillOpacity="0.08"
-                  stroke="#C2704E"
-                  strokeOpacity="0.45"
-                  strokeWidth="2"
-                  strokeDasharray="6 6"
-                />
-              )}
-
-              {/* 10. Scenic Roads (Route 107 & Mountain Trails) */}
-              <g fill="none" stroke="#C2704E" strokeOpacity="0.52" strokeWidth="2.2" strokeDasharray="7 6" strokeLinecap="round">
-                {/* Route 107 Spine */}
-                <path d="M510,640 C530,525 585,455 635,390 C685,325 725,265 738,180 C750,95 715,35 690,-10" />
-                {/* Mountain Road to Ban Tham & Ban Na Lao Mai */}
-                <path d="M612,420 C535,385 480,340 425,295 C365,245 315,215 255,195" />
-                {/* Trail from Ban Na Lao Mai to Muang Kong */}
-                <path d="M255,195 C215,265 205,345 215,435" />
-                {/* Forest Road to Ban Mae Mae */}
-                <path d="M675,325 C655,255 642,205 632,160" />
-              </g>
-
-              {/* Route 107 Highway Shield */}
-              <g transform="translate(558, 520)">
-                <rect x="-20" y="-11" width="40" height="22" rx="6" fill="#FFFFFF" stroke="#C2704E" strokeWidth="1.5" />
-                <text x="0" y="4" textAnchor="middle" fontSize="10.5" fontWeight="700" fill="#C2704E" fontFamily="Outfit, sans-serif">
-                  107
-                </text>
-              </g>
-
-              {/* 11. Cartographic Titles & Valley Region Banners */}
-              <g fontFamily="Outfit, Inter, sans-serif">
-                {/* Doi Luang Summit Label */}
-                <text x="295" y="62" textAnchor="middle" fontSize="13" fontWeight="800" letterSpacing="0.14em" fill="#1E382A">
-                  DOI LUANG CHIANG DAO
-                </text>
-                <text x="295" y="79" textAnchor="middle" fontSize="11" fontWeight="600" fill="#C2704E">
-                  ▲ 2,175 m · UNESCO Biosphere Reserve
-                </text>
-
-                {/* Mae Ping River Label */}
-                <text x="805" y="455" fontSize="10.5" fontWeight="700" letterSpacing="0.1em" fill="#3B624E" opacity="0.75" transform="rotate(-74 805 455)">
-                  MAE PING RIVER
-                </text>
-
-                {/* Sub-Region Place Labels */}
-                <g fontSize="12" fontWeight="700" fill="#1E382A" opacity="0.78">
-                  <text x="135" y="185">BAN NA LAO MAI</text>
-                  <text x="115" y="515">MUANG KONG VALLEY</text>
-                  <text x="585" y="105">BAN MAE MAE FOREST</text>
-                  <text x="415" y="385">BAN THAM &amp; CAVE</text>
-                  <text x="645" y="545">CHIANG DAO TOWN</text>
-                </g>
-              </g>
-
-              {/* Minimalist Compass Rose (Bottom Left) */}
-              <g transform="translate(54, 576)" stroke="#2C4C3B" strokeOpacity="0.55" fill="none">
-                <circle cx="0" cy="0" r="22" fill="#FFFFFF" fillOpacity="0.6" strokeWidth="1.2" />
-                <path d="M0,-28 L4,-4 L28,0 L4,4 L0,28 L-4,4 L-28,0 L-4,-4 Z" strokeWidth="1.2" />
-                <polygon points="0,-24 4,-4 -4,-4" fill="#C2704E" stroke="none" />
-                <text x="-4" y="-32" fontSize="10" fontWeight="800" fill="#2C4C3B" stroke="none" fontFamily="Outfit, sans-serif">
-                  N
-                </text>
-              </g>
-            </svg>
-
-            {/* Interactive Homestay Pins (Shows Name + Price Directly on Map) */}
-            {visiblePins.map(pin => {
-              const isSelected = selectedPin?.prop.id === pin.prop.id;
-              const { primary } = shortDisplayName(pin.prop.name);
-              return (
-                <button
-                  key={pin.prop.id}
-                  type="button"
-                  className={`cd-map-pin ${isSelected ? 'active' : ''}`}
-                  style={{ left: `${pin.x}%`, top: `${pin.y}%` }}
-                  onClick={() => setSelectedId(pin.prop.id)}
-                  aria-label={`${pin.prop.name} - ${formatPrice(pin.prop)}`}
-                >
-                  <span className="cd-pin-dot" />
-                  <span className="cd-pin-name">{primary}</span>
-                  <span className="cd-pin-price">{formatPrice(pin.prop)}</span>
+        <div className="cd-map-layout">
+          {/* ── Left: map ── */}
+          <div className="cd-map-stage">
+            <div className="cd-map-controls">
+              <div className="cd-segmented" role="group" aria-label={t('chiangDaoMap.mapStyleLabel')}>
+                <button type="button" className={viewMode === 'map' ? 'active' : ''} onClick={() => setViewMode('map')}>
+                  {t('chiangDaoMap.modeMap')}
                 </button>
-              );
-            })}
-
-            {/* Bottom-Right Floating Legend Pill (Never blocks Doi Luang peak) */}
-            <div className="cd-map-legend">
-              <div className="cd-legend-top">
-                <strong>{activeZoneMeta.label}</strong>
-                <span className="cd-legend-elev">{activeZoneMeta.elevation}</span>
+                <button
+                  type="button"
+                  className={viewMode === 'illustrated' ? 'active' : ''}
+                  onClick={() => setViewMode('illustrated')}
+                >
+                  {t('chiangDaoMap.modeIllustrated')}
+                </button>
               </div>
-              <span className="cd-legend-desc">{activeZoneMeta.subtitle}</span>
+
+              {viewMode === 'map' && (
+                <button
+                  type="button"
+                  className={`cd-toggle ${is3D ? 'active' : ''}`}
+                  aria-pressed={is3D}
+                  onClick={() => setIs3D(v => !v)}
+                >
+                  {t('chiangDaoMap.mode3D')}
+                </button>
+              )}
             </div>
-          </div>
 
-          {/* Right: Selected Homestay Card + Scrollable Directory of All Chiang Dao Stays */}
-          <div className="cd-map-sidebar">
-            {selectedPin && (
-              <article
-                className="cd-selected-card"
-                onClick={() => navigate(`/hotels/${selectedPin.prop.id}`)}
+            {viewMode === 'map' ? (
+              <div ref={mapContainerRef} className="cd-map-canvas" />
+            ) : (
+              <div
+                ref={stageRef}
+                className={`cd-art-stage ${artZoom > 1.01 ? 'can-pan' : ''} ${isDragging ? 'is-dragging' : ''}`}
+                onPointerDown={onStagePointerDown}
+                onPointerMove={onStagePointerMove}
+                onPointerUp={onStagePointerUp}
+                onPointerCancel={onStagePointerUp}
+                onDoubleClick={onStageDoubleClick}
+                onClick={e => {
+                  if (!(e.target as HTMLElement).closest('button')) setSelectedId(null);
+                }}
               >
-                <div className="cd-selected-media">
-                  <img
-                    src={selectedPin.prop.imageUrl || '/doiluangbg.jpg'}
-                    alt={selectedPin.prop.name}
-                    loading="lazy"
-                  />
-                  <span className="cd-selected-zone">{selectedPin.zoneLabel}</span>
-                  {selectedPin.prop.isVerified && (
-                    <span className="cd-selected-verified">Verified Stay</span>
-                  )}
-                </div>
+                <div
+                  className={`cd-art-viewport ${isDragging ? 'no-transition' : ''}`}
+                  style={{ transform: `translate3d(${artPan.x}%, ${artPan.y}%, 0) scale(${artZoom})` }}
+                >
+                  <img src="/chiangdao-art-map.jpg" alt={t('chiangDaoMap.modeIllustrated')} className="cd-art-img" draggable={false} />
 
-                <div className="cd-selected-body">
-                  <div className="cd-selected-top">
-                    <div>
-                      <span className="cd-selected-type">
-                        {selectedPin.prop.type || 'Homestay'} · ★ {selectedPin.prop.rating || 4.8}
-                      </span>
-                      <h3>{shortDisplayName(selectedPin.prop.name).primary}</h3>
-                      {shortDisplayName(selectedPin.prop.name).secondary && (
-                        <small className="cd-selected-subname">
-                          {shortDisplayName(selectedPin.prop.name).secondary}
-                        </small>
-                      )}
-                    </div>
-                    <div className="cd-selected-price">
-                      <strong>{formatPrice(selectedPin.prop)}</strong>
-                      <span>
-                        {selectedPin.prop.price_type === 'per_person' ? '/ person' : '/ night'}
-                      </span>
-                    </div>
+                  {/* Subtle crisp SVG cartographic layer (contours, drifting mist, scenic accents) */}
+                  <svg className="cd-art-svg" viewBox="0 0 1000 562" preserveAspectRatio="none" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="cd-mist-grad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#FFFDF8" stopOpacity="0" />
+                        <stop offset="50%" stopColor="#FFFDF8" stopOpacity="0.45" />
+                        <stop offset="100%" stopColor="#FFFDF8" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <g fill="none" stroke="#2C4C3B" strokeOpacity="0.14" strokeWidth="1" strokeDasharray="4 5">
+                      <ellipse cx="220" cy="145" rx="145" ry="52" />
+                      <ellipse cx="220" cy="145" rx="200" ry="78" />
+                    </g>
+                    <ellipse className="cd-art-mist cd-art-mist-1" cx="240" cy="162" rx="135" ry="14" fill="url(#cd-mist-grad)" />
+                    <ellipse className="cd-art-mist cd-art-mist-2" cx="655" cy="185" rx="115" ry="12" fill="url(#cd-mist-grad)" />
+                  </svg>
+
+                  {/* Peak & River geographic landmarks */}
+                  <div
+                    className="cd-art-landmark cd-art-landmark-peak"
+                    style={{ left: '22%', top: '12%', transform: `translate(-50%, -50%) scale(${1 / artZoom})` }}
+                  >
+                    <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                      <path d="M2 13L8 3l6 10H2z" />
+                    </svg>
+                    <span>{t('chiangDaoMap.doiLuangPeak')}</span>
                   </div>
 
-                  <p className="cd-selected-desc">
-                    {selectedPin.prop.description && selectedPin.prop.description.trim().length > 0
-                      ? selectedPin.prop.description
-                      : `Peaceful ${selectedPin.prop.type?.toLowerCase() || 'homestay'} tucked in ${selectedPin.zoneLabel}, Chiang Dao.`}
-                  </p>
+                  <div
+                    className="cd-art-landmark cd-art-landmark-river"
+                    style={{ left: '84.5%', top: '57%', transform: `translate(-50%, -50%) scale(${1 / artZoom})` }}
+                  >
+                    <span>{t('chiangDaoMap.maePingRiver')}</span>
+                  </div>
 
-                  {selectedPin.prop.features && selectedPin.prop.features.length > 0 && (
-                    <div className="cd-selected-tags">
-                      {selectedPin.prop.features.slice(0, 3).map((feat, i) => (
-                        <span key={i}>{feat}</span>
-                      ))}
-                    </div>
-                  )}
+                  {ZONES.filter(z => z.artLabelPos).map(zone => {
+                    const count = allStays.filter(s => s.zoneId === zone.id).length;
+                    return (
+                      <button
+                        key={zone.id}
+                        type="button"
+                        className={`cd-art-label ${activeZone === zone.id ? 'active' : ''}`}
+                        style={{
+                          left: `${zone.artLabelPos!.x}%`,
+                          top: `${zone.artLabelPos!.y}%`,
+                          transform: `translate(-50%, -50%) scale(${1 / artZoom})`,
+                        }}
+                        onClick={() => selectZone(activeZone === zone.id ? 'all' : zone.id)}
+                      >
+                        <span>{getZoneLabel(zone.id)}</span>
+                        <em>{count}</em>
+                      </button>
+                    );
+                  })}
 
-                  <div className="cd-selected-actions">
-                    <button
-                      type="button"
-                      className="cd-selected-cta"
-                      onClick={e => {
-                        e.stopPropagation();
-                        navigate(`/hotels/${selectedPin.prop.id}`);
-                      }}
-                    >
-                      <span>View Stay Details</span>
-                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                        <polyline points="12 5 19 12 12 19" />
+                  {visibleStays.map(stay => {
+                    const isActive = stay.prop.id === selectedId;
+                    const isHovered = stay.prop.id === hoveredId;
+                    const { primary } = splitName(stay.prop.name);
+                    return (
+                      <button
+                        key={stay.prop.id}
+                        type="button"
+                        className={`cd-pin cd-art-pin${isActive ? ' is-active' : ''}${isHovered ? ' is-hovered' : ''}`}
+                        style={{
+                          left: `${stay.artX}%`,
+                          top: `${stay.artY}%`,
+                          transform: `translate(-50%, -100%) scale(${1 / artZoom})`,
+                        }}
+                        onClick={() => selectStay(stay)}
+                        onMouseEnter={() => setHoveredId(stay.prop.id)}
+                        onMouseLeave={() => setHoveredId(null)}
+                        aria-label={`${primary}, ${formatPrice(stay.prop)}`}
+                      >
+                        {(isHovered || isActive) && (
+                          <span className="cd-art-pin-tip">{primary}</span>
+                        )}
+                        {formatPrice(stay.prop)}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Minimal editorial compass rose */}
+                <div className="cd-art-compass" aria-hidden="true">
+                  <svg viewBox="0 0 36 36" width="32" height="32" fill="none">
+                    <circle cx="18" cy="18" r="16" stroke="currentColor" strokeWidth="1" strokeOpacity="0.35" />
+                    <path d="M18 5L20.5 16L18 18L15.5 16L18 5Z" fill="#C2704E" />
+                    <path d="M18 31L20.5 20L18 18L15.5 20L18 31Z" fill="currentColor" fillOpacity="0.45" />
+                    <circle cx="18" cy="18" r="1.6" fill="#2C4C3B" />
+                  </svg>
+                  <span>N</span>
+                </div>
+
+                <div className="cd-art-zoom" aria-label="Zoom">
+                  <button type="button" onClick={() => stepArtZoom(0.55)} disabled={artZoom >= MAX_ART_ZOOM} aria-label={t('chiangDaoMap.zoomIn')}>
+                    +
+                  </button>
+                  <button type="button" onClick={() => stepArtZoom(-0.55)} disabled={artZoom <= MIN_ART_ZOOM} aria-label={t('chiangDaoMap.zoomOut')}>
+                    −
+                  </button>
+                  {artZoom > 1.05 && (
+                    <button type="button" onClick={resetArtView} aria-label={t('chiangDaoMap.resetView')} title={t('chiangDaoMap.resetView')}>
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+                        <path d="M3 3v5h5" />
                       </svg>
                     </button>
-
-                    {selectedPin.prop.contact?.phone && (
-                      <a
-                        href={`tel:${selectedPin.prop.contact.phone}`}
-                        className="cd-selected-call"
-                        onClick={e => e.stopPropagation()}
-                        title={`Call Host: ${selectedPin.prop.contact.phone}`}
-                      >
-                        Call {selectedPin.prop.contact.phone}
-                      </a>
-                    )}
-                  </div>
+                  )}
                 </div>
-              </article>
+              </div>
             )}
 
-            {/* Complete Clickable List of Chiang Dao Accommodations */}
-            <div className="cd-stay-list">
-              <div className="cd-stay-list-head">
-                <span>
-                  {activeZone === 'all'
-                    ? `All Chiang Dao Stays (${visiblePins.length})`
-                    : `${activeZoneMeta.label} Stays (${visiblePins.length})`}
-                </span>
-                <button type="button" onClick={() => navigate('/hotels?q=Chiang%20Dao')}>
-                  Full Directory →
+            {/* ── Preview card: appears only after the user picks a stay ── */}
+            {selectedStay && (
+              <div className="cd-preview" role="dialog" aria-label={splitName(selectedStay.prop.name).primary}>
+                <button type="button" className="cd-preview-close" onClick={() => setSelectedId(null)} aria-label={t('chiangDaoMap.close')}>
+                  ×
                 </button>
-              </div>
-              <div className="cd-stay-list-items">
-                {visiblePins.map(pin => {
-                  const isSelected = selectedPin?.prop.id === pin.prop.id;
-                  const { primary } = shortDisplayName(pin.prop.name);
-                  return (
-                    <button
-                      key={pin.prop.id}
-                      type="button"
-                      className={`cd-stay-row ${isSelected ? 'active' : ''}`}
-                      onClick={() => setSelectedId(pin.prop.id)}
-                    >
-                      <img src={pin.prop.imageUrl || '/doiluangbg.jpg'} alt="" loading="lazy" />
-                      <div className="cd-stay-row-info">
-                        <strong>{primary}</strong>
-                        <span>
-                          {pin.zoneLabel} · ★ {pin.prop.rating || 4.8}
-                        </span>
-                      </div>
-                      <span className="cd-stay-row-price">{formatPrice(pin.prop)}</span>
+                <img src={selectedStay.prop.imageUrl || '/doiluangbg.jpg'} alt="" />
+                <div className="cd-preview-body">
+                  <span className="cd-preview-meta">
+                    {getZoneLabel(selectedStay.zoneId)} · ★ {selectedStay.prop.rating || 4.8}
+                  </span>
+                  <h3>{splitName(selectedStay.prop.name).primary}</h3>
+                  <span className="cd-preview-price">
+                    {formatPrice(selectedStay.prop)} <em>/ {getPriceUnit(selectedStay.prop)}</em>
+                  </span>
+                  <div className="cd-preview-actions">
+                    <button type="button" className="cd-btn-primary" onClick={() => navigate(`/hotels/${selectedStay.prop.id}`)}>
+                      {t('chiangDaoMap.viewStay')}
                     </button>
-                  );
-                })}
+                    <a
+                      className="cd-btn-secondary"
+                      href={`https://www.google.com/maps/search/?api=1&query=${selectedStay.lat},${selectedStay.lng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {t('chiangDaoMap.directions')}
+                    </a>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
+
+          {/* ── Right: stay list ── */}
+          <aside className="cd-list" aria-label={t('chiangDaoMap.areasLabel')}>
+            <div className="cd-list-head">
+              <span>
+                {t('chiangDaoMap.staysInArea', { count: visibleStays.length, area: getZoneLabel(activeZoneMeta.id) })}
+              </span>
+              <button type="button" onClick={() => navigate('/hotels?q=Chiang%20Dao')}>
+                {t('chiangDaoMap.seeAll')}
+              </button>
+            </div>
+
+            <ul className="cd-list-items">
+              {visibleStays.map(stay => {
+                const { primary } = splitName(stay.prop.name);
+                const isActive = stay.prop.id === selectedId;
+                return (
+                  <li key={stay.prop.id}>
+                    <button
+                      type="button"
+                      className={`cd-list-card ${isActive ? 'active' : ''}`}
+                      onClick={() => selectStay(stay)}
+                      onMouseEnter={() => setHoveredId(stay.prop.id)}
+                      onMouseLeave={() => setHoveredId(null)}
+                      onFocus={() => setHoveredId(stay.prop.id)}
+                      onBlur={() => setHoveredId(null)}
+                    >
+                      <img src={stay.prop.imageUrl || '/doiluangbg.jpg'} alt="" loading="lazy" />
+                      <span className="cd-list-info">
+                        <strong>{primary}</strong>
+                        <span className="cd-list-meta">
+                          {getZoneLabel(stay.zoneId)} · ★ {stay.prop.rating || 4.8}
+                        </span>
+                        <span className="cd-list-price">
+                          {formatPrice(stay.prop)} <em>/ {getPriceUnit(stay.prop)}</em>
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </aside>
         </div>
       </div>
     </section>

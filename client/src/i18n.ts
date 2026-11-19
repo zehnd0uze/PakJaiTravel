@@ -14,12 +14,20 @@ const resources = {
   },
 };
 
+const savedLng = typeof window !== 'undefined' ? window.localStorage.getItem('i18nextLng') : null;
+const initialLng = savedLng && (savedLng.startsWith('en') || savedLng.startsWith('th')) ? savedLng : 'th';
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources,
-    fallbackLng: 'en',
+    lng: initialLng,
+    fallbackLng: 'th',
+    detection: {
+      order: ['localStorage'],
+      caches: ['localStorage'],
+    },
     interpolation: {
       escapeValue: false, // React already safe from xss
     },

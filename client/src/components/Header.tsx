@@ -69,7 +69,7 @@ export const Header: React.FC = () => {
   const handleInlineVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user?.email || !verifyOtp) {
-      setVerifyError('Please enter the 6-digit code.');
+      setVerifyError(t('header.userMenu.enterSixDigits'));
       return;
     }
     setVerifyError('');
@@ -77,13 +77,13 @@ export const Header: React.FC = () => {
     setVerifyLoading(true);
     try {
       await verify(user.email, verifyOtp);
-      setVerifyMessage('Verified successfully!');
+      setVerifyMessage(t('header.userMenu.verifiedSuccess'));
       setTimeout(() => {
         setMenuOpen(false);
         window.location.reload();
       }, 1500);
     } catch (err: any) {
-      setVerifyError(err.message || 'Verification failed.');
+      setVerifyError(err.message || t('header.userMenu.verifyFailed'));
     } finally {
       setVerifyLoading(false);
     }
@@ -97,9 +97,9 @@ export const Header: React.FC = () => {
     setVerifyLoading(true);
     try {
       await resendOtp(user.email);
-      setVerifyMessage('Code resent to your email.');
+      setVerifyMessage(t('header.userMenu.codeResent'));
     } catch (err: any) {
-      setVerifyError(err.message || 'Failed to resend code.');
+      setVerifyError(err.message || t('header.userMenu.sendFailed'));
     } finally {
       setVerifyLoading(false);
     }
@@ -442,9 +442,9 @@ export const Header: React.FC = () => {
                             {t('header.userMenu.certifiedHost')}
                           </span>
                         ) : user.isVerified ? (
-                          <span className="udh-role-pill verified">Verified Member</span>
+                          <span className="udh-role-pill verified">{t('header.userMenu.verifiedMember')}</span>
                         ) : (
-                          <span className="udh-role-pill unverified">{t('header.userMenu.unverified', 'Unverified Account')}</span>
+                          <span className="udh-role-pill unverified">{t('header.userMenu.unverified')}</span>
                         )}
                       </div>
                     </div>
@@ -453,28 +453,28 @@ export const Header: React.FC = () => {
                       <div className="verify-prompt-box">
                         {!showInlineVerify ? (
                           <>
-                            <p>{t('header.userMenu.verifyPrompt', 'Verify your email to unlock all features.')}</p>
+                            <p>{t('header.userMenu.verifyPrompt')}</p>
                             <button
                               className="verify-now-btn"
                               onClick={async () => {
                                 setShowInlineVerify(true);
                                 setVerifyError('');
-                                setVerifyMessage('Sending new code...');
+                                setVerifyMessage(t('header.userMenu.sendingCode'));
                                 try {
                                   if (user.email) await resendOtp(user.email);
-                                  setVerifyMessage('Code sent to your email!');
+                                  setVerifyMessage(t('header.userMenu.codeSent'));
                                 } catch (err: any) {
-                                  setVerifyError(err.message || 'Failed to send code.');
+                                  setVerifyError(err.message || t('header.userMenu.sendFailed'));
                                   setVerifyMessage('');
                                 }
                               }}
                             >
-                              {t('header.userMenu.verifyNow', 'Verify Now')}
+                              {t('header.userMenu.verifyNow')}
                             </button>
                           </>
                         ) : (
                           <div className="inline-verify-form" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <p style={{ fontSize: '0.85rem', margin: 0 }}>Enter 6-digit code:</p>
+                            <p style={{ fontSize: '0.85rem', margin: 0 }}>{t('header.userMenu.enterCode')}</p>
                             {verifyError && <div style={{ color: '#dc2626', fontSize: '0.75rem' }}>{verifyError}</div>}
                             {verifyMessage && <div style={{ color: '#16a34a', fontSize: '0.75rem' }}>{verifyMessage}</div>}
                             <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', marginBottom: '8px' }}>
@@ -508,14 +508,14 @@ export const Header: React.FC = () => {
                               disabled={verifyLoading}
                               style={{ padding: '6px', fontSize: '0.9rem' }}
                             >
-                              {verifyLoading ? 'Verifying...' : 'Submit'}
+                              {verifyLoading ? t('header.userMenu.verifying') : t('header.userMenu.submit')}
                             </button>
                             <button 
                               onClick={handleInlineResend}
                               disabled={verifyLoading}
                               style={{ background: 'none', border: 'none', color: '#2c4c3b', fontSize: '0.75rem', cursor: 'pointer', textDecoration: 'underline', alignSelf: 'center' }}
                             >
-                              Resend code
+                              {t('header.userMenu.resendCode')}
                             </button>
                           </div>
                         )}
@@ -639,7 +639,7 @@ export const Header: React.FC = () => {
               <li><button className="nav-link mobile-nav-link disabled-link" disabled title="Coming soon">{t('header.mobile.flights')} <span className="coming-soon-tag">{t('header.mobile.soon')}</span></button></li>
               <li><button className="nav-link mobile-nav-link disabled-link" disabled title="Coming soon">{t('header.mobile.activities')} <span className="coming-soon-tag">{t('header.mobile.soon')}</span></button></li>
               <li><button className="nav-link mobile-nav-link" onClick={toggleLanguage} style={{ borderTop: '1px solid #eee', marginTop: '8px' }}>
-                🌎 {i18n.language.startsWith('th') ? 'English' : 'ภาษาไทย'}
+                {i18n.language.startsWith('th') ? 'English' : 'ภาษาไทย'}
               </button></li>
             </ul>
           </nav>

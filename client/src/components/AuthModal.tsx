@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { TermsModal } from './TermsModal';
 import './AuthModal.css';
 
 export const AuthModal: React.FC = () => {
+  const { t } = useTranslation();
   const { isAuthModalOpen, authModalView, openAuthModal, closeAuthModal, signInWithOtp, verify, resendOtp, user, signInWithOAuth } = useAuth();
-  
-  // State
+
   const [authEmail, setAuthEmail] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [termsModalType, setTermsModalType] = useState<'terms' | 'privacy' | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
-  // Verify State
+
   const [verifyOtp, setVerifyOtp] = useState('');
   const [otpValues, setOtpValues] = useState<string[]>(Array(6).fill(''));
   const otpInputRefs = React.useRef<(HTMLInputElement | null)[]>([]);
@@ -33,12 +33,12 @@ export const AuthModal: React.FC = () => {
     setError('');
 
     if (!authEmail) {
-      setError('Please enter your email address.');
+      setError(t('auth.errEmail'));
       return;
     }
 
     if (!termsAccepted) {
-      setError('You must agree to the Terms of Service and Privacy Policy.');
+      setError(t('auth.errTerms'));
       return;
     }
 
@@ -50,7 +50,7 @@ export const AuthModal: React.FC = () => {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Something went wrong. Please try again.');
+        setError(t('auth.errGeneric'));
       }
     } finally {
       setLoading(false);
@@ -66,7 +66,7 @@ export const AuthModal: React.FC = () => {
       }
       setOtpValues(newOtp);
       setVerifyOtp(newOtp.join(''));
-      
+
       const nextFocus = Math.min(index + pasted.length, 5);
       otpInputRefs.current[nextFocus]?.focus();
       return;
@@ -91,20 +91,19 @@ export const AuthModal: React.FC = () => {
   const handleVerifySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
     if (verifyOtp.length !== 6) {
-      setError('Please enter the 6-digit code.');
+      setError(t('auth.errOtp'));
       return;
     }
 
     setLoading(true);
     try {
-      // Magic Link/OTP type
       await verify(authEmail || user?.email || '', verifyOtp, 'email');
       closeAuthModal();
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
-      else setError('Invalid code. Please try again.');
+      else setError(t('auth.errInvalidOtp'));
     } finally {
       setLoading(false);
     }
@@ -113,19 +112,19 @@ export const AuthModal: React.FC = () => {
   const handleResend = async () => {
     const emailToVerify = authEmail || user?.email;
     if (!emailToVerify) {
-      setError('Email address not found.');
+      setError(t('auth.errNoEmail'));
       return;
     }
-    
+
     setError('');
     setMessage('');
     setResending(true);
     try {
       await resendOtp(emailToVerify);
-      setMessage('A new code has been sent to your email.');
+      setMessage(t('auth.msgResent'));
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
-      else setError('Failed to resend code.');
+      else setError(t('auth.errResend'));
     } finally {
       setResending(false);
     }
@@ -134,15 +133,13 @@ export const AuthModal: React.FC = () => {
   return (
     <div className="auth-modal-backdrop" onClick={handleBackdropClick}>
       <div className="auth-modal-container">
-        {/* Left Side Banner */}
         <div className="auth-modal-banner">
           <div className="banner-content">
-            <h2>Discover<br/>Northern Thailand</h2>
-            <p>Join PakJaiTravel for exclusive deals and personalized recommendations.</p>
+            <h2>{t('auth.bannerTitle1')}<br/>{t('auth.bannerTitle2')}</h2>
+            <p>{t('auth.bannerDesc')}</p>
           </div>
         </div>
 
-        {/* Right Side Form */}
         <div className="auth-modal-content">
           <button className="auth-modal-close" onClick={closeAuthModal} aria-label="Close modal">
             <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -152,8 +149,8 @@ export const AuthModal: React.FC = () => {
             <div className="auth-logo">
               PakJai<span className="logo-accent">Travel</span>
             </div>
-            <h1>{authModalView === 'verify_email' ? 'Check your email' : 'Sign in / Register'}</h1>
-            {authModalView !== 'verify_email' && <p>Join our community today</p>}
+            <h1>{authModalView === 'verify_email' ? t('auth.titleVerify') : t('auth.titleAuth')}</h1>
+            {authModalView !== 'verify_email' && <p>{t('auth.subtitle')}</p>}
           </div>
 
           <div className="auth-modal-body">
@@ -162,46 +159,49 @@ export const AuthModal: React.FC = () => {
             {authModalView !== 'verify_email' && (
               <form onSubmit={handleEmailSubmit} id="modal-unified-form">
                 <div className="form-group">
-                  <label htmlFor="modal-auth-email">Email address</label>
+                  <label htmlFor="modal-auth-email">{t('auth.emailLabel')}</label>
                   <input
                     id="modal-auth-email"
                     type="email"
                     className={`form-input ${error ? 'input-error' : ''}`}
-                    placeholder="you@example.com"
+                    placeholder={t('auth.emailPlaceholder')}
                     value={authEmail}
                     onChange={(e) => setAuthEmail(e.target.value)}
                   />
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: '10px', marginTop: '12px', marginBottom: '16px' }}>
-                  <input 
-                    type="checkbox" 
-                    id="modal-register-terms" 
+                  <input
+                    type="checkbox"
+                    id="modal-register-terms"
                     checked={termsAccepted}
                     onChange={(e) => setTermsAccepted(e.target.checked)}
                     style={{ marginTop: '2px', cursor: 'pointer', width: '16px', height: '16px', flexShrink: 0 }}
                   />
                   <label htmlFor="modal-register-terms" style={{ fontSize: '0.85rem', color: '#666', lineHeight: 1.4, cursor: 'pointer', margin: 0 }}>
-                    I agree to the <button type="button" onClick={(e) => { e.preventDefault(); setTermsModalType('terms'); }} style={{ color: 'var(--primary-color)', background: 'none', border: 'none', padding: 0, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>Terms of Service</button> and <button type="button" onClick={(e) => { e.preventDefault(); setTermsModalType('privacy'); }} style={{ color: 'var(--primary-color)', background: 'none', border: 'none', padding: 0, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>Privacy Policy</button>.
+                    {t('auth.agreePrefix')}{' '}
+                    <button type="button" onClick={(e) => { e.preventDefault(); setTermsModalType('terms'); }} style={{ color: 'var(--primary-color)', background: 'none', border: 'none', padding: 0, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>{t('auth.terms')}</button>{' '}
+                    {t('auth.and')}{' '}
+                    <button type="button" onClick={(e) => { e.preventDefault(); setTermsModalType('privacy'); }} style={{ color: 'var(--primary-color)', background: 'none', border: 'none', padding: 0, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>{t('auth.privacy')}</button>
                   </label>
                 </div>
 
                 <button type="submit" className="auth-submit-btn" disabled={loading}>
-                  {loading ? 'Sending code...' : 'Continue with Email'}
+                  {loading ? t('auth.sendingCode') : t('auth.continueEmail')}
                 </button>
 
                 <div className="auth-modal-divider">
-                  <span>or</span>
+                  <span>{t('auth.or')}</span>
                 </div>
 
                 <div className="social-login-container">
                   <button type="button" className="social-btn google-btn" onClick={() => signInWithOAuth('google')} disabled={loading}>
                     <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                    Continue with Google
+                    {t('auth.continueGoogle')}
                   </button>
                   <button type="button" className="social-btn facebook-btn" onClick={() => signInWithOAuth('facebook')} disabled={loading}>
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="#1877F2" xmlns="http://www.w3.org/2000/svg"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                    Continue with Facebook
+                    {t('auth.continueFacebook')}
                   </button>
                 </div>
               </form>
@@ -210,19 +210,19 @@ export const AuthModal: React.FC = () => {
             {authModalView === 'verify_email' && (
               <form onSubmit={handleVerifySubmit} id="modal-verify-form">
                 <div style={{ marginBottom: '16px', fontSize: '0.9rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
-                  Please enter the 6-digit code sent to your email.
+                  {t('auth.otpPrompt')}
                 </div>
-                {message && <div style={{ 
-                  backgroundColor: '#f0fdf4', 
-                  color: '#16a34a', 
-                  padding: '12px', 
-                  borderRadius: '8px', 
+                {message && <div style={{
+                  backgroundColor: '#f0fdf4',
+                  color: '#16a34a',
+                  padding: '12px',
+                  borderRadius: '8px',
                   marginBottom: '16px',
                   fontSize: '0.9rem',
                   border: '1px solid #bcf0da'
                 }}>{message}</div>}
                 <div className="form-group">
-                  <label htmlFor="modal-verify-otp">6-Digit Code</label>
+                  <label htmlFor="modal-verify-otp">{t('auth.otpLabel')}</label>
                   <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '8px' }}>
                     {otpValues.map((digit, index) => (
                       <input
@@ -250,7 +250,7 @@ export const AuthModal: React.FC = () => {
                   </div>
                 </div>
                 <button type="submit" className="auth-submit-btn" disabled={loading} style={{ marginTop: '16px' }}>
-                  {loading ? 'Verifying...' : 'Verify & Sign in'}
+                  {loading ? t('auth.verifying') : t('auth.verifySignIn')}
                 </button>
                 <div style={{ marginTop: '20px', textAlign: 'center' }}>
                   <button
@@ -266,7 +266,7 @@ export const AuthModal: React.FC = () => {
                       textDecoration: 'underline'
                     }}
                   >
-                    {resending ? 'Resending...' : "Didn't receive a code? Resend"}
+                    {resending ? t('auth.resending') : t('auth.resendPrompt')}
                   </button>
                 </div>
               </form>
@@ -275,10 +275,10 @@ export const AuthModal: React.FC = () => {
         </div>
       </div>
 
-      <TermsModal 
-        isOpen={termsModalType !== null} 
-        type={termsModalType} 
-        onClose={() => setTermsModalType(null)} 
+      <TermsModal
+        isOpen={termsModalType !== null}
+        type={termsModalType}
+        onClose={() => setTermsModalType(null)}
       />
     </div>
   );

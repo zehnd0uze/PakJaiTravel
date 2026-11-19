@@ -92,11 +92,11 @@ export const Hotels: React.FC = () => {
   }, [allHotels]);
 
   const categories = [
-    { id: 'all', label: 'All Stays' },
-    { id: 'homestay', label: 'Homestays' },
-    { id: 'resort', label: 'Resorts & Villas' },
-    { id: 'nature', label: 'Forest & Glamping' },
-    { id: 'verified', label: 'Verified Only' },
+    { id: 'all', label: t('hotels.categories.all') },
+    { id: 'homestay', label: t('hotels.categories.homestay') },
+    { id: 'resort', label: t('hotels.categories.resort') },
+    { id: 'nature', label: t('hotels.categories.nature') },
+    { id: 'verified', label: t('hotels.categories.verified') },
   ];
 
   const filteredHotels = useMemo(() => {
@@ -176,10 +176,10 @@ export const Hotels: React.FC = () => {
         <header className="hotels-hero-header">
           <div className="hhh-left">
             <h1 className="hhh-title">
-              {qParam ? `Stays in "${qParam}"` : 'Discover Accommodations'}
+              {qParam ? t('hotels.titleSearch', { query: qParam }) : t('hotels.title')}
             </h1>
             <p className="hhh-subtitle">
-              Handpicked nature retreats, local homestays, and verified sanctuaries across Chiang Mai & Chiang Dao.
+              {t('hotels.subtitle')}
             </p>
           </div>
 
@@ -188,13 +188,13 @@ export const Hotels: React.FC = () => {
             className="hhh-host-pill"
             onClick={() => navigate('/become-host')}
           >
-            <span>Own an accommodation?</span>
-            <strong>List your place ↗</strong>
+            <span>{t('hotels.ownPlace')}</span>
+            <strong>{t('hotels.listYourPlace')}</strong>
           </button>
         </header>
 
         {/* ── Borderless Unified Filter & Search Toolbar ── */}
-        <section className="hotels-toolbar" aria-label="Filter accommodations">
+        <section className="hotels-toolbar" aria-label={t('hotels.title')}>
           {/* Category Pills */}
           <div className="hotels-category-pills" role="tablist">
             {categories.map((cat) => (
@@ -222,7 +222,7 @@ export const Hotels: React.FC = () => {
                 type="text"
                 value={localSearch}
                 onChange={(e) => setLocalSearch(e.target.value)}
-                placeholder="Filter by name, area, view..."
+                placeholder={t('hotels.searchPlaceholder')}
               />
               {localSearch && (
                 <button
@@ -244,9 +244,9 @@ export const Hotels: React.FC = () => {
                 value={selectedDistrict}
                 onChange={(e) => setSelectedDistrict(e.target.value)}
                 className="h-tonal-select"
-                aria-label="Filter by district"
+                aria-label={t('hotels.allAreas')}
               >
-                <option value="">All Areas</option>
+                <option value="">{t('hotels.allAreas')}</option>
                 {districts.map(d => (
                   <option key={d} value={d}>{d}</option>
                 ))}
@@ -257,24 +257,24 @@ export const Hotels: React.FC = () => {
               value={priceRange}
               onChange={(e) => setPriceRange(e.target.value as any)}
               className="h-tonal-select"
-              aria-label="Filter by price"
+              aria-label={t('hotels.priceAll')}
             >
-              <option value="all">Any Price</option>
-              <option value="under2000">Under ฿2,000</option>
-              <option value="2000to4500">฿2,000 – ฿4,500</option>
-              <option value="luxury">฿4,500+</option>
+              <option value="all">{t('hotels.priceAll')}</option>
+              <option value="under2000">{t('hotels.priceUnder2000')}</option>
+              <option value="2000to4500">{t('hotels.price2000to4500')}</option>
+              <option value="luxury">{t('hotels.priceLuxury')}</option>
             </select>
 
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
               className="h-tonal-select"
-              aria-label="Sort stays"
+              aria-label={t('hotels.sortRecommended')}
             >
-              <option value="recommended">Sort: Recommended</option>
-              <option value="price_asc">Price: Low to High</option>
-              <option value="price_desc">Price: High to Low</option>
-              <option value="rating">Highest Rated</option>
+              <option value="recommended">{t('hotels.sortRecommended')}</option>
+              <option value="price_asc">{t('hotels.sortPriceAsc')}</option>
+              <option value="price_desc">{t('hotels.sortPriceDesc')}</option>
+              <option value="rating">{t('hotels.sortRating')}</option>
             </select>
 
             {hasActiveFilters && (
@@ -283,7 +283,7 @@ export const Hotels: React.FC = () => {
                 className="h-reset-btn"
                 onClick={handleResetFilters}
               >
-                Reset
+                {t('hotels.reset')}
               </button>
             )}
           </div>
@@ -292,8 +292,8 @@ export const Hotels: React.FC = () => {
         {/* ── Results Summary Row ── */}
         <div className="hotels-results-meta">
           <span>
-            Showing <strong>{filteredHotels.length}</strong> {filteredHotels.length === 1 ? 'verified stay' : 'verified stays'}
-            {selectedDistrict ? ` in ${selectedDistrict}` : ''}
+            {t('hotels.showing', { count: filteredHotels.length })}
+            {selectedDistrict ? ` ${t('hotels.inArea', { area: selectedDistrict })}` : ''}
           </span>
         </div>
 
@@ -353,7 +353,7 @@ export const Hotels: React.FC = () => {
                         <strong>฿{hotel.pricePerNight.toLocaleString()}</strong>
                         <span>{isPerPerson ? t('common.perPerson') : t('common.perNight')}</span>
                       </div>
-                      <span className="dsc-explore-link">View stay →</span>
+                      <span className="dsc-explore-link">{t('hotels.viewStay')}</span>
                     </div>
                   </div>
                 </article>
@@ -362,16 +362,16 @@ export const Hotels: React.FC = () => {
           </div>
         ) : (
           <div className="hotels-empty-state">
-            <h3>No stays match your current filter</h3>
+            <h3>{t('hotels.emptyTitle')}</h3>
             <p>
-              Try clearing your search filter or exploring all available stays across Chiang Mai and Chiang Dao.
+              {t('hotels.emptyBody')}
             </p>
             <button
               type="button"
               className="h-empty-reset-btn"
               onClick={handleResetFilters}
             >
-              Show All Stays
+              {t('hotels.showAll')}
             </button>
           </div>
         )}

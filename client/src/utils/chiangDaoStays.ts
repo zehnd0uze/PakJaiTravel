@@ -6,13 +6,16 @@ export interface ChiangDaoAtlasStay extends Property {
   zoneId: ChiangDaoZoneId;
   zoneLabel: string;
   elevation: string;
-  /** Art map canvas percentage coordinates (0–100) */
-  mapX: number;
-  mapY: number;
+  /** Real-world WGS84 GPS coordinates for Live Map & Google Maps Directions */
+  lat: number;
+  lng: number;
+  /** Exact visual coordinates (%) aligned with huts/villas on /chiangdao-art-map.jpg */
+  artX: number;
+  artY: number;
 }
 
 export const CHIANG_DAO_ATLAS_STAYS: ChiangDaoAtlasStay[] = [
-  // ── 1. BAN NA LAO MAI (High-Altitude Doi Luang Balcony Village · 1,150 m) ──
+  // ── 1. BAN NA LAO MAI (บ้านนาเลาใหม่ · 1,150 m) ──
   {
     id: 'cd-rabiang-dao',
     name: 'บ้านระเบียงดาว (Baan Rabiang Dao)',
@@ -20,15 +23,17 @@ export const CHIANG_DAO_ATLAS_STAYS: ChiangDaoAtlasStay[] = [
     zoneId: 'nalao',
     zoneLabel: 'Ban Na Lao Mai',
     elevation: '1,150 m',
-    mapX: 25,
-    mapY: 28,
+    lat: 19.3708,
+    lng: 98.8669,
+    artX: 14.5,
+    artY: 35,
     rating: 4.9,
     reviews: 320,
     pricePerNight: 800,
     price_type: 'per_person',
     currency: 'THB',
-    imageUrl: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1200&auto=format&fit=crop',
-    images: ['https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1200&auto=format&fit=crop'],
+    imageUrl: '/doiluangbg.jpg',
+    images: ['/doiluangbg.jpg'],
     isVerified: true,
     features: ['Doi Luang Front View', 'Breakfast & Dinner', 'Private Balcony'],
     amenities: ['Breakfast', 'Dinner', 'Mountain View', 'Balcony', 'Hot Shower'],
@@ -47,8 +52,10 @@ export const CHIANG_DAO_ATLAS_STAYS: ChiangDaoAtlasStay[] = [
     zoneId: 'nalao',
     zoneLabel: 'Ban Na Lao Mai',
     elevation: '1,160 m',
-    mapX: 33,
-    mapY: 23,
+    lat: 19.3726,
+    lng: 98.8692,
+    artX: 15,
+    artY: 39,
     rating: 4.9,
     reviews: 240,
     pricePerNight: 850,
@@ -74,8 +81,10 @@ export const CHIANG_DAO_ATLAS_STAYS: ChiangDaoAtlasStay[] = [
     zoneId: 'nalao',
     zoneLabel: 'Ban Na Lao Mai',
     elevation: '1,140 m',
-    mapX: 18,
-    mapY: 35,
+    lat: 19.3688,
+    lng: 98.8644,
+    artX: 12,
+    artY: 46,
     rating: 4.8,
     reviews: 195,
     pricePerNight: 750,
@@ -101,8 +110,10 @@ export const CHIANG_DAO_ATLAS_STAYS: ChiangDaoAtlasStay[] = [
     zoneId: 'nalao',
     zoneLabel: 'Ban Na Lao Mai',
     elevation: '1,120 m',
-    mapX: 35,
-    mapY: 34,
+    lat: 19.3679,
+    lng: 98.8698,
+    artX: 33,
+    artY: 50,
     rating: 4.8,
     reviews: 210,
     pricePerNight: 800,
@@ -128,8 +139,10 @@ export const CHIANG_DAO_ATLAS_STAYS: ChiangDaoAtlasStay[] = [
     zoneId: 'nalao',
     zoneLabel: 'Ban Na Lao Mai',
     elevation: '1,155 m',
-    mapX: 27,
-    mapY: 40,
+    lat: 19.3738,
+    lng: 98.8648,
+    artX: 38.5,
+    artY: 41.5,
     rating: 4.9,
     reviews: 175,
     pricePerNight: 850,
@@ -149,7 +162,7 @@ export const CHIANG_DAO_ATLAS_STAYS: ChiangDaoAtlasStay[] = [
     status: 'published',
   },
 
-  // ── 2. MUANG KONG (Hidden Valley & River Bends Behind Doi Luang · 680 m) ──
+  // ── 2. MUANG KONG (เมืองคอง · 680 m) ──
   {
     id: 'cd-maan-mok-muang-kong',
     name: 'ม่านหมอกเมืองคอง (Maan Mok Muang Kong)',
@@ -157,8 +170,10 @@ export const CHIANG_DAO_ATLAS_STAYS: ChiangDaoAtlasStay[] = [
     zoneId: 'muangkong',
     zoneLabel: 'Muang Kong',
     elevation: '680 m',
-    mapX: 18,
-    mapY: 62,
+    lat: 19.3865,
+    lng: 98.7058,
+    artX: 22.5,
+    artY: 67.5,
     rating: 4.8,
     reviews: 134,
     pricePerNight: 900,
@@ -184,8 +199,10 @@ export const CHIANG_DAO_ATLAS_STAYS: ChiangDaoAtlasStay[] = [
     zoneId: 'muangkong',
     zoneLabel: 'Muang Kong',
     elevation: '710 m',
-    mapX: 27,
-    mapY: 69,
+    lat: 19.3792,
+    lng: 98.7135,
+    artX: 13.5,
+    artY: 79,
     rating: 4.7,
     reviews: 98,
     pricePerNight: 800,
@@ -205,7 +222,7 @@ export const CHIANG_DAO_ATLAS_STAYS: ChiangDaoAtlasStay[] = [
     status: 'published',
   },
 
-  // ── 3. BAN MAE MAE (Forest Canopy & Mountain Stream Village · 790 m) ──
+  // ── 3. BAN MAE MAE (บ้านแม่แมะ · 790 m) ──
   {
     id: 'cd-baan-ton-mai',
     name: 'บ้านต้นไม้แม่แมะ (Treehouse Mae Mae)',
@@ -213,8 +230,10 @@ export const CHIANG_DAO_ATLAS_STAYS: ChiangDaoAtlasStay[] = [
     zoneId: 'maemae',
     zoneLabel: 'Ban Mae Mae',
     elevation: '790 m',
-    mapX: 62,
-    mapY: 22,
+    lat: 19.3228,
+    lng: 98.8878,
+    artX: 66.5,
+    artY: 33.5,
     rating: 4.9,
     reviews: 285,
     pricePerNight: 1200,
@@ -240,8 +259,10 @@ export const CHIANG_DAO_ATLAS_STAYS: ChiangDaoAtlasStay[] = [
     zoneId: 'maemae',
     zoneLabel: 'Ban Mae Mae',
     elevation: '810 m',
-    mapX: 70,
-    mapY: 29,
+    lat: 19.3264,
+    lng: 98.8932,
+    artX: 74.5,
+    artY: 42,
     rating: 4.8,
     reviews: 164,
     pricePerNight: 1500,
@@ -267,8 +288,10 @@ export const CHIANG_DAO_ATLAS_STAYS: ChiangDaoAtlasStay[] = [
     zoneId: 'maemae',
     zoneLabel: 'Ban Mae Mae',
     elevation: '775 m',
-    mapX: 55,
-    mapY: 30,
+    lat: 19.3195,
+    lng: 98.8825,
+    artX: 58.5,
+    artY: 40.5,
     rating: 4.7,
     reviews: 112,
     pricePerNight: 950,
@@ -288,7 +311,7 @@ export const CHIANG_DAO_ATLAS_STAYS: ChiangDaoAtlasStay[] = [
     status: 'published',
   },
 
-  // ── 4. BAN THAM & FOOTHILLS (Chiang Dao Cave & Forest Sanctuary · 460 m) ──
+  // ── 4. BAN THAM & FOOTHILLS (บ้านถ้ำ · 465 m) ──
   {
     id: 'cd-nest-chiang-dao',
     name: 'เดอะ เนสท์ เชียงดาว (The Nest Chiang Dao)',
@@ -296,8 +319,10 @@ export const CHIANG_DAO_ATLAS_STAYS: ChiangDaoAtlasStay[] = [
     zoneId: 'tham',
     zoneLabel: 'Ban Tham',
     elevation: '465 m',
-    mapX: 46,
-    mapY: 47,
+    lat: 19.3976,
+    lng: 98.9268,
+    artX: 40.5,
+    artY: 66.5,
     rating: 4.9,
     reviews: 310,
     pricePerNight: 1850,
@@ -323,8 +348,10 @@ export const CHIANG_DAO_ATLAS_STAYS: ChiangDaoAtlasStay[] = [
     zoneId: 'tham',
     zoneLabel: 'Ban Tham',
     elevation: '480 m',
-    mapX: 53,
-    mapY: 54,
+    lat: 19.3918,
+    lng: 98.9342,
+    artX: 57,
+    artY: 63.5,
     rating: 4.9,
     reviews: 188,
     pricePerNight: 2200,
@@ -350,8 +377,10 @@ export const CHIANG_DAO_ATLAS_STAYS: ChiangDaoAtlasStay[] = [
     zoneId: 'tham',
     zoneLabel: 'Ban Tham',
     elevation: '470 m',
-    mapX: 40,
-    mapY: 56,
+    lat: 19.3865,
+    lng: 98.9212,
+    artX: 46,
+    artY: 70,
     rating: 4.8,
     reviews: 152,
     pricePerNight: 1400,
@@ -371,7 +400,7 @@ export const CHIANG_DAO_ATLAS_STAYS: ChiangDaoAtlasStay[] = [
     status: 'published',
   },
 
-  // ── 5. TOWN & MAE PING RIVERSIDE (410 m) ──
+  // ── 5. TOWN & MAE PING RIVERSIDE (ตัวเมืองเชียงดาว & ริมปิง · 410 m) ──
   {
     id: 'cd-buraphat',
     name: 'บูรภัฏ รีสอร์ท (Buraphat Resort Chiang Dao)',
@@ -379,8 +408,10 @@ export const CHIANG_DAO_ATLAS_STAYS: ChiangDaoAtlasStay[] = [
     zoneId: 'town',
     zoneLabel: 'Town & Riverside',
     elevation: '415 m',
-    mapX: 69,
-    mapY: 63,
+    lat: 19.3692,
+    lng: 98.9614,
+    artX: 68,
+    artY: 83,
     rating: 4.8,
     reviews: 145,
     pricePerNight: 1600,
@@ -406,8 +437,10 @@ export const CHIANG_DAO_ATLAS_STAYS: ChiangDaoAtlasStay[] = [
     zoneId: 'town',
     zoneLabel: 'Town & Riverside',
     elevation: '405 m',
-    mapX: 78,
-    mapY: 70,
+    lat: 19.3585,
+    lng: 98.9722,
+    artX: 79,
+    artY: 77,
     rating: 4.9,
     reviews: 128,
     pricePerNight: 1950,

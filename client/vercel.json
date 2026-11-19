@@ -17,7 +17,7 @@
         { "key": "Cross-Origin-Opener-Policy", "value": "same-origin-allow-popups" },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.cloudinary.com https://nominatim.openstreetmap.org https://photon.komoot.io; frame-src https://www.google.com https://maps.google.com https://www.openstreetmap.org; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+          "value": "default-src 'self'; script-src 'self' blob:; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.cloudinary.com https://nominatim.openstreetmap.org https://photon.komoot.io https://*.basemaps.cartocdn.com https://server.arcgisonline.com https://s3.amazonaws.com; frame-src https://www.google.com https://maps.google.com https://www.openstreetmap.org; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
         }
       ]
     },

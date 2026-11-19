@@ -123,7 +123,7 @@ export const HotelDetail: React.FC = () => {
   if (loading) {
     return (
       <div className="hotel-detail-page container section-padding animate-fade-in">
-        <p style={{ textAlign: 'center', padding: '80px 0', color: '#8A94A6' }}>Loading...</p>
+        <p style={{ textAlign: 'center', padding: '80px 0', color: '#8A94A6' }}>{t('hotelDetail.loading')}</p>
       </div>
     );
   }
@@ -132,10 +132,10 @@ export const HotelDetail: React.FC = () => {
     return (
       <div className="hotel-detail-page container section-padding animate-fade-in">
         <div className="not-found">
-          <h1>Property Not Found</h1>
-          <p>The property you're looking for doesn't exist or has been removed.</p>
+          <h1>{t('hotelDetail.notFoundTitle')}</h1>
+          <p>{t('hotelDetail.notFoundBody')}</p>
           <Button variant="primary" size="md" onClick={() => navigate('/hotels')}>
-            Browse Hotels
+            {t('hotelDetail.browseStays')}
           </Button>
         </div>
       </div>
@@ -157,9 +157,9 @@ export const HotelDetail: React.FC = () => {
     <div className="hotel-detail-page animate-fade-in">
       {/* Breadcrumb */}
       <div className="detail-breadcrumb container">
-        <span className="breadcrumb-link" onClick={() => navigate('/')}>Home</span>
+        <span className="breadcrumb-link" onClick={() => navigate('/')}>{t('hotelDetail.breadcrumbHome')}</span>
         <span className="breadcrumb-sep">›</span>
-        <span className="breadcrumb-link" onClick={() => navigate('/hotels')}>Hotels</span>
+        <span className="breadcrumb-link" onClick={() => navigate('/hotels')}>{t('hotelDetail.breadcrumbHotels')}</span>
         <span className="breadcrumb-sep">›</span>
         <span className="breadcrumb-current">{hotel.name}</span>
       </div>
@@ -170,11 +170,11 @@ export const HotelDetail: React.FC = () => {
           <div className="gallery-main">
             <img
               src={images[selectedImage]}
-              alt={`${hotel.name} — Photo ${selectedImage + 1}`}
+              alt={`${hotel.name} — ${selectedImage + 1}`}
               className="gallery-main-img"
             />
             <div className="gallery-photo-count">
-              Photo {selectedImage + 1} / {images.length}
+              {t('hotelDetail.photoCount', { current: selectedImage + 1, total: images.length })}
             </div>
           </div>
           <div className="gallery-thumbs">
@@ -208,16 +208,20 @@ export const HotelDetail: React.FC = () => {
                   <span className="detail-rating-score">{hotel.rating}</span>
                   <div className="detail-rating-meta">
                     <span className="detail-rating-label">
-                      {hotel.rating >= 4.8 ? 'Exceptional' : hotel.rating >= 4.5 ? 'Excellent' : 'Very Good'}
+                      {hotel.rating >= 4.8
+                        ? t('hotelDetail.ratingExceptional')
+                        : hotel.rating >= 4.5
+                          ? t('hotelDetail.ratingExcellent')
+                          : t('hotelDetail.ratingVeryGood')}
                     </span>
-                    <span className="detail-reviews">{hotel.reviews} reviews</span>
+                    <span className="detail-reviews">{t('hotelDetail.reviewsCount', { count: hotel.reviews })}</span>
                   </div>
                 </div>
               ) : (
                 <div className="detail-rating-block new-property" style={{ display: 'flex', alignItems: 'center' }}>
-                  <span className="detail-rating-score" style={{ fontSize: '1rem', padding: '6px 12px', background: 'var(--primary-color)', color: 'white', borderRadius: '8px', fontWeight: 600 }}>New</span>
+                  <span className="detail-rating-score" style={{ fontSize: '1rem', padding: '6px 12px', background: 'var(--primary-color)', color: 'white', borderRadius: '8px', fontWeight: 600 }}>{t('hotelDetail.newBadge')}</span>
                   <div className="detail-rating-meta" style={{ marginLeft: '12px' }}>
-                    <span className="detail-rating-label" style={{ fontSize: '0.9rem', color: '#1a1a1a', fontWeight: 600 }}>No reviews yet</span>
+                    <span className="detail-rating-label" style={{ fontSize: '0.9rem', color: '#1a1a1a', fontWeight: 600 }}>{t('hotelDetail.noReviewsYet')}</span>
                   </div>
                 </div>
               )}
@@ -225,7 +229,7 @@ export const HotelDetail: React.FC = () => {
             {hotel.isVerified && (
               <div className="detail-verified-banner">
                 <VerifiedBadge />
-                <span>This property is verified by PakJaiTravel — 100% legitimate owner</span>
+                <span>{t('hotelDetail.verifiedBanner')}</span>
               </div>
             )}
           </div>
@@ -233,7 +237,7 @@ export const HotelDetail: React.FC = () => {
           {/* Description */}
           {hotel.description && (
             <div className="detail-section">
-              <h2>About This Property</h2>
+              <h2>{t('hotelDetail.aboutTitle')}</h2>
               <p className="detail-description">{hotel.description}</p>
             </div>
           )}
@@ -241,7 +245,7 @@ export const HotelDetail: React.FC = () => {
           {/* Amenities */}
           {hotel.amenities?.length > 0 && (
             <div className="detail-section">
-              <h2>Amenities</h2>
+              <h2>{t('hotelDetail.amenitiesTitle')}</h2>
               <div className="amenities-grid">
                 {hotel.amenities.map((amenity) => (
                   <div key={amenity} className="amenity-item">
@@ -256,20 +260,20 @@ export const HotelDetail: React.FC = () => {
           {/* Check-in / Check-out */}
           {hotel.checkIn && (
             <div className="detail-section">
-              <h2>House Rules</h2>
+              <h2>{t('hotelDetail.houseRulesTitle')}</h2>
               <div className="rules-grid">
                 <div className="rule-item">
                   <span className="rule-icon"></span>
                   <div>
-                    <strong>Check-in</strong>
-                    <span>After {hotel.checkIn}</span>
+                    <strong>{t('hotelDetail.checkIn')}</strong>
+                    <span>{t('hotelDetail.checkInAfter', { time: hotel.checkIn })}</span>
                   </div>
                 </div>
                 <div className="rule-item">
                   <span className="rule-icon"></span>
                   <div>
-                    <strong>Check-out</strong>
-                    <span>Before {hotel.checkOut}</span>
+                    <strong>{t('hotelDetail.checkOut')}</strong>
+                    <span>{t('hotelDetail.checkOutBefore', { time: hotel.checkOut })}</span>
                   </div>
                 </div>
               </div>
@@ -278,7 +282,7 @@ export const HotelDetail: React.FC = () => {
 
           {/* Location Map */}
           <div className="detail-section">
-            <h2>Location & Map</h2>
+            <h2>{t('hotelDetail.locationTitle')}</h2>
             <div className="map-container" style={{ width: '100%', height: '400px', borderRadius: '20px', overflow: 'hidden', marginTop: '16px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
               <iframe
                 title={`Map of ${hotel.name}`}
@@ -288,7 +292,7 @@ export const HotelDetail: React.FC = () => {
                 loading="lazy"
                 allowFullScreen
                 referrerPolicy="no-referrer-when-downgrade"
-                src={`https://maps.google.com/maps?width=100%25&height=600&hl=en&q=${encodeURIComponent(hotel.name + ', ' + (hotel.location || 'Chiang Dao, Thailand'))}&t=&z=14&ie=UTF8&iwloc=B&output=embed`}
+                src={`https://maps.google.com/maps?width=100%25&height=600&hl=th&q=${encodeURIComponent(hotel.name + ', ' + (hotel.location || 'Chiang Dao, Thailand'))}&t=&z=14&ie=UTF8&iwloc=B&output=embed`}
               ></iframe>
             </div>
             <p style={{ marginTop: '16px', fontSize: '0.95rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -299,13 +303,13 @@ export const HotelDetail: React.FC = () => {
           {/* Contact */}
           {hotel.contact && (
             <div className="detail-section">
-              <h2>Contact Information</h2>
+              <h2>{t('hotelDetail.contactTitle')}</h2>
               <div className="contact-grid">
                 {hotel.contact.phone && (
                   <div className="contact-item">
                     <span className="contact-icon"></span>
                     <div>
-                      <strong>Phone</strong>
+                      <strong>{t('hotelDetail.phone')}</strong>
                       <a href={`tel:${hotel.contact.phone}`}>{hotel.contact.phone}</a>
                     </div>
                   </div>
@@ -314,7 +318,7 @@ export const HotelDetail: React.FC = () => {
                   <div className="contact-item">
                     <span className="contact-icon"></span>
                     <div>
-                      <strong>Email</strong>
+                      <strong>{t('hotelDetail.email')}</strong>
                       <a href={`mailto:${hotel.contact.email}`}>{hotel.contact.email}</a>
                     </div>
                   </div>
@@ -323,7 +327,7 @@ export const HotelDetail: React.FC = () => {
                   <div className="contact-item">
                     <span className="contact-icon" style={{ color: '#06C755', fontWeight: 700 }}>LINE</span>
                     <div>
-                      <strong>LINE ID</strong>
+                      <strong>{t('hotelDetail.lineId')}</strong>
                       <span>{hotel.contact.line}</span>
                     </div>
                   </div>
@@ -337,7 +341,7 @@ export const HotelDetail: React.FC = () => {
         <aside className="detail-sidebar">
           <div className="sidebar-card">
             <div className="sidebar-price">
-              <span className="price-label">From</span>
+              <span className="price-label">{t('hotelDetail.from')}</span>
               <span className="price-amount">฿{hotel.pricePerNight.toLocaleString()}</span>
               <span className="price-unit">{hotel.priceType === 'per_person' ? t('common.perPerson') : t('common.perNight')}</span>
             </div>
@@ -349,7 +353,7 @@ export const HotelDetail: React.FC = () => {
                 </div>
                 <div className="host-info">
                   <strong>{hotel.host.name}</strong>
-                  <span>Host since {hotel.host.since}</span>
+                  <span>{t('hotelDetail.hostSince', { year: hotel.host.since })}</span>
                 </div>
               </div>
             )}
@@ -371,7 +375,7 @@ export const HotelDetail: React.FC = () => {
                 marginBottom: '16px',
                 fontSize: '0.85rem'
               }}>
-                Verify your email to contact hosts and book this property.
+                {t('hotelDetail.verifyToContact')}
               </div>
             )}
 
@@ -382,7 +386,7 @@ export const HotelDetail: React.FC = () => {
               disabled={!!(user && !user.isVerified)}
               onClick={() => hotel.contact?.phone ? window.open(`tel:${hotel.contact.phone}`) : null}
             >
-              📞 Call Host {hotel.contact?.phone ? `(${hotel.contact.phone})` : ''}
+              {t('hotelDetail.callHost')} {hotel.contact?.phone ? `(${hotel.contact.phone})` : ''}
             </Button>
             {hotel.contact?.line && (
               <Button
@@ -396,7 +400,7 @@ export const HotelDetail: React.FC = () => {
                   window.open(`https://line.me/R/ti/p/~${cleanLine}`, '_blank');
                 }}
               >
-                💬 Chat on LINE ({hotel.contact.line})
+                {t('hotelDetail.chatLine')} ({hotel.contact.line})
               </Button>
             )}
             <Button
@@ -406,7 +410,7 @@ export const HotelDetail: React.FC = () => {
               disabled={!!(user && !user.isVerified)}
               onClick={() => hotel.contact?.email ? window.open(`mailto:${hotel.contact.email}?subject=Booking Inquiry for ${hotel.name}`) : null}
             >
-              ✉️ Send Email
+              {t('hotelDetail.sendEmail')}
             </Button>
 
             {/* Claim Property Banner for Owners */}
@@ -419,7 +423,7 @@ export const HotelDetail: React.FC = () => {
               textAlign: 'center'
             }}>
               <span style={{ fontSize: '0.82rem', color: '#64748b', display: 'block', marginBottom: '8px' }}>
-                Are you the owner of this accommodation?
+                {t('hotelDetail.ownerQuestion')}
               </span>
               <button
                 type="button"
@@ -449,7 +453,7 @@ export const HotelDetail: React.FC = () => {
                   e.currentTarget.style.color = '#2e7d32';
                 }}
               >
-                🏷️ Claim this Listing (ขอสิทธิ์ดูแลที่พักนี้)
+                {t('hotelDetail.claimListing')}
               </button>
             </div>
           </div>

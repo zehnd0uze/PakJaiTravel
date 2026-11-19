@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabase';
 import { uploadToCloudinary } from '../utils/cloudinary';
@@ -30,6 +31,7 @@ export const ClaimPropertyModal: React.FC<ClaimPropertyModalProps> = ({
   preselectedPropertyName,
   onClaimSubmitted
 }) => {
+  const { t } = useTranslation();
   const { user, openAuthModal } = useAuth();
   const navigate = useNavigate();
 
@@ -103,7 +105,7 @@ export const ClaimPropertyModal: React.FC<ClaimPropertyModalProps> = ({
       setProofUrl(uploadedUrl);
     } catch (err: any) {
       console.error('Proof upload failed:', err);
-      setError('Failed to upload proof document. You can still describe your ownership proof in the notes.');
+      setError(t('claimModal.errUpload'));
     } finally {
       setUploadingProof(false);
     }
@@ -120,17 +122,17 @@ export const ClaimPropertyModal: React.FC<ClaimPropertyModalProps> = ({
     }
 
     if (!selectedPropertyId) {
-      setError('Please select an accommodation to claim.');
+      setError(t('claimModal.errSelect'));
       return;
     }
 
     if (!fullName.trim()) {
-      setError('Please enter your full name.');
+      setError(t('claimModal.errName'));
       return;
     }
 
     if (!phone.trim()) {
-      setError('Please enter your contact phone number.');
+      setError(t('claimModal.errPhone'));
       return;
     }
 
@@ -156,7 +158,7 @@ export const ClaimPropertyModal: React.FC<ClaimPropertyModalProps> = ({
       if (onClaimSubmitted) onClaimSubmitted();
     } catch (err: any) {
       console.error('Failed to submit claim:', err);
-      setError(err.message || 'Failed to submit ownership claim. Please try again.');
+      setError(err.message || t('claimModal.errSubmit'));
     } finally {
       setSubmitting(false);
     }
@@ -171,8 +173,8 @@ export const ClaimPropertyModal: React.FC<ClaimPropertyModalProps> = ({
         {/* Header */}
         <div className="claim-modal-header">
           <div className="claim-modal-header-text">
-            <h2>🏷️ Claim Accommodation Ownership</h2>
-            <p>ขอสิทธิ์ดูแลและจัดการที่พักของคุณบน PakJai</p>
+            <h2>{t('claimModal.title')}</h2>
+            <p>{t('claimModal.subtitle')}</p>
           </div>
           <button className="claim-modal-close" onClick={onClose}>×</button>
         </div>
@@ -180,25 +182,24 @@ export const ClaimPropertyModal: React.FC<ClaimPropertyModalProps> = ({
         {/* Not Logged In State */}
         {!user ? (
           <div className="claim-modal-body" style={{ textAlign: 'center', padding: '36px 28px' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🔒</div>
             <h3 style={{ fontSize: '1.25rem', color: '#0f172a', margin: '0 0 8px 0' }}>
-              Please Sign In to Claim this Listing
+              {t('claimModal.signInTitle')}
             </h3>
             <p style={{ color: '#64748b', fontSize: '0.92rem', lineHeight: 1.5, margin: '0 0 24px 0' }}>
-              To ensure ownership requests are securely linked to your host profile, please sign in or create an account.
+              {t('claimModal.signInBody')}
             </p>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-              <button 
-                className="claim-btn claim-btn-secondary" 
+              <button
+                className="claim-btn claim-btn-secondary"
                 onClick={() => { onClose(); openAuthModal('register'); }}
               >
-                Register as Host
+                {t('claimModal.registerHost')}
               </button>
-              <button 
-                className="claim-btn claim-btn-primary" 
+              <button
+                className="claim-btn claim-btn-primary"
                 onClick={() => { onClose(); openAuthModal('login'); }}
               >
-                Sign In
+                {t('claimModal.signIn')}
               </button>
             </div>
           </div>
@@ -206,16 +207,8 @@ export const ClaimPropertyModal: React.FC<ClaimPropertyModalProps> = ({
           /* Success Screen */
           <div className="claim-success-content">
             <div className="claim-success-icon">✓</div>
-            <h3>Ownership Claim Submitted!</h3>
-            <p>
-              Your claim for <strong>{displayName || 'this accommodation'}</strong> has been sent to the PakJai admin team for verification.
-            </p>
-            <div className="claim-notice-box" style={{ width: '100%', boxSizing: 'border-box' }}>
-              <span>ℹ️</span>
-              <span>
-                Once approved, the accommodation will automatically appear in your <strong>Host Dashboard</strong> where you can edit photos, pricing, and post community updates.
-              </span>
-            </div>
+            <h3>{t('claimModal.successTitle')}</h3>
+            <p>{t('claimModal.successBody')}</p>
             <button
               className="claim-btn claim-btn-primary"
               style={{ marginTop: '12px', width: '100%' }}
@@ -224,7 +217,7 @@ export const ClaimPropertyModal: React.FC<ClaimPropertyModalProps> = ({
                 navigate('/dashboard');
               }}
             >
-              Go to Host Dashboard
+              {t('claimModal.goDashboard')}
             </button>
           </div>
         ) : (
@@ -240,23 +233,20 @@ export const ClaimPropertyModal: React.FC<ClaimPropertyModalProps> = ({
               {/* Property Target */}
               {displayName ? (
                 <div className="claim-property-preview">
-                  <span className="claim-property-icon">🏡</span>
                   <div>
                     <div className="claim-property-info-title">{displayName}</div>
-                    <div className="claim-property-info-sub">Selected Property for Ownership Verification</div>
+                    <div className="claim-property-info-sub">{t('claimModal.claimingFor')}</div>
                   </div>
                 </div>
               ) : (
                 <div className="claim-form-group">
-                  <label>
-                    Select Your Accommodation <span className="required">*</span>
-                  </label>
+                  <label>{t('claimModal.selectProperty')}</label>
                   <select
                     value={selectedPropertyId}
                     onChange={e => setSelectedPropertyId(e.target.value)}
                     required
                   >
-                    <option value="">-- Choose from existing listings --</option>
+                    <option value="">{t('claimModal.selectPlaceholder')}</option>
                     {properties.map(p => (
                       <option key={p.id} value={p.id}>
                         {p.name} ({p.district || 'Chiang Dao'}, {p.province || 'Chiang Mai'})
@@ -267,34 +257,30 @@ export const ClaimPropertyModal: React.FC<ClaimPropertyModalProps> = ({
               )}
 
               <div className="claim-form-group">
-                <label>
-                  Full Name / Host Name (ชื่อ-นามสกุล เจ้าของที่พัก) <span className="required">*</span>
-                </label>
+                <label>{t('claimModal.fullName')}</label>
                 <input
                   type="text"
                   value={fullName}
                   onChange={e => setFullName(e.target.value)}
-                  placeholder="e.g. นายสมศักดิ์ เลาหมี่"
+                  placeholder={t('claimModal.fullNamePlaceholder')}
                   required
                 />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                 <div className="claim-form-group">
-                  <label>
-                    Contact Phone (เบอร์โทรศัพท์) <span className="required">*</span>
-                  </label>
+                  <label>{t('claimModal.phone')}</label>
                   <input
                     type="tel"
                     value={phone}
                     onChange={e => setPhone(e.target.value)}
-                    placeholder="08X-XXX-XXXX"
+                    placeholder={t('claimModal.phonePlaceholder')}
                     required
                   />
                 </div>
 
                 <div className="claim-form-group">
-                  <label>Email Address</label>
+                  <label>{t('claimModal.email')}</label>
                   <input
                     type="email"
                     value={email}
@@ -305,19 +291,17 @@ export const ClaimPropertyModal: React.FC<ClaimPropertyModalProps> = ({
               </div>
 
               <div className="claim-form-group">
-                <label>
-                  Ownership Proof & Notes (หลักฐานความเป็นเจ้าของ / ข้อมูลยืนยัน)
-                </label>
+                <label>{t('claimModal.proofNotes')}</label>
                 <textarea
                   rows={3}
                   value={proofNotes}
                   onChange={e => setProofNotes(e.target.value)}
-                  placeholder="e.g. เบอร์โทรและชื่อบัญชีตรงกับที่ระบุในรายการที่พัก, Facebook Page เจ้าของ, หรือข้อมูลติดต่อยืนยัน..."
+                  placeholder={t('claimModal.proofNotesPlaceholder')}
                 />
               </div>
 
               <div className="claim-form-group">
-                <label>Optional Verification Document / Photo (รูปถ่ายหรือเอกสารยืนยัน)</label>
+                <label>{t('claimModal.proofUpload')}</label>
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                   <input
                     type="file"
@@ -326,16 +310,9 @@ export const ClaimPropertyModal: React.FC<ClaimPropertyModalProps> = ({
                     disabled={uploadingProof}
                     style={{ fontSize: '0.85rem' }}
                   />
-                  {uploadingProof && <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Uploading...</span>}
-                  {proofUrl && <span style={{ fontSize: '0.85rem', color: '#16a34a', fontWeight: 600 }}>✓ Attached</span>}
+                  {uploadingProof && <span style={{ fontSize: '0.85rem', color: '#64748b' }}>{t('claimModal.uploading')}</span>}
+                  {proofUrl && <span style={{ fontSize: '0.85rem', color: '#16a34a', fontWeight: 600 }}>✓ {t('claimModal.uploaded')}</span>}
                 </div>
-              </div>
-
-              <div className="claim-notice-box">
-                <span>🛡️</span>
-                <span>
-                  Admin will review and verify your ownership request within 24 hours. After approval, you will have full control to edit rates, photos, and calendar in your Host Dashboard.
-                </span>
               </div>
             </div>
 
@@ -346,14 +323,14 @@ export const ClaimPropertyModal: React.FC<ClaimPropertyModalProps> = ({
                 onClick={onClose}
                 disabled={submitting}
               >
-                Cancel
+                {t('claimModal.cancel')}
               </button>
               <button
                 type="submit"
                 className="claim-btn claim-btn-primary"
                 disabled={submitting || uploadingProof}
               >
-                {submitting ? 'Submitting Request...' : 'Submit Ownership Claim'}
+                {submitting ? t('claimModal.submitting') : t('claimModal.submit')}
               </button>
             </div>
           </form>
